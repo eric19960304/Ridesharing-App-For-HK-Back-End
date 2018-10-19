@@ -3,13 +3,18 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon ./bin/www"
+    "start": "nodemon app"
   },
   "dependencies": {
+    "bcrypt": "^3.0.2",
+    "body-parser": "^1.18.3",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
-    "express": "~4.16.0",
+    "express": "^4.16.4",
+    "jsonwebtoken": "^8.3.0",
+    "mongoose": "^5.3.4",
     "morgan": "~1.9.0",
     "nodemon": "~1.18.4"
-  }
+  },
+  "devDependencies": {}
 }

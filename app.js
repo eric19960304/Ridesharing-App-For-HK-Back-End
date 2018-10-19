@@ -1,20 +1,37 @@
-let express = require('express');
-let path = require('path');
-let cookieParser = require('cookie-parser');
-let logger = require('morgan');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const bodyParser = require('body-parser');
 
-let indexRouter = require('./src/controller/index');
-let usersRouter = require('./src/controller/users');
+const userRouter = require('./src/controllers');
+const config = require('./config');
 
-let app = express();
+const app = express();
 
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(bodyParser.json());
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+// db
+const MongoClient = require('./src/db');
+const mongoClient = new MongoClient(config);
+mongoClient.connect();
 
-module.exports = app;
+// routes
+app.use('/user', userRouter);
+
+/*
+
+All routes:
+/user/signup
+/user/login
+
+*/
+const PORT = 3000;
+app.listen(PORT, () => {
+    console.log('Server is running on Port', PORT);
+});
