@@ -5,7 +5,7 @@ prerequisite:
 
 nodejs version 10.x.x installed
 
-clean mongodb running on localhost:27017 [Windows](https://stackoverflow.com/questions/20796714/how-do-i-start-mongo-db-from-windows) [Mac](https://stackoverflow.com/questions/18452023/installing-and-running-mongodb-on-osx)
+clean mongodb running on localhost:27017 ( [Windows](https://stackoverflow.com/questions/20796714/how-do-i-start-mongo-db-from-windows) | [Mac](https://stackoverflow.com/questions/18452023/installing-and-running-mongodb-on-osx) )
 
 To start run the server:
 
