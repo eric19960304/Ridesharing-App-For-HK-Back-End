@@ -17,28 +17,28 @@ To run the server:
 
 Project structure:
 
-controllers: 
+controllers
 
 * all routes (Restful APIs)
 
-models: 
+models
 
-* mongodb model defined
+* define database models
 
 helpers: 
 
 * utility function / class / constants
 
 
-middleware: 
+middleware
 
 * for middleware of express.js
 
 
-db: 
+db
 
 * database client
 
-config.js: 
+config.js
 
     server setting (e.g. secret key location, database url)
