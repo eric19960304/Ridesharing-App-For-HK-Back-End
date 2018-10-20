@@ -1,9 +1,8 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
 
-const config = require('../../../config')
-const User = require('../../models');
+const { fetchUserByEmail } = require('../../middleware/user');
+const { authenticateUserLogin } = require('../../middleware/auth');
+const { generateJWTToken } = require('../../helpers');
 
 const router = express.Router();
 
@@ -17,50 +16,24 @@ User request format example:
 
 */
 
-router.post('/', function(req, res){
-  const { email, password } = req.body;
+router.post(
+    '/',
+    fetchUserByEmail,
+    authenticateUserLogin,
+    (req, res) => {
 
-  User.findOne({ email })
-  .exec()
-  .then((user) => {
-
-    bcrypt.compare(
-      password, 
-      user.password, 
-      (err, result) => { // start of callback function
-        if(err) {
-          return res.status(401).json({
-            error: err
-          });
+        if (!req.authenticated) {
+            return res.status(401).json({
+                failed: 'Unauthorized Access'
+            });
         }
 
-        if(result) {
-          const JWTToken = jwt.sign(
-            {
-              email: user.email,
-              _id: user._id
-            },
-            config.jwt_secret,
-            
-          );
-
-          return res.status(200).json({
-            jwt: JWTToken
-          });
-        }
-
-        // otherwise
-        return res.status(401).json({
-            failed: 'Unauthorized Access'
+        res.status(200).json({
+            jwt: generateJWTToken(req.user)
         });
-      } // end of callback function
-    );
-  })
-  .catch(error => {
-     res.status(500).json({
-        error: error
-     });
-  });;
-});
+
+    }
+);
+
 
 module.exports = router;

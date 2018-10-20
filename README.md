@@ -19,7 +19,7 @@ Project structure:
 
 controllers
 
-* all routes (Restful APIs)
+* routes (Restful APIs)
 
 models
 
@@ -32,7 +32,7 @@ helpers:
 
 middleware
 
-* for middleware of express.js
+* reusable middleware in express.js
 
 
 db
