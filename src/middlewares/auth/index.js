@@ -30,7 +30,7 @@ const authenticateUserLogin = (req, res, next) => {
         } // end of callback function
     );
 
-}
+};
 
 
 const encryptPassword = (req, res, next) => {
@@ -55,7 +55,7 @@ const encryptPassword = (req, res, next) => {
         next();
 
     });
-}
+};
 
 
 module.exports = {

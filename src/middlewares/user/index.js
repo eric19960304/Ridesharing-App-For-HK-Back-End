@@ -19,12 +19,12 @@ const fetchUserByEmail = (req, res, next) => {
         .exec()
         .then((user) => {
 
-            if(user){
+            if (user) {
                 req.user = user;
                 next();
-            }else{
+            } else {
                 return res.status(401).json({
-                    failed: "email not found"
+                    failed: 'email not found'
                 });
             }
 
@@ -36,7 +36,7 @@ const fetchUserByEmail = (req, res, next) => {
             });
 
         });
-}
+};
 
 
 const createUser = (req, res, next) => {
@@ -66,9 +66,9 @@ const createUser = (req, res, next) => {
                 failed: err
             });
         });
-}
+};
 
 module.exports = {
-  fetchUserByEmail,
-  createUser
+    fetchUserByEmail,
+    createUser
 };

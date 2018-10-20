@@ -17,7 +17,7 @@ router.post(
         req.newUser = {
             email,
             encrypted_password
-        }
+        };
 
         next();
     },
