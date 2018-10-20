@@ -5,16 +5,18 @@ const saltRound = 10;
 
 const authenticateUserLogin = (req, res, next) => {
     /*
-    assume req.user exist
     glue authenticated bool variable to req object to indicate the result of user authentication
+
+    prerequisite: req.body.password & req.user.password
+    consequences: req.authenticated | None
     */
 
     const { password } = req.body;
-    const { user } = req;
+    const database_password = req.user.password;
 
     bcrypt.compare(
         password,
-        user.password,
+        database_password,
         (err, result) => { // start of callback function
             if (err) {
                 console.log(err);
@@ -34,13 +36,16 @@ const authenticateUserLogin = (req, res, next) => {
 const encryptPassword = (req, res, next) => {
     /*
     glue encrypted_password string variable to req object if password can be hashed
+
+    prerequisite: req.body.password
+    consequences: req.encrypted_password | None
     */
-    const { email, password } = req.body;
+    const { password } = req.body;
 
     bcrypt.hash(password, saltRound, (err, encrypted_password) => {
         if (err) {
             // hash error
-            res.status(500).json({
+            return res.status(500).json({
                 error: err
             });
         }
