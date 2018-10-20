@@ -30,9 +30,9 @@ helpers:
 * utility function / class / constants
 
 
-middleware
+middlewares
 
-* reusable middleware in express.js
+* reusable middlewares in express.js
 
 
 db

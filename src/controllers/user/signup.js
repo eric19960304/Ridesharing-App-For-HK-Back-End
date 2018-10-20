@@ -1,7 +1,7 @@
 const express = require('express');
 
-const { createUser } = require('../../middleware/user');
-const { encryptPassword } = require('../../middleware/auth');
+const { createUser } = require('../../middlewares/user');
+const { encryptPassword } = require('../../middlewares/auth');
 
 
 const router = express.Router();

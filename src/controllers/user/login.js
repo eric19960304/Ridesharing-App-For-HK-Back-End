@@ -1,7 +1,7 @@
 const express = require('express');
 
-const { fetchUserByEmail } = require('../../middleware/user');
-const { authenticateUserLogin } = require('../../middleware/auth');
+const { fetchUserByEmail } = require('../../middlewares/user');
+const { authenticateUserLogin } = require('../../middlewares/auth');
 const { generateJWTToken } = require('../../helpers');
 
 const router = express.Router();
