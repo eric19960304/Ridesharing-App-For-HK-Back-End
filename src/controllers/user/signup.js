@@ -7,26 +7,30 @@ const { encryptPassword } = require('../../middlewares/auth');
 const router = express.Router();
 
 
-router.post(
-    '/',
+const endRule = (req, res) => {
+    res.status(200).json({
+        success: 'registration success'
+    });
+};
+
+
+const prepareUserInfo = (req, res, next) => {
+    const { email } = req.body;
+    const { encrypted_password } = req;
+
+    req.newUser = {
+        email,
+        encrypted_password
+    };
+
+    next();
+};
+
+router.post('/',
     encryptPassword,
-    (req, res, next) => {
-        const { email } = req.body;
-        const { encrypted_password } = req;
-
-        req.newUser = {
-            email,
-            encrypted_password
-        };
-
-        next();
-    },
+    prepareUserInfo,
     createUser,
-    (req, res) => {
-        res.status(200).json({
-            success: 'registration success'
-        });
-    }
+    endRule
 );
 
 module.exports = router;

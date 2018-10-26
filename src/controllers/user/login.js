@@ -16,23 +16,24 @@ User request format example:
 
 */
 
-router.post(
-    '/',
+const endRule = (req, res) => {
+
+    if (!req.authenticated) {
+        return res.status(401).json({
+            failed: 'Unauthorized Access'
+        });
+    }
+
+    res.status(200).json({
+        jwt: generateJWTToken(req.user)
+    });
+
+};
+
+router.post('/',
     fetchUserByEmail,
     authenticateUserLogin,
-    (req, res) => {
-
-        if (!req.authenticated) {
-            return res.status(401).json({
-                failed: 'Unauthorized Access'
-            });
-        }
-
-        res.status(200).json({
-            jwt: generateJWTToken(req.user)
-        });
-
-    }
+    endRule
 );
 
 
