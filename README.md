@@ -41,4 +41,4 @@ db
 
 config.js
 
-    server setting (e.g. secret key location, database url)
+* server setting (e.g. secret key location, database url)
