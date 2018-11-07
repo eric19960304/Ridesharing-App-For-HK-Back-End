@@ -94,6 +94,7 @@ const createUser = (req, res, next) => {
     user.save()
         .then((result) => {
             console.log('created user:', result);
+            req.createdUser = result;
             next();
         })
         .catch(err => {

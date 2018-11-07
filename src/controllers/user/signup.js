@@ -2,14 +2,14 @@ const express = require('express');
 
 const { createUser, checkUserIsExist } = require('../../middlewares/user');
 const { encryptPassword } = require('../../middlewares/auth');
-
+const { generateJWTToken } = require('../../helpers');
 
 const router = express.Router();
 
 
 const endRule = (req, res) => {
     res.status(200).json({
-        success: 'Sign up successful!'
+        jwt: generateJWTToken(req.createdUser)
     });
 };
 
