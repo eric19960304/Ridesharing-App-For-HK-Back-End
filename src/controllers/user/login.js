@@ -22,7 +22,7 @@ const endRule = (req, res) => {
 
     if (!req.authenticated) {
         return res.status(401).json({
-            failed: 'Unauthorized Access'
+            message: 'Invalid email or password'
         });
     }
 

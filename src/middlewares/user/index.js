@@ -38,14 +38,50 @@ const fetchUserByEmail = (req, res, next) => {
         });
 };
 
+const checkUserIsExist = (req, res, next) => {
+    /*
+    glue boolean variable to req object if user exists
+
+    prerequisite: req.body.email
+    consequences: req.userIsExist
+    */
+
+    const { email } = req.newUser;
+
+    User.findOne({ email })
+        .exec()
+        .then((user) => {
+
+            if(user === null){
+                req.userIsExist = false;
+            }else{
+                req.userIsExist = true;
+            }
+            
+            next();
+        })
+        .catch(err => {
+            console.log(err);
+            return res.status(200).json({
+                message: 'Something wrong! Please try again latter.'
+            });
+        });
+};
+
 
 const createUser = (req, res, next) => {
     /*
     create a user
 
-    prerequisite: req.newUser.email & req.newUser.email.encrypted_password
+    prerequisite: req.newUser.email & req.newUser.email.encrypted_password & req.userIsExist
     consequences: create a user record on database
     */
+
+    if('userIsExist' in req && req.userIsExist === true){
+        return res.status(200).json({
+            message: 'This email has been used!'
+        });
+    }
 
     const { email, encrypted_password } = req.newUser;
 
@@ -61,14 +97,15 @@ const createUser = (req, res, next) => {
             next();
         })
         .catch(err => {
-
-            return res.status(500).json({
-                failed: err
+            console.log('create user error: ', err);
+            return res.status(200).json({
+                message: 'Something wrong! Please try again latter.'
             });
         });
 };
 
 module.exports = {
     fetchUserByEmail,
+    checkUserIsExist,
     createUser
 };

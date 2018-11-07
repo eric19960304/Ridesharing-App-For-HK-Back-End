@@ -1,6 +1,6 @@
 const express = require('express');
 
-const { createUser } = require('../../middlewares/user');
+const { createUser, checkUserIsExist } = require('../../middlewares/user');
 const { encryptPassword } = require('../../middlewares/auth');
 
 
@@ -9,7 +9,7 @@ const router = express.Router();
 
 const endRule = (req, res) => {
     res.status(200).json({
-        success: 'registration success'
+        success: 'Sign up successful!'
     });
 };
 
@@ -29,6 +29,7 @@ const prepareUserInfo = (req, res, next) => {
 router.post('/',
     encryptPassword,
     prepareUserInfo,
+    checkUserIsExist,
     createUser,
     endRule
 );
