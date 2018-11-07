@@ -7,12 +7,17 @@ const http = require('http');
 const https = require('https');
 const privateKey  = fs.readFileSync('/ssl_cert/server.key', 'utf8');
 const certificate = fs.readFileSync('/ssl_cert/server.crt', 'utf8');
+const ca = fs.readFileSync('/ssl_cert/ca.crt', 'utf8');
 
 const userRouter = require('./src/controllers');
 const config = require('./config');
 
 const app = express();
-const credentials = {key: privateKey, cert: certificate};
+const credentials = {
+    key: privateKey, 
+    cert: certificate,
+    ca
+};
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
