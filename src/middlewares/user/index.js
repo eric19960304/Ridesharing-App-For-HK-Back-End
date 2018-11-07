@@ -24,15 +24,15 @@ const fetchUserByEmail = (req, res, next) => {
                 next();
             } else {
                 return res.status(401).json({
-                    failed: 'email not found'
+                    message: 'email not found'
                 });
             }
 
         })
         .catch(err => {
-
+            console.log(err);
             return res.status(500).json({
-                failed: err
+                message: 'Something wrong! Please try again latter.'
             });
 
         });
