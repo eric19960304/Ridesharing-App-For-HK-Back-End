@@ -1,5 +1,7 @@
 
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const config = require('../../../config');
 
 const saltRound = 10;
 
@@ -58,7 +60,19 @@ const encryptPassword = (req, res, next) => {
 };
 
 
+const generateJWTToken = (user) => {
+    return jwt.sign(
+        {
+            email: user.email,
+            _id: user._id
+        },
+        config.jwt_secret,
+    );
+};
+
+
 module.exports = {
     authenticateUserLogin,
-    encryptPassword
+    encryptPassword,
+    generateJWTToken,
 };
