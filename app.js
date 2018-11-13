@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const http = require('http');
 const https = require('https');
 
-const userRouter = require('./src/controllers');
+const { userRouter, testRouter} = require('./src/controllers');
 const config = require('./config');
 
 const app = express();
@@ -24,12 +24,14 @@ mongoClient.connect();
 
 // routes
 app.use('/user', userRouter);
+app.use('/test', testRouter);
 
 /*
 
-All routes:
+All routes (all is POST):
 /user/signup
 /user/login
+/test/sayhello
 
 */
 

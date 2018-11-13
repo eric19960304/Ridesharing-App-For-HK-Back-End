@@ -11,11 +11,11 @@ const generateJWTToken = (user) => {
     );
 };
 
-const verifyJWTToken = (jwt) => {
-    return jwt.verify(jwt, config.jwt_secret);
+const decodedJWT = (jwtString) => {
+    return jwt.verify(jwtString, config.jwt_secret);
 };
 
 module.exports = {
     generateJWTToken,
-    verifyJWTToken,
+    decodedJWT,
 };

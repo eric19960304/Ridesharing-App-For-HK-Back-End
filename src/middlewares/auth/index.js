@@ -1,5 +1,6 @@
 
 const bcrypt = require('bcrypt');
+const { decodedJWT } = require('../../helpers/auth');
 
 const saltRound = 10;
 
@@ -57,8 +58,39 @@ const encryptPassword = (req, res, next) => {
     });
 };
 
+const verifyJwt = (req, res, next) => {
+    /*
+    glue encrypted_password string variable to req object if password can be hashed
+
+    prerequisite: None
+    consequences: req.userIdentity | None
+    */
+    const JWT = req.get('JWT');
+
+    if (!JWT) {
+        return res.status(401).json({
+            message: 'JWT Token not provided.'
+        });
+    }
+    let userIdentity = null;
+    try {
+        userIdentity = decodedJWT(JWT);
+    } catch (err) {
+        return res.status(401).json({
+            message: 'Unauthorized access'
+        });
+    }
+
+    if(userIdentity){
+        req.userIdentity = userIdentity;
+    }
+
+    next();
+
+};
 
 module.exports = {
     authenticateUserLogin,
     encryptPassword,
+    verifyJwt,
 };
