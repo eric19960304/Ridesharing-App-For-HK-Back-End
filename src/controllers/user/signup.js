@@ -1,7 +1,8 @@
 const express = require('express');
 
 const { createUser, checkUserIsExist } = require('../../middlewares/user');
-const { encryptPassword, generateJWTToken } = require('../../middlewares/auth');
+const { encryptPassword } = require('../../middlewares/auth');
+const { generateJWTToken } = require('../../helpers/auth');
 
 const router = express.Router();
 
