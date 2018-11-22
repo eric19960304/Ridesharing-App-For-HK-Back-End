@@ -83,13 +83,13 @@ const createUser = (req, res, next) => {
         });
     }
 
-    const { email, encrypted_password, userName } = req.newUser;
+    const { email, encrypted_password, username } = req.newUser;
 
     const user = new User({
         _id: new ObjectId(),
         email: email,
         password: encrypted_password,
-        userName: userName,
+        username: username,
     });
 
     user.save()
