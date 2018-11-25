@@ -12,9 +12,12 @@
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
     "express": "^4.16.4",
+    "gmail-send": "^1.2.14",
     "jsonwebtoken": "^8.3.0",
     "mongoose": "^5.3.4",
-    "nodemon": "~1.18.4"
+    "nodemon": "~1.18.4",
+    "pug": "^2.0.3",
+    "uuid": "^3.3.2"
   },
   "devDependencies": {}
 }
