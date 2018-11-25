@@ -1,7 +1,7 @@
 const express = require('express');
 
 const { fetchUserById, fetchUserByEmail } = require('../../middlewares/user');
-const { createTempLink } = require('../../middlewares/tempLink');
+const { createTempLink, deleteTempLink } = require('../../middlewares/tempLink');
 const { encryptPassword } = require('../../middlewares/auth');
 const mailClient = require('../../helpers/mailClient');
 const { User, TempLink} = require('../../models');
@@ -71,7 +71,7 @@ const serveResetPasswordForm = (req, res) => {
     });
 };
 
-const changeUserPasword = (req, res) => {
+const changeUserPasword = (req, res, next) => {
     const newPassword = req.encrypted_password;
 
     req.user.password = newPassword;
@@ -83,8 +83,9 @@ const changeUserPasword = (req, res) => {
                     message: 'Something wrong! Please try again latter.'
                 });
             }
+
             console.log('Password updated: ', user);
-            return res.send('Your password has been changed successfully!');
+            next();
         }
     );
 };
@@ -114,7 +115,11 @@ router.post('/:token',
     fetchUserIdentityFromTempLink,
     fetchUserById,
     encryptPassword,
-    changeUserPasword
+    changeUserPasword,
+    deleteTempLink,
+    (req, res) => {
+        return res.send('Your password has been changed successfully!');
+    }
 );
 
 

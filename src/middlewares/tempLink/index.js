@@ -40,6 +40,30 @@ const createTempLink = (req, res, next) => {
         });
 };
 
+const deleteTempLink = (req, res, next) => {
+    /*
+    consequence: None
+    */
+
+    const _id = req.tempLink._id;
+    TempLink.findOneAndRemove({ _id })
+        .exec()
+        .then(() => {
+
+            console.log('removed tempLink: ', _id);
+            next();
+
+        })
+        .catch(err => {
+            console.log(err);
+            return res.status(500).json({
+                message: 'Something wrong! Please try again latter.'
+            });
+
+        });
+}
+
 module.exports = {
-    createTempLink
+    createTempLink,
+    deleteTempLink
 };
