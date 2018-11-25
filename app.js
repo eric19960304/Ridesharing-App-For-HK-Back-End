@@ -29,6 +29,13 @@ app.use(express.static('public'));
 // routes
 app.use('/user', userRouter);
 app.use('/test', testRouter);
+/*
+/user/login [POST]
+/user/signup [POST]
+/user/reset-password/request [POST]
+/user/reset-password/:token [GET]
+/user/reset-password/:token [POST]
+*/
 
 
 console.log('using config:', config);
