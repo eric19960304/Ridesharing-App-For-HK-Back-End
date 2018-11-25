@@ -13,9 +13,9 @@ const printRequest = (req, res, next) => { console.log(req.body); next(); };
 
 
 
-const fetchUserIdentityFromTempLink = (req, res, next) => {
+const fetchTempLinkAndUserIdentity = (req, res, next) => {
     /*
-    consequence: req.userIdentity
+    consequence: req.userIdentity & tempLink
     Type userIdentity = { _id: string, email: null }
     */
 
@@ -33,6 +33,7 @@ const fetchUserIdentityFromTempLink = (req, res, next) => {
                     email: null
                 };
 
+                req.tempLink = tempLink;
                 req.userIdentity = userIdentity;
                 next();
 
@@ -105,14 +106,14 @@ router.post('/request',
 
 router.get('/:token',
     printRequest,
-    fetchUserIdentityFromTempLink,
+    fetchTempLinkAndUserIdentity,
     fetchUserById,
     serveResetPasswordForm
 );
 
 router.post('/:token',
     printRequest,
-    fetchUserIdentityFromTempLink,
+    fetchTempLinkAndUserIdentity,
     fetchUserById,
     encryptPassword,
     changeUserPasword,
