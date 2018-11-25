@@ -18,7 +18,7 @@ User request format example:
 
 const printRequest = (req, res, next) => { console.log(req.body); next(); };
 
-const endRule = (req, res) => {
+const returnJWT = (req, res) => {
 
     if (!req.authenticated) {
         return res.status(401).json({
@@ -32,11 +32,15 @@ const endRule = (req, res) => {
 
 };
 
+/* 
+/user/login
+*/
+
 router.post('/',
     printRequest,
     fetchUserByEmail,
     authenticateUserLogin,
-    endRule
+    returnJWT
 );
 
 

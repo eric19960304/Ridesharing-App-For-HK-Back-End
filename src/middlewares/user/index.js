@@ -8,9 +8,6 @@ const ObjectId = mongoose.Types.ObjectId;
 const fetchUserByEmail = (req, res, next) => {
     /*
     glue user object to req object if found
-
-    prerequisite: req.body.email
-    consequences: req.user | None
     */
 
     const { email } = req.body;
@@ -41,9 +38,6 @@ const fetchUserByEmail = (req, res, next) => {
 const checkUserIsExist = (req, res, next) => {
     /*
     glue boolean variable to req object if user exists
-
-    prerequisite: req.body.email
-    consequences: req.userIsExist
     */
 
     const { email } = req.newUser;
@@ -72,9 +66,6 @@ const checkUserIsExist = (req, res, next) => {
 const createUser = (req, res, next) => {
     /*
     create a user
-
-    prerequisite: req.newUser.email & req.newUser.email.encrypted_password & req.userIsExist
-    consequences: create a user record on database
     */
 
     if('userIsExist' in req && req.userIsExist === true){
@@ -89,7 +80,7 @@ const createUser = (req, res, next) => {
         _id: new ObjectId(),
         email: email,
         password: encrypted_password,
-        username: username,
+        username,
     });
 
     user.save()

@@ -32,6 +32,7 @@ All routes (all is POST):
 /user/signup
 /user/login
 /test/sayhello
+/test/sayhello
 
 */
 

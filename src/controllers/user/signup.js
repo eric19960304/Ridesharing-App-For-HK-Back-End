@@ -6,32 +6,36 @@ const { generateJWTToken } = require('../../helpers/auth');
 
 const router = express.Router();
 
-
-const endRule = (req, res) => {
-    res.status(200).json({
-        jwt: generateJWTToken(req.createdUser)
-    });
-};
-
-
-const prepareUserInfo = (req, res, next) => {
-    const { email } = req.body;
+const extractUserInfoFromReqBody = (req, res, next) => {
+    const { email, username } = req.body;
     const { encrypted_password } = req;
 
     req.newUser = {
         email,
+        username,
         encrypted_password
     };
 
     next();
 };
 
+const returnJWT = (req, res) => {
+    res.status(200).json({
+        jwt: generateJWTToken(req.createdUser)
+    });
+};
+
+
+/* 
+/user/signup
+*/
+
 router.post('/',
     encryptPassword,
-    prepareUserInfo,
+    extractUserInfoFromReqBody,
     checkUserIsExist,
     createUser,
-    endRule
+    returnJWT
 );
 
 module.exports = router;

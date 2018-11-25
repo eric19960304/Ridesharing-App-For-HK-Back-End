@@ -7,9 +7,6 @@ const saltRound = 10;
 const authenticateUserLogin = (req, res, next) => {
     /*
     glue authenticated bool variable to req object to indicate the result of user authentication
-
-    prerequisite: req.body.password & req.user.password
-    consequences: req.authenticated | None
     */
 
     const { password } = req.body;
@@ -37,9 +34,6 @@ const authenticateUserLogin = (req, res, next) => {
 const encryptPassword = (req, res, next) => {
     /*
     glue encrypted_password string variable to req object if password can be hashed
-
-    prerequisite: req.body.password
-    consequences: req.encrypted_password | None
     */
     const { password } = req.body;
 
@@ -61,11 +55,8 @@ const encryptPassword = (req, res, next) => {
 const verifyJwt = (req, res, next) => {
     /*
     glue encrypted_password string variable to req object if password can be hashed
-
-    prerequisite: None
-    consequences: req.userIdentity | None
     */
-    const JWT = req.get('JWT');
+    const JWT = req.get('JWT'); // get JWT from POST header
 
     if (!JWT) {
         return res.status(401).json({
