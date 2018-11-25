@@ -12,25 +12,16 @@ const mailCallback = (err, res) => {
     console.log('Sending Email, err: ', err, 'response: ', res);
 };
 
-class MailClient {
+const send = (to, subject, html) => {
+    gmailClient(defaultMailSetting)(
+        {
+            to, subject, html  // override mail setting
+        },
+        mailCallback
+    );
+};
 
-    constructor(){
-        this.sendMailMethod = gmailClient(defaultMailSetting);
-    }
 
-    sendTestMail(){
-        this.sendMailMethod({}, mailCallback);
-    }
-
-    send(to, subject, text){
-        this.sendMailMethod(
-            {
-                to, subject, text  // override mail setting
-            },
-            mailCallback
-        );
-    }
-
-}
-
-module.exports = MailClient;
+module.exports = {
+    send
+};

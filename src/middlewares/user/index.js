@@ -1,23 +1,35 @@
 const mongoose = require('mongoose');
 
-const User = require('../../models');
+const { User } = require('../../models');
 
 const ObjectId = mongoose.Types.ObjectId;
 
 
 const fetchUserByEmail = (req, res, next) => {
     /*
-    glue user object to req object if found
+    consequence: req.user
     */
 
-    const { email } = req.body;
+    let email = null;
+    if(req.body && req.body.email){
+        email = req.body.email;
+    }
+    if(req.userIdentity && req.userIdentity.email){
+        email = req.userIdentity.email;
+    }
+
+    if(email === null){
+        return res.status(400).json({
+            message: 'email field missing'
+        });
+    }
 
     User.findOne({ email })
         .exec()
         .then((user) => {
 
             if (user) {
-                req.user = user;
+                req.user = user;  // attach user's info to req
                 next();
             } else {
                 return res.status(401).json({
@@ -35,9 +47,39 @@ const fetchUserByEmail = (req, res, next) => {
         });
 };
 
+const fetchUserById = (req, res, next) => {
+    /*
+    consequence: req.user
+    */
+
+    const _id = req.userIdentity._id;
+
+    User.findOne({ _id })
+        .exec()
+        .then((user) => {
+
+            if (user) {
+                req.user = user;  // attach user's info to req
+                next();
+            } else {
+                return res.status(401).json({
+                    message: 'userid not found'
+                });
+            }
+
+        })
+        .catch(err => {
+            console.log(err);
+            return res.status(500).json({
+                message: 'Something wrong! Please try again latter.'
+            });
+
+        });
+};
+
 const checkUserIsExist = (req, res, next) => {
     /*
-    glue boolean variable to req object if user exists
+    consequence: req.userIsExist
     */
 
     const { email } = req.newUser;
@@ -46,6 +88,7 @@ const checkUserIsExist = (req, res, next) => {
         .exec()
         .then((user) => {
 
+            // attach userIsExist to req
             if(user === null){
                 req.userIsExist = false;
             }else{
@@ -65,7 +108,7 @@ const checkUserIsExist = (req, res, next) => {
 
 const createUser = (req, res, next) => {
     /*
-    create a user
+    consequence: req.createdUser
     */
 
     if('userIsExist' in req && req.userIsExist === true){
@@ -86,7 +129,7 @@ const createUser = (req, res, next) => {
     user.save()
         .then((result) => {
             console.log('created user:', result);
-            req.createdUser = result;
+            req.createdUser = result;   // attach createdUser to req
             next();
         })
         .catch(err => {
@@ -99,6 +142,7 @@ const createUser = (req, res, next) => {
 
 module.exports = {
     fetchUserByEmail,
+    fetchUserById,
     checkUserIsExist,
     createUser
 };

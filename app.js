@@ -13,8 +13,9 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
+app.set('view engine', 'pug');
+app.set('views', './src/views');
 
 
 // db
@@ -22,19 +23,13 @@ const MongoClient = require('./src/db');
 const mongoClient = new MongoClient(config);
 mongoClient.connect();
 
+// static files
+app.use(express.static('public'));
+
 // routes
 app.use('/user', userRouter);
 app.use('/test', testRouter);
 
-/*
-
-All routes (all is POST):
-/user/signup
-/user/login
-/test/sayhello
-/test/sayhello
-
-*/
 
 console.log('using config:', config);
 

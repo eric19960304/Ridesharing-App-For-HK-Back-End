@@ -5,7 +5,8 @@ const config = {
     mailConfig: {
         user: 'hkucsfyp2018threeriders@gmail.com',
         pass: process.env.GMAIL_PASSWORD || 'password'
-    }
+    },
+    domainName: 'https://demo.coder.faith'
 };
 
 module.exports = config;
