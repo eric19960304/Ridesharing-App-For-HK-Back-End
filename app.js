@@ -1,12 +1,13 @@
 const express = require('express');
-const path = require('path');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const http = require('http');
 const https = require('https');
 
-const { userRouter, testRouter} = require('./src/controllers');
+const { authRouter, testRouter, apiRouter} = require('./src/controllers');
+const { verifyJwt } = require('../../middlewares/auth');
 const config = require('./config');
+
 
 const app = express();
 
@@ -26,16 +27,26 @@ mongoClient.connect();
 // static files
 app.use(express.static('public'));
 
-// routes
-app.use('/user', userRouter);
-app.use('/test', testRouter);
 /*
-/user/login [POST]
-/user/signup [POST]
-/user/reset-password/request [POST]
-/user/reset-password/:token [GET]
-/user/reset-password/:token [POST]
+All routes:
+/auth/login [POST]
+/auth/signup [POST]
+/auth/reset-password/request [POST]
+/auth/reset-password/:token [GET]
+/auth/reset-password/:token [POST]
+/api/secret/google-map-api-key [POST]
 */
+app.use('/auth', authRouter);
+app.use(
+    '/api', 
+    verifyJwt,  // doorguard, if jwt valid, user info will be injected into req.userIdentity
+    apiRouter
+);
+app.use(
+    '/test', 
+    verifyJwt,  // doorguard, if jwt valid, user info will be injected into req.userIdentity
+    testRouter
+);
 
 
 console.log('using config:', config);

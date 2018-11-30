@@ -27,7 +27,7 @@ const returnJWT = (req, res) => {
 
 
 /* 
-/user/signup
+/auth/signup
 */
 
 router.post('/',

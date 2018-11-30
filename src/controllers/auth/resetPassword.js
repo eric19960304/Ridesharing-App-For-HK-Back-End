@@ -93,9 +93,9 @@ const changeUserPasword = (req, res, next) => {
 
 
 /* 
-/user/reset-password/request [POST]
-/user/reset-password/:token [GET]
-/user/reset-password/:token [POST]
+/auth/reset-password/request [POST]
+/auth/reset-password/:token [GET]
+/auth/reset-password/:token [POST]
 */
 
 router.post('/request',

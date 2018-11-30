@@ -33,7 +33,7 @@ const returnJWT = (req, res) => {
 };
 
 /* 
-/user/login
+/auth/login
 */
 
 router.post('/',
