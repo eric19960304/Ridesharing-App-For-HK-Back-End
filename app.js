@@ -5,7 +5,7 @@ const http = require('http');
 const https = require('https');
 
 const { authRouter, testRouter, apiRouter} = require('./src/controllers');
-const { verifyJwt } = require('../../middlewares/auth');
+const { verifyJwt } = require('./src/middlewares/auth');
 const config = require('./config');
 
 
