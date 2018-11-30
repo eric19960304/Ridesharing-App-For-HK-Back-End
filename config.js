@@ -12,7 +12,7 @@ const config = {
         pass: process.env.GMAIL_PASSWORD || 'password'
     },
     domainName: 'https://demo.coder.faith',
-    google_map_api_key: process.env.GOOGLE_MAP_API_KEY | 'apikeyNotFound'
+    google_map_api_key: process.env.GOOGLE_MAP_API_KEY || 'apikeyNotFound'
 };
 
 module.exports = config;
