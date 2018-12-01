@@ -84,7 +84,7 @@ router.post('/',
     returnResponse
 );
 
-router.post('/activate/:token',
+router.get('/activate/:token',
     fetchTempLinkAndUserIdentity,
     fetchUserById,
     activateUser,
