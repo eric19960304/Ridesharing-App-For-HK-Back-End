@@ -16,24 +16,28 @@ User request format example:
 
 */
 
-const printRequest = (req, res, next) => { console.log(req.body); next(); };
-
 const returnJWT = (req, res) => {
 
-    if (!req.authenticated) {
+    if(!req.authenticated) {
         return res.status(401).json({
             message: 'Invalid email or password'
         });
     }
 
-    const userInfo = {
+    if(!req.user.activated){
+        return res.status(401).json({
+            message: 'Email is not activated'
+        });
+    }
+
+    const user = {
         email: req.user.email,
         nickname: req.user.nickname
     };
 
     res.status(200).json({
         jwt: generateJWTToken(req.user),
-        user: userInfo
+        user
     });
 
 };
@@ -43,7 +47,6 @@ const returnJWT = (req, res) => {
 */
 
 router.post('/',
-    printRequest,
     fetchUserByEmail,
     authenticateUserLogin,
     returnJWT

@@ -20,7 +20,7 @@ const fetchUserByEmail = (req, res, next) => {
 
     if(email === null){
         return res.status(400).json({
-            message: 'email field missing'
+            message: 'Email field missing'
         });
     }
 
@@ -33,7 +33,7 @@ const fetchUserByEmail = (req, res, next) => {
                 next();
             } else {
                 return res.status(401).json({
-                    message: 'email not found'
+                    message: 'Email not found'
                 });
             }
 
@@ -63,7 +63,7 @@ const fetchUserById = (req, res, next) => {
                 next();
             } else {
                 return res.status(401).json({
-                    message: 'userid not found'
+                    message: 'Userid not found'
                 });
             }
 
@@ -106,9 +106,9 @@ const checkUserIsExist = (req, res, next) => {
 };
 
 
-const createUser = (req, res, next) => {
+const createInactiveUser = (req, res, next) => {
     /*
-    consequence: req.createdUser
+    consequence: req.user
     */
 
     if('userIsExist' in req && req.userIsExist === true){
@@ -124,12 +124,13 @@ const createUser = (req, res, next) => {
         email: email,
         password: encrypted_password,
         nickname,
+        actived: false
     });
 
     user.save()
         .then((result) => {
             console.log('created user:', result);
-            req.createdUser = result;   // attach createdUser to req
+            req.user = result;   // attach user to req
             next();
         })
         .catch(err => {
@@ -144,5 +145,5 @@ module.exports = {
     fetchUserByEmail,
     fetchUserById,
     checkUserIsExist,
-    createUser
+    createInactiveUser
 };

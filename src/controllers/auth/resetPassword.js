@@ -1,68 +1,28 @@
 const express = require('express');
 
 const { fetchUserById, fetchUserByEmail } = require('../../middlewares/user');
-const { createTempLink, deleteTempLink } = require('../../middlewares/tempLink');
+const { 
+    createTempLink, 
+    deleteTempLink, 
+    fetchTempLinkAndUserIdentity 
+} = require('../../middlewares/tempLink');
 const { encryptPassword } = require('../../middlewares/auth');
 const mailClient = require('../../helpers/mailClient');
-const { User, TempLink} = require('../../models');
 const config = require('../../../config');
 
 const router = express.Router();
 
-const printRequest = (req, res, next) => { console.log(req.body); next(); };
-
-
-
-const fetchTempLinkAndUserIdentity = (req, res, next) => {
-    /*
-    consequence: req.userIdentity & tempLink
-    Type userIdentity = { _id: string, email: null }
-    */
-
-    const token = req.params.token;
-
-    TempLink.findOne({ token })
-        .exec()
-        .then((tempLink) => {
-
-            if (tempLink && tempLink.purpose === 'resetPassword' && 
-                new Date() < new Date(tempLink.expiryDate) ) {
-
-                const userIdentity = {
-                    _id: tempLink.userId,
-                    email: null
-                };
-
-                req.tempLink = tempLink;
-                req.userIdentity = userIdentity;
-                next();
-
-            } else {
-                return res.send('link not exists or expired');
-            }
-
-        })
-        .catch(err => {
-            console.log(err);
-            return res.status(500).json({
-                message: 'Something wrong! Please try again latter.'
-            });
-
-        });
-};
 
 
 const sendResetPasswordLinkToUserByMail = (req, res) => {
     const { token } = req.createdTempLink;
     const { nickname, email } = req.user;
     const url = config.domainName + '/user/reset-password/' + token;
-    mailClient.send(
-        email, 
-        'Threeriders: Reset Password Link', 
-        `Dear ${nickname}, <br/> Please click the following link to reset your password: <br/><a href="${url}">${url}</a><br/><br/>Threeriders HKUCS FYP 2018`
-    );
+    const subject = 'Threeriders: Reset Password Link';
+    const content = `Dear ${nickname}, <br/> Please click the following link to reset your password: <br/><a href="${url}">${url}</a><br/><br/>Threeriders HKUCS FYP 2018`;
+    mailClient.send( email, subject, content);
     return res.status(200).json({
-        message: 'link sent'
+        message: 'Link sent'
     });
 };
 
@@ -91,6 +51,17 @@ const changeUserPasword = (req, res, next) => {
     );
 };
 
+const ensureEmailNotExistAndSetTempLinkPurpose = (req, res, next) => {
+    if('userIsExist' in req && req.userIsExist === true){
+        return res.status(200).json({
+            message: 'This email has been used!'
+        });
+    }
+
+    req.tempLinkPurpose = 'resetPassword';
+    next();
+};
+
 
 /* 
 /auth/reset-password/request [POST]
@@ -98,21 +69,20 @@ const changeUserPasword = (req, res, next) => {
 /auth/reset-password/:token [POST]
 */
 
-router.post('/request',
-    fetchUserByEmail,
-    createTempLink,
-    sendResetPasswordLinkToUserByMail
-);
-
 router.get('/:token',
-    printRequest,
     fetchTempLinkAndUserIdentity,
     fetchUserById,
     serveResetPasswordForm
 );
 
+router.post('/request',
+    fetchUserByEmail,
+    ensureEmailNotExistAndSetTempLinkPurpose,
+    createTempLink,
+    sendResetPasswordLinkToUserByMail
+);
+
 router.post('/:token',
-    printRequest,
     fetchTempLinkAndUserIdentity,
     fetchUserById,
     encryptPassword,

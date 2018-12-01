@@ -6,14 +6,14 @@ const mailClient = require('../../helpers/mailClient');
 const sayhello = (req, res) => {
     const userIdentity = req.userIdentity;
     res.status(200).json({
-        message: 'hello ' + userIdentity.email.split('@')[0] + '!'
+        message: 'Hello ' + userIdentity.email.split('@')[0] + '!'
     });
 };
 
 const sendEmail = (req, res) => {
     mailClient.send('ericlauchiho@gmail.com', 'test subject', '<a href="https://i.cs.hku.hk/fyp/2018/fyp18028/">link</a>,  test content.');
     res.status(200).json({
-        message: 'email sent'
+        message: 'Email sent'
     });
 };
 
