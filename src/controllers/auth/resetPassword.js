@@ -54,12 +54,12 @@ const fetchTempLinkAndUserIdentity = (req, res, next) => {
 
 const sendResetPasswordLinkToUserByMail = (req, res) => {
     const { token } = req.createdTempLink;
-    const { username, email } = req.user;
+    const { nickname, email } = req.user;
     const url = config.domainName + '/user/reset-password/' + token;
     mailClient.send(
         email, 
         'Threeriders: Reset Password Link', 
-        `Dear ${username}, <br/> Please click the following link to reset your password: <br/><a href="${url}">${url}</a><br/><br/>Threeriders HKUCS FYP 2018`
+        `Dear ${nickname}, <br/> Please click the following link to reset your password: <br/><a href="${url}">${url}</a><br/><br/>Threeriders HKUCS FYP 2018`
     );
     return res.status(200).json({
         message: 'link sent'
@@ -68,7 +68,7 @@ const sendResetPasswordLinkToUserByMail = (req, res) => {
 
 const serveResetPasswordForm = (req, res) => {
     res.render('newPasswordForm', {
-        username: req.user.username
+        nickname: req.user.nickname
     });
 };
 

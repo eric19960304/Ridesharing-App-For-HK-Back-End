@@ -7,12 +7,12 @@ const { generateJWTToken } = require('../../helpers/auth');
 const router = express.Router();
 
 const extractUserInfoFromReqBody = (req, res, next) => {
-    const { email, username } = req.body;
+    const { email, nickname } = req.body;
     const { encrypted_password } = req;
 
     req.newUser = {
         email,
-        username,
+        nickname,
         encrypted_password
     };
 

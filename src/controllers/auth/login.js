@@ -26,8 +26,14 @@ const returnJWT = (req, res) => {
         });
     }
 
+    const userInfo = {
+        email: req.user.email,
+        nickname: req.user.nickname
+    };
+
     res.status(200).json({
-        jwt: generateJWTToken(req.user)
+        jwt: generateJWTToken(req.user),
+        user: userInfo
     });
 
 };
