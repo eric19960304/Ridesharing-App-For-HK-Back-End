@@ -106,7 +106,7 @@ const checkUserIsExist = (req, res, next) => {
 };
 
 
-const createInactiveUser = (req, res, next) => {
+const createUnactivatedUser = (req, res, next) => {
     /*
     consequence: req.user
     */
@@ -124,7 +124,7 @@ const createInactiveUser = (req, res, next) => {
         email: email,
         password: encrypted_password,
         nickname,
-        actived: false
+        activated: false
     });
 
     user.save()
@@ -145,5 +145,5 @@ module.exports = {
     fetchUserByEmail,
     fetchUserById,
     checkUserIsExist,
-    createInactiveUser
+    createUnactivatedUser
 };

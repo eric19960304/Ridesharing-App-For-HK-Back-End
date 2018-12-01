@@ -1,6 +1,6 @@
 const express = require('express');
 
-const { createInactiveUser, checkUserIsExist } = require('../../middlewares/user');
+const { createUnactivatedUser, checkUserIsExist } = require('../../middlewares/user');
 const { 
     createTempLink, 
     deleteTempLink,
@@ -77,7 +77,7 @@ router.post('/',
     encryptPassword,
     extractUserInfoFromReqBody,
     checkUserIsExist,
-    createInactiveUser,
+    createUnactivatedUser,
     setTempLinkPurpose,
     createTempLink,
     sendActivationEmail,
