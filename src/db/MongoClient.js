@@ -7,7 +7,7 @@ class MongoClient {
     }
 
     getMongoUrl() {
-        return this._config.MONGODB_URI;
+        return this._config.mongodb_url;
     }
 
     connect() {
