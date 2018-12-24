@@ -20,7 +20,7 @@ app.set('views', './src/views');
 
 
 // db
-const MongoClient = require('./src/db');
+const MongoClient = require('./src/db/mongoClient');
 const mongoClient = new MongoClient(config);
 mongoClient.connect();
 
