@@ -129,7 +129,6 @@ const createUnactivatedUser = (req, res, next) => {
 
     user.save()
         .then((result) => {
-            console.log('created user:', result);
             req.user = result;   // attach user to req
             next();
         })

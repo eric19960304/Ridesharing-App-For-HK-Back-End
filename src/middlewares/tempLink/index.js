@@ -23,7 +23,6 @@ const createTempLink = (req, res, next) => {
 
     tempLink.save()
         .then((result) => {
-            console.log('created tempLink:', result);
             req.createdTempLink = result;   // attach createdTempLink to req
             next();
         })
@@ -45,7 +44,6 @@ const deleteTempLink = (req, res, next) => {
         .exec()
         .then(() => {
 
-            console.log('removed tempLink: ', _id);
             next();
 
         })

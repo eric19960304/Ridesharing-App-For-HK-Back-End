@@ -45,7 +45,6 @@ const changeUserPasword = (req, res, next) => {
                 });
             }
 
-            console.log('Password updated: ', user);
             next();
         }
     );
