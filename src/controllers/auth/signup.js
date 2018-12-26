@@ -50,7 +50,6 @@ const activateUser = (req, res, next) => {
                 });
             }
 
-            console.log('activated user: ', user._id);
             next();
         }
     );

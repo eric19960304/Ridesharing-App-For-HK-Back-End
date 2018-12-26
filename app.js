@@ -20,7 +20,7 @@ app.set('views', './src/views');
 
 
 // db
-const MongoClient = require('./src/db');
+const MongoClient = require('./src/db/mongoClient');
 const mongoClient = new MongoClient(config);
 mongoClient.connect();
 
@@ -28,8 +28,8 @@ mongoClient.connect();
 app.use(express.static('public'));
 
 // print request for all routes
-const printRequest = (req, res, next) => { console.log(req.body); next(); };
-app.use(printRequest);
+// const printRequest = (req, res, next) => { console.log(req.body); next(); };
+// app.use(printRequest);
 
 /*
 All routes:
@@ -39,6 +39,7 @@ All routes:
 /auth/reset-password/:token [GET]
 /auth/reset-password/:token [POST]
 /api/secret/google-map-api-key [POST]
+/api/driver/location-update [POST]
 */
 app.use('/auth', authRouter);
 app.use(
@@ -76,4 +77,6 @@ if(process.env.PROD){
     httpsServer.listen(443, () => {
         console.log('Server is running on Port 443');
     });
+}else{
+    console.log('development mode');
 }
