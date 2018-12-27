@@ -56,8 +56,10 @@ typings/
 
 # dotenv environment variables file
 .env
+*/venv
 
 # next.js build output
 .next
 
 .idea/
+.DS_Store

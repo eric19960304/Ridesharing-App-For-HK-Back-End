@@ -117,19 +117,18 @@ const createUnactivatedUser = (req, res, next) => {
         });
     }
 
-    const { email, encrypted_password, nickname } = req.newUser;
+    const { email, encryptedPassword, nickname } = req.newUser;
 
     const user = new User({
         _id: new ObjectId(),
         email: email,
-        password: encrypted_password,
+        password: encryptedPassword,
         nickname,
         activated: false
     });
 
     user.save()
         .then((result) => {
-            console.log('created user:', result);
             req.user = result;   // attach user to req
             next();
         })
@@ -141,9 +140,34 @@ const createUnactivatedUser = (req, res, next) => {
         });
 };
 
+
+const updateUser = (req, res, next) => {
+    /*
+    consequence: req.user
+    */
+
+    for(const key in req.updatedUserInfo){
+        if(req.updatedUserInfo[key]){
+            req.user[key] = req.updatedUserInfo[key];
+        }
+    }
+    
+    req.user.save()
+        .then(() => {
+            next();
+        })
+        .catch(err => {
+            console.log('update user error: ', err);
+            return res.status(200).json({
+                message: 'Something wrong! Please try again latter.'
+            });
+        });
+};
+
 module.exports = {
     fetchUserByEmail,
     fetchUserById,
     checkUserIsExist,
-    createUnactivatedUser
+    createUnactivatedUser,
+    updateUser
 };
