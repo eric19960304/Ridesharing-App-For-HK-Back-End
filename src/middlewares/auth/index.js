@@ -1,4 +1,3 @@
-
 const bcrypt = require('bcrypt');
 const { decodedJWT } = require('../../helpers/auth');
 
@@ -33,13 +32,13 @@ const authenticateUserLogin = (req, res, next) => {
 
 const encryptPassword = (req, res, next) => {
     /*
-    attach encrypted_password to req if password can be hashed
+    attach encryptedPassword to req if password can be hashed
 
-    consequence: req.encrypted_password
+    consequence: req.encryptedPassword
     */
     const { password } = req.body;
 
-    bcrypt.hash(password, saltRound, (err, encrypted_password) => {
+    bcrypt.hash(password, saltRound, (err, encryptedPassword) => {
         if (err) {
             // hash error
             return res.status(500).json({
@@ -47,7 +46,7 @@ const encryptPassword = (req, res, next) => {
             });
         }
 
-        req.encrypted_password = encrypted_password;
+        req.encryptedPassword = encryptedPassword;
 
         next();
 

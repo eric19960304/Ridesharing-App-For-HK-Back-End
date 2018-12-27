@@ -16,12 +16,12 @@ const router = express.Router();
 
 const extractUserInfoFromReqBody = (req, res, next) => {
     const { email, nickname } = req.body;
-    const { encrypted_password } = req;
+    const { encryptedPassword } = req;
 
     req.newUser = {
         email,
         nickname,
-        encrypted_password
+        encryptedPassword
     };
 
     next();

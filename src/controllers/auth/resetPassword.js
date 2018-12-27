@@ -33,7 +33,7 @@ const serveResetPasswordForm = (req, res) => {
 };
 
 const changeUserPasword = (req, res, next) => {
-    const newPassword = req.encrypted_password;
+    const newPassword = req.encryptedPassword;
 
     req.user.password = newPassword;
     req.user.save(
