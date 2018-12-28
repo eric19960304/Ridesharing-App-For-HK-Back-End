@@ -7,6 +7,11 @@ nodejs version 10.x.x installed
 
 clean mongodb running on localhost:27017 ( [Windows](https://stackoverflow.com/questions/20796714/how-do-i-start-mongo-db-from-windows) | [Mac](https://stackoverflow.com/questions/18452023/installing-and-running-mongodb-on-osx) )
 
+yarn with version >=1.12.3 installed
+
+redis running on port 6379 (default port)
+
+
 Required enviroment variables in server (see config.js):
 * MONGODB_PASSWORD
 * PROD
@@ -14,11 +19,18 @@ Required enviroment variables in server (see config.js):
 * GMAIL_PASSWORD (for hkucsfyp2018threeriders@gmail.com, you can change the email address in config.js)
 * GOOGLE_MAP_API_KEY
 
-To run the server:
 
-`npm install`
+To install all the packages:
 
-`npm start`
+`yarn`
+
+To run the server in development mode:
+
+`yarn start`
+
+To run the server in production mode (all env variables should be set):
+
+`yarn run prod`
 
 
 Project structure:
