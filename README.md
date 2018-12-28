@@ -3,13 +3,13 @@
 
 prerequisite:
 
-nodejs version 10.x.x installed
+1. nodejs version 10.x.x installed
 
-clean mongodb running on localhost:27017 ( [Windows](https://stackoverflow.com/questions/20796714/how-do-i-start-mongo-db-from-windows) | [Mac](https://stackoverflow.com/questions/18452023/installing-and-running-mongodb-on-osx) )
+2. clean mongodb running on localhost:27017 ( [Windows](https://stackoverflow.com/questions/20796714/how-do-i-start-mongo-db-from-windows) | [Mac](https://stackoverflow.com/questions/18452023/installing-and-running-mongodb-on-osx) )
 
-yarn with version >=1.12.3 installed
+3. yarn with version >=1.12.3 installed
 
-redis running on port 6379 (default port)
+4. redis running on port 6379 (default port)
 
 
 Required enviroment variables in server (see config.js):
