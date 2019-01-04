@@ -117,14 +117,10 @@ const createUnactivatedUser = (req, res, next) => {
         });
     }
 
-    const { email, encryptedPassword, nickname } = req.newUser;
-
     const user = new User({
         _id: new ObjectId(),
-        email: email,
-        password: encryptedPassword,
-        nickname,
-        activated: false
+        activated: false,
+        ...req.newUser
     });
 
     user.save()

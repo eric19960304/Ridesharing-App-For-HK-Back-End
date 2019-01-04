@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const mailClient = require('../../helpers/mailClient');
+const notificationClient = require('../../helpers/notificationClient');
 
 const sayhello = (req, res) => {
     const userIdentity = req.userIdentity;
@@ -21,9 +22,20 @@ const gettest = (req, res) => {
     res.send('hello world');
 };
 
+const pushNotif = (req, res) => {
+    const pushToken = req.body.pushToken;
+
+    notificationClient([pushToken], 'test notification ^_^');
+
+    res.status(200).json({
+        message: 'Notification sent'
+    });
+};
+
 /* 
 /test/sayhello
 /test/sendemail
+/test/push-notification
 */
 
 router.get('/gettest',
@@ -36,6 +48,10 @@ router.post('/sayhello',
 
 router.post('/sendemail',
     sendEmail,
+);
+
+router.post('/push-notification',
+    pushNotif
 );
 
 module.exports = router;
