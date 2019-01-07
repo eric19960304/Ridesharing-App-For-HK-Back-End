@@ -8,7 +8,6 @@ const { authRouter, testRouter, apiRouter} = require('./src/controllers');
 const { verifyJwt } = require('./src/middlewares/auth');
 const config = require('./config');
 
-
 const app = express();
 
 app.use(express.json());
@@ -54,7 +53,6 @@ app.use(
     testRouter
 );
 
-
 console.log('using config:', config);
 
 const httpServer = http.createServer(app);
@@ -86,3 +84,104 @@ if(process.env.PROD){
         console.log('Server is running on Port 80');
     });
 }
+
+// const websocket = require('socket.io')(httpServer);
+// const { Message } = require('./src/models');
+
+// users = {}
+
+// websocket.on('connection', (socket) => {
+//     console.log('A client just joined on', socket.id);
+//     socket.on('userJoined', (message) => onUserJoined(message, socket));
+//     socket.on('message', (message) => onMessageReceived(message, socket));
+// });
+
+// const onUserJoined = (message, socket) => {
+//     console.log(message);
+//     user = message.text
+//     if (!(user in users)) {
+//         sendExistingMessages(user, socket);
+//     } else {
+//       users[user] = socket.id;
+//       sendExistingMessages(user, socket);
+//     }
+//     // try {
+        
+//     // } catch(err) {
+//     //     console.log(err);
+//     // }
+// }
+
+// const sendExistingMessages = (user, socket) => {
+//     //let receiverId = user;
+
+//     Message.find({ $or: [ { 'senderId': user }, { 'recieverId': user } ]  })
+//         .sort({ 'createdAt': -1 })
+//         .exec(function (err, message) {
+//             if (err){
+//                 console.log(err);
+//                 return res.status(200).json({
+//                     message: 'Something wrong! Please try again latter.'
+//                 });
+//             }else{
+//                 if (!message.length) return;
+//                 for(var i = 0; i < message.length; i++){
+//                     message[i].user = user;
+//                     console.log(message[i]);
+//                 }
+//             }
+//         });
+//         // .then((message) => {
+//         //     console.log(message);
+//         //     console.log(message.toObject());
+//         //     var newMessage = message.toObject();
+//         //     // If there aren't any messages, then return.
+//         //     if (!message.length) return;
+//         //     for(var i = 0; i < newMessage.length; i++){
+//         //         newMessage[i].user = user;
+
+//         //     }
+//         //     console.log(newMessage)
+//         //     socket.emit('message', newMessage.reverse());
+//         // })
+//         // .catch(err => {
+//         //     console.log(err);
+//         //     return res.status(200).json({
+//         //         message: 'Something wrong! Please try again latter.'
+//         //     });
+//         // });
+        
+//         // .sort()
+//         // .toArray((err, messages) => {
+//         //     if (err) console.log(err);
+//         //     // If there aren't any messages, then return.
+//         //     if (!messages.length) return;
+//         //     socket.emit('message', messages.reverse());
+//         // });
+
+//         //socket.clients[senderSocket].emit();
+// }
+
+// const onMessageReceived = (message, senderSocket) => {
+    
+//     console.log(message);
+
+//     const newMessage = new Message({
+//         senderId: message.user.id,
+//         receiverId: 'server',
+//         message: message.text,
+//         createdAt: message.createdAt
+//     });
+
+//     newMessage.save()
+//         .catch(err => {
+//             console.log('insert message error: ', err);
+//             return res.status(200).json({
+//                 message: 'Something wrong! Please try again latter.'
+//             });
+//         });
+// }
+
+const socketio = require('socket.io')(httpServer);
+const socketRouter = require('./src/controllers/socket/index')(socketio);
+app.use('/socket', socketRouter);
