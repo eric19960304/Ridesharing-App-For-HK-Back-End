@@ -18,6 +18,7 @@ const notify = async (pushTokens, messageToNotify, data = {}) => {
             to: pushToken,
             sound: 'default',
             body: messageToNotify,
+            badge: 1,
             data,
         });
     }

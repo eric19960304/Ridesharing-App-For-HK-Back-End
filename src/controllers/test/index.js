@@ -25,7 +25,7 @@ const gettest = (req, res) => {
 const pushNotif = (req, res) => {
     const pushToken = req.body.pushToken;
 
-    notificationClient([pushToken], 'test notification ^_^');
+    notificationClient.notify([pushToken], 'test notification ^_^', {message: 'test notification ^_^'});
 
     res.status(200).json({
         message: 'Notification sent'

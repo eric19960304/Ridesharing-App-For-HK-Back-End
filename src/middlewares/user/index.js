@@ -139,7 +139,7 @@ const createUnactivatedUser = (req, res, next) => {
 
 const updateUser = (req, res, next) => {
     /*
-    consequence: req.user
+    consequence: modify req.user
     */
 
     for(const key in req.updatedUserInfo){
