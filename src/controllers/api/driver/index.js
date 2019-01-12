@@ -8,7 +8,7 @@ const redisClient = require('../../../db/redisClient');
 /api/driver/location-update
 */
 
-const printLocation = (req, res) => {
+const storeLocationToCache = (req, res) => {
     const latitude = req.body.location.latitude;
     const longitude = req.body.location.longitude;
     const userId = req.userIdentity._id;
@@ -19,7 +19,7 @@ const printLocation = (req, res) => {
 };
 
 router.post('/location-update',
-    printLocation
+    storeLocationToCache
 );
 
 

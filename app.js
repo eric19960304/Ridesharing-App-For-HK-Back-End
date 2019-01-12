@@ -28,8 +28,8 @@ mongoClient.connect();
 app.use(express.static('public'));
 
 // print request for all routes
-// const printRequest = (req, res, next) => { console.log(req.body); next(); };
-// app.use(printRequest);
+const printRequest = (req, res, next) => { console.log('Request Body: ', req.body); next(); };
+app.use(printRequest);
 
 /*
 All routes:
