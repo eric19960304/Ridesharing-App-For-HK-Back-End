@@ -1,5 +1,7 @@
-# Ridesharing-App-For-HK-Back-End
+# HKUCS FYP Back End Server for Ridesharing App
 
+
+Also see the App repository: https://github.com/eric19960304/Ridesharing-App-For-HK
 
 prerequisite:
 
