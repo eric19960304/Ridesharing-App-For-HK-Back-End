@@ -1,4 +1,4 @@
-# FYP-Server
+# Ridesharing-App-For-HK-Back-End
 
 
 prerequisite:
