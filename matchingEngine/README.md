@@ -19,4 +19,4 @@ To install all the packages:
 
 To run the server "engine_v1":
 
-`python3 -m engine_v1`
+`python3 engine_v1`

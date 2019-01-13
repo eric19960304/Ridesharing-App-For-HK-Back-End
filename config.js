@@ -14,8 +14,7 @@ const config = {
         pass: process.env.GMAIL_PASSWORD || 'password'
     },
     domainName,
-    google_map_api_key: process.env.GOOGLE_MAP_API_KEY || 'apikeyNotFound',
-    matching_engine_url: process.env.MATCHING_ENGINE_URL || 'http://localhost:5000'
+    google_map_api_key: process.env.GOOGLE_MAP_API_KEY || 'apikeyNotFound'
 };
 
 module.exports = config;

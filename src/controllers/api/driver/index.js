@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const redis = require("redis");
 const redisClient = require('../../../db/redisClient');
 
 const { REAL_TIME } = require('../../../helpers/constants');
@@ -8,6 +7,19 @@ const { REAL_TIME } = require('../../../helpers/constants');
 
 /* 
 /api/driver/location-update
+expected req.body format:
+{
+	"location":  {
+		"accuracy": number,
+		"altitude": number,
+		"altitudeAccuracy": number,
+		"heading": number,
+		"latitude": number,
+		"longitude": number,
+		"speed": number
+	},
+	"timestamp": number
+}
 */
 
 const storeLocationToCache = (req, res) => {

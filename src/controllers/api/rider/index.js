@@ -2,19 +2,17 @@ const express = require('express');
 
 const redisClient = require('../../../db/redisClient');
 const { REAL_TIME } = require('../../../helpers/constants');
-const config = require('../../../../config');
-const networkClient = require('../../../helpers/networkClient');
 
 const router = express.Router();
 
 /* 
 /api/rider/real-time-ride-request
 expected req.body format: {
-        location: {
+        startLocation: {
             latitude: number,
             longitude: number
         },
-        destination: {
+        endLocation: {
             latitude: number,
             longitude: number
         }
@@ -46,11 +44,11 @@ const checkRiderStatus = (req, res, next) => {
 
 const storeRideRequest = (req, res) => {
     const userId = req.userIdentity._id;
-    const currentLocation = req.body.location;
-    const destination = req.body.destination;
+    const startLocation = req.body.startLocation;
+    const endLocation = req.body.endLocation;
 
     let completeRequest = Object.assign({}, req.body);
-    completeRequest.riderId = userId;
+    completeRequest.userId = userId;
 
     redisClient.rpush(
         REAL_TIME.REDIS_KEYS.RIDE_REQUEST, 
@@ -63,10 +61,8 @@ const storeRideRequest = (req, res) => {
         REAL_TIME.RIDE_STATUS.IN_QUEUE
     );
 
-    networkClient.POST(config.matching_engine_url+'trigger-real-time-match', {});
-
     return res.status(200).json({
-        result: `real-time-ride-request received: riderId=${userId}, current location: (lat=${currentLocation.latitude}, long=${currentLocation.longitude}), destination: (lat=${destination.latitude}, long=${destination.longitude})`
+        result: `real-time-ride-request received: userId=${userId}, start location: (lat=${startLocation.latitude}, long=${startLocation.longitude}), end Location: (lat=${endLocation.latitude}, long=${endLocation.longitude})`
     });
 };
 
