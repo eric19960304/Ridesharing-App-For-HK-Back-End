@@ -1,6 +1,7 @@
 import redis
 from sanic import Sanic
 from sanic.response import json, text
+from asyncio import sleep
 
 
 
@@ -28,7 +29,12 @@ async def test_if_alive(request):
         })
     return response
 
-app.add_route(controller.test, '/test-if-alive', methods=['POST'])
+async def realTimeMatch(request):
+
+
+
+app.add_route(test_if_alive, '/test-if-alive', methods=['POST'])
+app.add_route(match, 'trigger-real-time-match', methods=['POST'])
 
 def run():
     app.run(host="0.0.0.0", port=5000)

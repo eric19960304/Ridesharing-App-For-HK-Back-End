@@ -1,2 +1,3 @@
 redis==3.0.1
 sanic==18.12.0
+asyncio==3.4.3

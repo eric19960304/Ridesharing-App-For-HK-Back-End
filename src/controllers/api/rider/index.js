@@ -1,8 +1,11 @@
 const express = require('express');
-const router = express.Router();
+
 const redisClient = require('../../../db/redisClient');
 const { REAL_TIME_RIDE_STATUS } = require('../../../helpers/constants');
+const config = require('../../../../config');
+const networkClient = require('../../../helpers/networkClient');
 
+const router = express.Router();
 
 /* 
 /api/rider/real-time-ride-request
@@ -41,7 +44,7 @@ const checkRiderStatus = (req, res, next) => {
     
 };
 
-const printLocation = (req, res) => {
+const storeRideRequest = (req, res) => {
     const userId = req.userIdentity._id;
     const currentLocation = req.body.location;
     const destination = req.body.destination;
@@ -52,6 +55,8 @@ const printLocation = (req, res) => {
     redisClient.rpush("realTimeRideRequest", JSON.stringify(completeRequest));
     redisClient.hset("realTimeRideStatus", userId, REAL_TIME_RIDE_STATUS.IN_QUEUE);
 
+    networkClient.POST(config.matching_engine_url+'trigger-real-time-match', {});
+
     return res.status(200).json({
         result: `real-time-ride-request received: riderId=${userId}, current location: (lat=${currentLocation.latitude}, long=${currentLocation.longitude}), destination: (lat=${destination.latitude}, long=${destination.longitude})`
     });
@@ -59,7 +64,7 @@ const printLocation = (req, res) => {
 
 router.post('/real-time-ride-request',
     checkRiderStatus,
-    printLocation
+    storeRideRequest
 );
 
 
