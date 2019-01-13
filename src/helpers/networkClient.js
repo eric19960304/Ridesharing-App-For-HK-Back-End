@@ -1,5 +1,5 @@
 
-const fetch = require('asyncio');
+const fetch = require('node-fetch');
 
 const POST = async (url, body) => {
     try {
@@ -18,6 +18,6 @@ const POST = async (url, body) => {
 };
 
 
-export default {
+module.export = {
     POST
 };

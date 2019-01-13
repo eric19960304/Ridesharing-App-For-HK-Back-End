@@ -1,7 +1,7 @@
 const express = require('express');
 
 const redisClient = require('../../../db/redisClient');
-const { REAL_TIME_RIDE_STATUS } = require('../../../helpers/constants');
+const { REAL_TIME } = require('../../../helpers/constants');
 const config = require('../../../../config');
 const networkClient = require('../../../helpers/networkClient');
 
@@ -24,7 +24,7 @@ expected req.body format: {
 
 const checkRiderStatus = (req, res, next) => {
     const userId = req.userIdentity._id;
-    redisClient.hget("realTimeRideStatus", userId, (err, status)=>{
+    redisClient.hget(REAL_TIME.REDIS_KEYS.RIDE_STATUS, userId, (err, status)=>{
         if(err){
             console.log("something wrong with redis server");
             return res.status(200).json({
@@ -32,7 +32,7 @@ const checkRiderStatus = (req, res, next) => {
             });
         }
 
-        if(status && status !== REAL_TIME_RIDE_STATUS.IDLE){
+        if(status && status !== REAL_TIME.RIDE_STATUS.IDLE){
             return res.status(200).json({
                 message: 'Your previous ride request is processing, please wait.'
             });
@@ -52,8 +52,16 @@ const storeRideRequest = (req, res) => {
     let completeRequest = Object.assign({}, req.body);
     completeRequest.riderId = userId;
 
-    redisClient.rpush("realTimeRideRequest", JSON.stringify(completeRequest));
-    redisClient.hset("realTimeRideStatus", userId, REAL_TIME_RIDE_STATUS.IN_QUEUE);
+    redisClient.rpush(
+        REAL_TIME.REDIS_KEYS.RIDE_REQUEST, 
+        JSON.stringify(completeRequest)
+    );
+
+    redisClient.hset(
+        REAL_TIME.REDIS_KEYS.RIDE_STATUS, 
+        userId, 
+        REAL_TIME.RIDE_STATUS.IN_QUEUE
+    );
 
     networkClient.POST(config.matching_engine_url+'trigger-real-time-match', {});
 
