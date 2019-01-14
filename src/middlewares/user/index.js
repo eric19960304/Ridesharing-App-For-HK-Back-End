@@ -160,10 +160,54 @@ const updateUser = (req, res, next) => {
         });
 };
 
+const findUsersPushTokens = (req, res, next) => {
+    /*
+    consequence: req.usersPushTokens
+    [ 
+        {
+            userId: string,
+            pushTokens: [string]
+        }
+    ]
+    */
+
+    const listOfIds = req.userIds.map( id => mongoose.Types.ObjectId(id) );
+
+    User.find({ '_id': { $in: listOfIds} })
+        .exec()
+        .then((users) => {
+
+            if (users.length !== listOfIds.length) {
+                return res.status(401).json({
+                    message: 'Some users ids are not valid'
+                });
+            }
+
+            const usersPushTokens = [];
+            users.forEach(user => {
+                usersPushTokens.push({
+                    userId: user._id,
+                    pushTokens: usersPushTokens.pushTokens
+                });
+            });
+
+            req.usersPushTokens = usersPushTokens;
+            next();
+        })
+        .catch(err => {
+            console.log(err);
+            return res.status(500).json({
+                message: 'Something wrong! Please try again latter.'
+            });
+
+        });
+};
+
 module.exports = {
     fetchUserByEmail,
     fetchUserById,
     checkUserIsExist,
     createUnactivatedUser,
-    updateUser
+    updateUser,
+    findUsersPushTokens
 };

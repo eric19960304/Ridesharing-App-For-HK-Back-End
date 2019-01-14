@@ -1,8 +1,12 @@
 const { Expo } = require('expo-server-sdk');
 let expo = new Expo();
 
-const notify = async (pushTokens, messageToNotify, data = {}) => {
+const notify = async (pushTokens, messageToNotify, extraData = {}) => {
     let messages = [];
+    const data = {
+        message: messageToNotify,
+        ...extraData
+    };
 
     for (let pushToken of pushTokens) {
         // Each push token looks like ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]

@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const http = require('http');
 const https = require('https');
 
-const { authRouter, testRouter, apiRouter} = require('./src/controllers');
+const { authRouter, testRouter, apiRouter, notifyMatchResultRouter } = require('./src/controllers');
 const { verifyJwt } = require('./src/middlewares/auth');
 const config = require('./config');
 
@@ -41,12 +41,17 @@ All routes:
 /api/secret/google-map-api-key [POST]
 /api/driver/location-update [POST]
 /api/user/edit-profile [POST]
+/notify-match-result/real-time-ride [POST]
 */
 app.use('/auth', authRouter);
 app.use(
     '/api', 
     verifyJwt,  // doorguard, if jwt valid, user info will be injected into req.userIdentity
     apiRouter
+);
+app.use(
+    '/notify-match-result',
+    notifyMatchResultRouter
 );
 app.use(
     '/test', 

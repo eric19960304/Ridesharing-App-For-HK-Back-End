@@ -3,6 +3,7 @@ from sanic import Sanic
 from sanic import response
 from time import sleep, gmtime, strftime, time
 import json
+import requests
 
 REAL_TIME_RIDE_STATUS__IDLE = 'idle'
 REAL_TIME_RIDE_STATUS__IN_QUEUE = 'inQueue'
@@ -13,6 +14,7 @@ REDIS_KEYS__REAL_TIME_RIDE_STATUS = 'realTimeRideStatus'
 REDIS_KEYS__REAL_TIME_RIDE_REQUEST = 'realTimeRideRequest'
 REDIS_KEYS__DRIVER_LOCATION = 'driverLocation'
 
+SERVER_ENDPOINT = 'http://localhost/notify-match-result/real-time-ride'
 
 def run_match(rideRequest: dict):
     driverLocations : dict = redisConn.hgetall(REDIS_KEYS__DRIVER_LOCATION)
@@ -39,7 +41,7 @@ def run_match(rideRequest: dict):
     matchResult = find_match(rideRequest, driverLocationsList)
     print('matchResult: ', matchResult)
 
-    return matchResult
+    requests.post(url = SERVER_ENDPOINT, data = matchResult)
 
 
 def find_match(rideRequest : dict, driverLocationsList : list):
