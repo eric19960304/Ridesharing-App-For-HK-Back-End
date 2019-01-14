@@ -10,19 +10,13 @@ const { fetchUserById } = require('../../middlewares/user');
 const { encryptPassword } = require('../../middlewares/auth');
 const mailClient = require('../../helpers/mailClient');
 const config = require('../../../config');
+const { createNewUserForDatabase } = require('../../helpers/creator');
 
 const router = express.Router();
 
 
 const extractUserInfoFromReqBody = (req, res, next) => {
-    const { email, nickname } = req.body;
-    const { encryptedPassword } = req;
-
-    req.newUser = {
-        email,
-        nickname,
-        encryptedPassword
-    };
+    req.newUser = createNewUserForDatabase(req.body);
 
     next();
 };

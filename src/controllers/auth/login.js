@@ -3,6 +3,7 @@ const express = require('express');
 const { fetchUserByEmail } = require('../../middlewares/user');
 const { authenticateUserLogin } = require('../../middlewares/auth');
 const { generateJWTToken } = require('../../helpers/auth');
+const creator = require('../../helpers/creator');
 
 const router = express.Router();
 
@@ -30,10 +31,7 @@ const returnJWT = (req, res) => {
         });
     }
 
-    const user = {
-        email: req.user.email,
-        nickname: req.user.nickname
-    };
+    const user = creator.createUserForFrontend(req.user);
 
     res.status(200).json({
         jwt: generateJWTToken(req.user),
