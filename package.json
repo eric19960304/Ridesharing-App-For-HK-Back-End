@@ -11,6 +11,7 @@
     "body-parser": "^1.18.3",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
+    "expo-server-sdk": "^3.1.0",
     "express": "^4.16.4",
     "gmail-send": "^1.2.14",
     "jsonwebtoken": "^8.4.0",

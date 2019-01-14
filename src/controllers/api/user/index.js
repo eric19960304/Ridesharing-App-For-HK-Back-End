@@ -3,6 +3,7 @@ const router = express.Router();
 
 const { authenticateUserLogin, encryptPassword } = require('../../../middlewares/auth');
 const { fetchUserById, updateUser } = require('../../../middlewares/user');
+const { createNewUserForDatabase } = require('../../../helpers/creator');
 
 /* 
 /api/user/edit-profile
@@ -18,16 +19,14 @@ const prepareForPasswordEncrypt = (req, res, next) => {
 };
 
 const prepareUpdatedUserInfo = (req, res, next) => {
-    req.updatedUserInfo = Object.assign({}, req.body);
+    req.updatedUserInfo = createNewUserForDatabase(req.body);
 
     next();
 };
 
 const prepareUpdatedUserInfoAndPassword = (req, res, next) => {
     if(req.authenticated === true){
-        req.body.password = req.encryptedPassword;
-        delete req.encryptPassword;
-        req.updatedUserInfo = Object.assign({}, req.body);
+        req.updatedUserInfo = createNewUserForDatabase(req.body);
         next();
     }else{
         return res.status(401).json({
@@ -41,6 +40,18 @@ const returnResponse = (req, res) => {
         success: true
     });
 };
+
+const storePushToken = (req, res, next) => {
+    if(!req.body.pushToken){
+        return res.status(400).json({
+            message: "pushToken not in request body"
+        });
+    }
+    req.user.pushTokens.push(req.pushToken);
+    req.user.save();
+    next();
+};
+
 
 router.post('/edit-profile',
     fetchUserById,
@@ -56,6 +67,12 @@ router.post('/edit-profile-with-password',
     encryptPassword,
     prepareUpdatedUserInfoAndPassword,
     updateUser,
+    returnResponse
+);
+
+router.post('/push-token',
+    fetchUserById,
+    storePushToken,
     returnResponse
 );
 
