@@ -16,8 +16,8 @@ REDIS_KEYS__DRIVER_LOCATION = 'driverLocation'
 
 SERVER_ENDPOINT = 'http://localhost/notify-match-result/real-time-ride'
 
-def run_match(rideRequest: dict):
-    driverLocations : dict = redisConn.hgetall(REDIS_KEYS__DRIVER_LOCATION)
+def run_match(rideRequest):
+    driverLocations = redisConn.hgetall(REDIS_KEYS__DRIVER_LOCATION)
     
     if len(driverLocations) == 0:
         while True:
@@ -25,13 +25,13 @@ def run_match(rideRequest: dict):
             currentTimeStr = strftime("%Y-%m-%d %H:%M:%S", gmtime())
             print("[{}] wait for active driver".format(currentTimeStr))
             sleep(3)
-            driverLocations : dict = redisConn.hgetall(REDIS_KEYS__DRIVER_LOCATION)
+            driverLocations = redisConn.hgetall(REDIS_KEYS__DRIVER_LOCATION)
             if len(driverLocations) > 0:
                 # driver appears, exit wait loop
                 break
 
     # ready to start matching
-    driverLocationsList : list = driverLocations.items()
+    driverLocationsList = driverLocations.items()
     redisConn.hset(
         REDIS_KEYS__REAL_TIME_RIDE_STATUS, 
         rideRequest['userId'],
@@ -44,7 +44,7 @@ def run_match(rideRequest: dict):
     requests.post(url = SERVER_ENDPOINT, data = matchResult)
 
 
-def find_match(rideRequest : dict, driverLocationsList : list):
+def find_match(rideRequest, driverLocationsList):
     '''
     rideRequest format:
     {
