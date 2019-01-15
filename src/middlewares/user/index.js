@@ -160,10 +160,46 @@ const updateUser = (req, res, next) => {
         });
 };
 
+const findUsersPushTokens = (req, res, next) => {
+    /*
+    consequence: req.usersPushTokens
+    [ 
+        {
+            userId: string,
+            pushTokens: [string]
+        }
+    ]
+    */
+
+    User.find({ '_id': { $in: req.userIds} })
+        .exec()
+        .then((users) => {
+
+            const usersPushTokens = [];
+            users.forEach(user => {
+                usersPushTokens.push({
+                    userId: user._id,
+                    pushTokens: user.pushTokens
+                });
+            });
+
+            req.usersPushTokens = usersPushTokens;
+            next();
+        })
+        .catch(err => {
+            console.log(err);
+            return res.status(500).json({
+                message: 'Something wrong! Please try again latter.'
+            });
+
+        });
+};
+
 module.exports = {
     fetchUserByEmail,
     fetchUserById,
     checkUserIsExist,
     createUnactivatedUser,
-    updateUser
+    updateUser,
+    findUsersPushTokens
 };

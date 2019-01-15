@@ -17,7 +17,7 @@ const router = express.Router();
 const sendResetPasswordLinkToUserByMail = (req, res) => {
     const { token } = req.createdTempLink;
     const { nickname, email } = req.user;
-    const url = config.domainName + '/user/reset-password/' + token;
+    const url = config.domainName + '/auth/reset-password/' + token;
     const subject = 'Threeriders: Reset Password Link';
     const content = `Dear ${nickname}, <br/> Please click the following link to reset your password: <br/><a href="${url}">${url}</a><br/><br/>Threeriders HKUCS FYP 2018`;
     mailClient.send( email, subject, content);

@@ -16,6 +16,7 @@
     "gmail-send": "^1.2.14",
     "jsonwebtoken": "^8.4.0",
     "mongoose": "^5.4.0",
+    "node-fetch": "^2.3.0",
     "nodemon": "^1.18.9",
     "pug": "^2.0.3",
     "redis": "^2.8.0",

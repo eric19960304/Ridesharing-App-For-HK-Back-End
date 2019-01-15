@@ -7,6 +7,8 @@ const { createNewUserForDatabase } = require('../../../helpers/creator');
 
 /* 
 /api/user/edit-profile
+/api/user/edit-profile-with-password
+/api/user/push-token
 */
 
 const prepareForPasswordEncrypt = (req, res, next) => {
@@ -42,12 +44,21 @@ const returnResponse = (req, res) => {
 };
 
 const storePushToken = (req, res, next) => {
-    if(!req.body.pushToken){
+    const { pushToken } = req.body;
+
+    if(!pushToken){
         return res.status(400).json({
             message: "pushToken not in request body"
         });
     }
-    req.user.pushTokens.push(req.pushToken);
+
+    if(req.user.pushTokens.indexOf(pushToken) > -1 ){
+        return res.status(400).json({
+            message: "token already exists"
+        });
+    }
+
+    req.user.pushTokens.push(pushToken);
     req.user.save();
     next();
 };
@@ -75,6 +86,5 @@ router.post('/push-token',
     storePushToken,
     returnResponse
 );
-
 
 module.exports = router;

@@ -1,8 +1,12 @@
 const { Expo } = require('expo-server-sdk');
 let expo = new Expo();
 
-const notify = async (pushTokens, messageToNotify, data = {}) => {
+const notify = async (pushTokens, messageToNotify, extraData = {}) => {
     let messages = [];
+    const data = {
+        message: messageToNotify,
+        ...extraData
+    };
 
     for (let pushToken of pushTokens) {
         // Each push token looks like ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]
@@ -29,10 +33,12 @@ const notify = async (pushTokens, messageToNotify, data = {}) => {
         // Send the chunks to the Expo push notification service. There are
         // different strategies you could use. A simple one is to send one chunk at a
         // time, which nicely spreads the load out over time:
+        let sentCount = 0;
         for (let chunk of chunks) {
             try {
                 let ticketChunk = await expo.sendPushNotificationsAsync(chunk);
                 tickets.push(...ticketChunk);
+                sentCount++;
                 // NOTE: If a ticket contains an error code in ticket.details.error, you
                 // must handle it appropriately. The error codes are listed in the Expo
                 // documentation:
@@ -41,6 +47,7 @@ const notify = async (pushTokens, messageToNotify, data = {}) => {
                 console.error(error);
             }
         }
+        console.log(`${sentCount}/${pushTokens.length} notifications are sent`);
     })();
 
     let receiptIds = [];
@@ -56,8 +63,6 @@ const notify = async (pushTokens, messageToNotify, data = {}) => {
     (async () => {
         // Like sending notifications, there are different strategies you could use
         // to retrieve batches of receipts from the Expo service.
-        let sentCount = 0;
-        const totalChunk = receiptIdChunks.length;
         for (let chunk of receiptIdChunks) {
             try {
                 let receipts = await expo.getPushNotificationReceiptsAsync(chunk);
@@ -66,7 +71,6 @@ const notify = async (pushTokens, messageToNotify, data = {}) => {
                 // notification and information about an error, if one occurred.
                 for (let receipt of receipts) {
                     if (receipt.status === 'ok') {
-                        sentCount++;
                         continue;
                     } else if (receipt.status === 'error') {
                         console.error(`There was an error sending a notification: ${receipt.message}`);
@@ -82,7 +86,6 @@ const notify = async (pushTokens, messageToNotify, data = {}) => {
                 console.error(error);
             }
         }
-        console.log(`${sentCount}/${totalChunk} notifications are sent`);
     })();
     
 };
