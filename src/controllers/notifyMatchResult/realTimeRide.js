@@ -2,8 +2,8 @@ const express = require('express');
 
 const notificationClient = require('../../helpers/notificationClient');
 const { findUsersPushTokens } = require('../../middlewares/user');
-const redisClient = require('../../../db/redisClient');
-const { REAL_TIME } = require('../../../helpers/constants');
+const redisClient = require('../../db/redisClient');
+const { REAL_TIME } = require('../../helpers/constants');
 
 const router = express.Router();
 
