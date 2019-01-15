@@ -16,14 +16,37 @@ REDIS_KEYS__DRIVER_LOCATION = 'driverLocation'
 
 SERVER_ENDPOINT = 'http://localhost/notify-match-result/real-time-ride'
 
+def startEngine():
+    # connect to redis
+    try:
+        redisConn = redis.StrictRedis(host='localhost', port=6379)
+        print('Connected to redis')
+        redisConn.flushall()
+        print('Flush All Cache')
+    except Exception as ex:
+        print('Error:', ex)
+        exit('Failed to connect, terminating.')
+
+    currentTimeStr = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+    print("[{}] wait for ride request".format(currentTimeStr))
+    while True:
+        rideRequestJSONString = redisConn.lpop(REDIS_KEYS__REAL_TIME_RIDE_REQUEST)
+        if rideRequestJSONString == None:
+            # when there is no item in list, the result retunrned from redis is None
+            sleep(3)
+        else:
+            rideRequest = ujson.loads( rideRequestJSONString.decode('utf-8') )
+            run_match(rideRequest)
+
 def run_match(rideRequest):
     driverLocationsDirty = redisConn.hgetall(REDIS_KEYS__DRIVER_LOCATION)
     
+    currentTimeStr = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+    print("[{}] wait for active driver".format(currentTimeStr))
+
     if len(driverLocationsDirty) == 0:
         while True:
             # no driver yet, enter wait loop
-            currentTimeStr = strftime("%Y-%m-%d %H:%M:%S", gmtime())
-            print("[{}] wait for active driver".format(currentTimeStr))
             sleep(3)
             driverLocationsDirty = redisConn.hgetall(REDIS_KEYS__DRIVER_LOCATION)
             if len(driverLocationsDirty) > 0:
@@ -113,23 +136,4 @@ def find_match(rideRequest, driverLocationsList):
 
 
 if __name__ == '__main__':
-    # connect to redis
-    try:
-        redisConn = redis.StrictRedis(host='localhost', port=6379)
-        print('Connected to redis')
-        redisConn.flushall()
-        print('Flush All Cache')
-    except Exception as ex:
-        print('Error:', ex)
-        exit('Failed to connect, terminating.')
-
-    while True:
-        rideRequestJSONString = redisConn.lpop(REDIS_KEYS__REAL_TIME_RIDE_REQUEST)
-        if rideRequestJSONString == None:
-            # when there is no item in list, the result retunrned from redis is None
-            currentTimeStr = strftime("%Y-%m-%d %H:%M:%S", gmtime())
-            print("[{}] wait for ride request".format(currentTimeStr))
-            sleep(3)
-        else:
-            rideRequest = ujson.loads( rideRequestJSONString.decode('utf-8') )
-            run_match(rideRequest)
+    startEngine()

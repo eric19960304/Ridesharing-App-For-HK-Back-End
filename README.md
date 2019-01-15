@@ -35,30 +35,25 @@ To run the server in production mode (all env variables should be set):
 `yarn run prod`
 
 
-Project structure:
 
-controllers
+# Matching Engine
 
-* routes (Restful APIs)
+prerequisite:
 
-models
+1. Python >= 3.5.2
 
-* define database models
+2. pip is for above python version command avaliable in your terminal
 
-helpers: 
+3. clean mongodb running on localhost:27017 ( [Windows](https://stackoverflow.com/questions/20796714/how-do-i-start-mongo-db-from-windows) | [Mac](https://stackoverflow.com/questions/18452023/installing-and-running-mongodb-on-osx) )
 
-* utility function / class / constants
-
-
-middlewares
-
-* reusable middlewares in express.js
+4. redis running on port 6379 (default port)
 
 
-db
 
-* database client
+To install all the packages (under /matchingEngine directory):
 
-config.js
+`pip install -r requirements.txt`
 
-* server setting (e.g. secret key location, database url)
+To run the server "engine_v1" (under /matchingEngine directory):
+
+`python engine_v1.py`
