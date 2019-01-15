@@ -1,6 +1,9 @@
 const express = require('express');
+
 const notificationClient = require('../../helpers/notificationClient');
 const { findUsersPushTokens } = require('../../middlewares/user');
+const redisClient = require('../../../db/redisClient');
+const { REAL_TIME } = require('../../../helpers/constants');
 
 const router = express.Router();
 
@@ -39,6 +42,13 @@ const sendNotificationToUsers = (req, res) => {
     });
 
     notificationClient.notify(pushTokens, 'Ride match found! Please checkout message page for detail.');
+
+    const riderId = req.body.rider.userId;
+    redisClient.hset(
+        REAL_TIME.REDIS_KEYS.RIDE_STATUS, 
+        riderId, 
+        REAL_TIME.RIDE_STATUS.IDLE
+    );
 
     res.status(200).json({
         message: 'Notification sent'
