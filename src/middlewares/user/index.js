@@ -171,23 +171,15 @@ const findUsersPushTokens = (req, res, next) => {
     ]
     */
 
-    const listOfIds = req.userIds.map( id => mongoose.Types.ObjectId(id) );
-
-    User.find({ '_id': { $in: listOfIds} })
+    User.find({ '_id': { $in: req.userIds} })
         .exec()
         .then((users) => {
-
-            if (users.length !== listOfIds.length) {
-                return res.status(401).json({
-                    message: 'Some users ids are not valid'
-                });
-            }
 
             const usersPushTokens = [];
             users.forEach(user => {
                 usersPushTokens.push({
                     userId: user._id,
-                    pushTokens: usersPushTokens.pushTokens
+                    pushTokens: user.pushTokens
                 });
             });
 

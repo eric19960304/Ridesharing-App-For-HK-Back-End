@@ -2,7 +2,7 @@ import redis
 from sanic import Sanic
 from sanic import response
 from time import sleep, gmtime, strftime, time
-import json
+import ujson
 import requests
 
 REAL_TIME_RIDE_STATUS__IDLE = 'idle'
@@ -17,31 +17,35 @@ REDIS_KEYS__DRIVER_LOCATION = 'driverLocation'
 SERVER_ENDPOINT = 'http://localhost/notify-match-result/real-time-ride'
 
 def run_match(rideRequest):
-    driverLocations = redisConn.hgetall(REDIS_KEYS__DRIVER_LOCATION)
+    driverLocationsDirty = redisConn.hgetall(REDIS_KEYS__DRIVER_LOCATION)
     
-    if len(driverLocations) == 0:
+    if len(driverLocationsDirty) == 0:
         while True:
             # no driver yet, enter wait loop
             currentTimeStr = strftime("%Y-%m-%d %H:%M:%S", gmtime())
             print("[{}] wait for active driver".format(currentTimeStr))
             sleep(3)
-            driverLocations = redisConn.hgetall(REDIS_KEYS__DRIVER_LOCATION)
-            if len(driverLocations) > 0:
+            driverLocationsDirty = redisConn.hgetall(REDIS_KEYS__DRIVER_LOCATION)
+            if len(driverLocationsDirty) > 0:
                 # driver appears, exit wait loop
                 break
 
+    # clean up the data from redis
+    driverLocations = dict()
+    for (userIdDirty, locationDirty) in driverLocationsDirty.items():
+        userId = userIdDirty.decode('utf-8')
+        location = ujson.loads( locationDirty.decode('utf-8') )
+        driverLocations[userId] = location
+
     # ready to start matching
-    driverLocationsList = driverLocations.items()
     redisConn.hset(
         REDIS_KEYS__REAL_TIME_RIDE_STATUS, 
         rideRequest['userId'],
         REAL_TIME_RIDE_STATUS__PROCESSING
     )
 
-    matchResult = find_match(rideRequest, driverLocationsList)
-    print('matchResult: ', matchResult)
-
-    requests.post(url = SERVER_ENDPOINT, data = matchResult)
+    matchResult = find_match(rideRequest, list(driverLocations.items()))
+    requests.post(url = SERVER_ENDPOINT, json = matchResult)
 
 
 def find_match(rideRequest, driverLocationsList):
@@ -80,7 +84,7 @@ def find_match(rideRequest, driverLocationsList):
         ...
     ]
     '''
-    print('rideRequest')
+    print('rideRequest', rideRequest)
     print('userId', rideRequest['userId'])
     startlatitude = rideRequest['startLocation']['latitude']
     startlongitude = rideRequest['startLocation']['longitude']
@@ -90,19 +94,19 @@ def find_match(rideRequest, driverLocationsList):
     print('end location: lat=', endlatitude, 'long=', endlongitude)
 
     for (userId, loc) in driverLocationsList:
-        loc = json.loads(loc)
         print('userId', userId)
         latitude = loc['location']['latitude']
         longitude = loc['location']['longitude']
         print('lat=', latitude, 'long=', longitude)
-    
+
     matchResult = {
-        'rider': rideRequest,
-        'driver': {
-            'userId': driverLocationsList[0][0],
-            'location': driverLocationsList[0][1]
+        "rider": rideRequest,
+        "driver": {
+            "userId": driverLocationsList[0][0],
+            "location": driverLocationsList[0][1]['location'],
+            "timestamp": driverLocationsList[0][1]['timestamp']
         },
-        'timestamp': time()
+        "timestamp": time()
     }
     
     return matchResult
@@ -113,17 +117,19 @@ if __name__ == '__main__':
     try:
         redisConn = redis.StrictRedis(host='localhost', port=6379)
         print('Connected to redis')
+        redisConn.flushall()
+        print('Flush All Cache')
     except Exception as ex:
         print('Error:', ex)
         exit('Failed to connect, terminating.')
 
     while True:
-        rideRequesJSONString = redisConn.lpop(REDIS_KEYS__REAL_TIME_RIDE_REQUEST)
-        if rideRequesJSONString == None:
+        rideRequestJSONString = redisConn.lpop(REDIS_KEYS__REAL_TIME_RIDE_REQUEST)
+        if rideRequestJSONString == None:
             # when there is no item in list, the result retunrned from redis is None
             currentTimeStr = strftime("%Y-%m-%d %H:%M:%S", gmtime())
             print("[{}] wait for ride request".format(currentTimeStr))
             sleep(3)
         else:
-            rideRequest = json.loads(rideRequesJSONString)
+            rideRequest = ujson.loads( rideRequestJSONString.decode('utf-8') )
             run_match(rideRequest)

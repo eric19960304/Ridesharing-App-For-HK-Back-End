@@ -33,10 +33,12 @@ const notify = async (pushTokens, messageToNotify, extraData = {}) => {
         // Send the chunks to the Expo push notification service. There are
         // different strategies you could use. A simple one is to send one chunk at a
         // time, which nicely spreads the load out over time:
+        let sentCount = 0;
         for (let chunk of chunks) {
             try {
                 let ticketChunk = await expo.sendPushNotificationsAsync(chunk);
                 tickets.push(...ticketChunk);
+                sentCount++;
                 // NOTE: If a ticket contains an error code in ticket.details.error, you
                 // must handle it appropriately. The error codes are listed in the Expo
                 // documentation:
@@ -45,6 +47,7 @@ const notify = async (pushTokens, messageToNotify, extraData = {}) => {
                 console.error(error);
             }
         }
+        console.log(`${sentCount}/${pushTokens.length} notifications are sent`);
     })();
 
     let receiptIds = [];
@@ -60,8 +63,6 @@ const notify = async (pushTokens, messageToNotify, extraData = {}) => {
     (async () => {
         // Like sending notifications, there are different strategies you could use
         // to retrieve batches of receipts from the Expo service.
-        let sentCount = 0;
-        const totalChunk = receiptIdChunks.length;
         for (let chunk of receiptIdChunks) {
             try {
                 let receipts = await expo.getPushNotificationReceiptsAsync(chunk);
@@ -70,7 +71,6 @@ const notify = async (pushTokens, messageToNotify, extraData = {}) => {
                 // notification and information about an error, if one occurred.
                 for (let receipt of receipts) {
                     if (receipt.status === 'ok') {
-                        sentCount++;
                         continue;
                     } else if (receipt.status === 'error') {
                         console.error(`There was an error sending a notification: ${receipt.message}`);
@@ -86,7 +86,6 @@ const notify = async (pushTokens, messageToNotify, extraData = {}) => {
                 console.error(error);
             }
         }
-        console.log(`${sentCount}/${totalChunk} notifications are sent`);
     })();
     
 };

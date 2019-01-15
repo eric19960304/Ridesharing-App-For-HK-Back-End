@@ -28,7 +28,7 @@ mongoClient.connect();
 app.use(express.static('public'));
 
 // print request for all routes
-const printRequest = (req, res, next) => { console.log('Request Body: ', req.body); next(); };
+const printRequest = (req, res, next) => { console.log(req.url + ': ', req.body); next(); };
 app.use(printRequest);
 
 /*
@@ -41,6 +41,8 @@ All routes:
 /api/secret/google-map-api-key [POST]
 /api/driver/location-update [POST]
 /api/user/edit-profile [POST]
+/api/user/edit-profile-with-password [POST]
+/api/user/push-token [POST]
 /notify-match-result/real-time-ride [POST]
 */
 app.use('/auth', authRouter);
