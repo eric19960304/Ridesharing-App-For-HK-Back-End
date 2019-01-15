@@ -67,4 +67,4 @@ typings/
 # for python
 __pycache__
 
-.vscode
+/.vscode
