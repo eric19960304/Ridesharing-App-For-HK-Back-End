@@ -16,6 +16,9 @@ REDIS_KEYS__DRIVER_LOCATION = 'driverLocation'
 
 SERVER_ENDPOINT = 'http://localhost/notify-match-result/real-time-ride'
 
+def getTimeStr():
+    return strftime("%Y-%m-%d %H:%M:%S", gmtime())
+
 def startEngine():
     # connect to redis
     try:
@@ -27,8 +30,7 @@ def startEngine():
         print('Error:', ex)
         exit('Failed to connect, terminating.')
 
-    currentTimeStr = strftime("%Y-%m-%d %H:%M:%S", gmtime())
-    print("[{}] wait for ride request".format(currentTimeStr))
+    print("[{}] wait for ride request".format( getTimeStr() ))
     while True:
         rideRequestJSONString = redisConn.lpop(REDIS_KEYS__REAL_TIME_RIDE_REQUEST)
         if rideRequestJSONString == None:
@@ -37,12 +39,13 @@ def startEngine():
         else:
             rideRequest = ujson.loads( rideRequestJSONString.decode('utf-8') )
             run_match(rideRequest, redisConn)
+            print("[{}] wait for ride request".format( getTimeStr() ))
+
 
 def run_match(rideRequest, redisConn):
     driverLocationsDirty = redisConn.hgetall(REDIS_KEYS__DRIVER_LOCATION)
     
-    currentTimeStr = strftime("%Y-%m-%d %H:%M:%S", gmtime())
-    print("[{}] wait for active driver".format(currentTimeStr))
+    print("[{}] wait for active driver".format( getTimeStr() ))
 
     if len(driverLocationsDirty) == 0:
         while True:
