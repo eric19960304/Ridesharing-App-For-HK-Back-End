@@ -36,9 +36,9 @@ def startEngine():
             sleep(3)
         else:
             rideRequest = ujson.loads( rideRequestJSONString.decode('utf-8') )
-            run_match(rideRequest)
+            run_match(rideRequest, redisConn)
 
-def run_match(rideRequest):
+def run_match(rideRequest, redisConn):
     driverLocationsDirty = redisConn.hgetall(REDIS_KEYS__DRIVER_LOCATION)
     
     currentTimeStr = strftime("%Y-%m-%d %H:%M:%S", gmtime())
@@ -67,11 +67,11 @@ def run_match(rideRequest):
         REAL_TIME_RIDE_STATUS__PROCESSING
     )
 
-    matchResult = find_match(rideRequest, list(driverLocations.items()))
+    matchResult = find_one_match(rideRequest, list(driverLocations.items()))
     requests.post(url = SERVER_ENDPOINT, json = matchResult)
 
 
-def find_match(rideRequest, driverLocationsList):
+def find_one_match(rideRequest, driverLocationsList):
     '''
     rideRequest format:
     {
