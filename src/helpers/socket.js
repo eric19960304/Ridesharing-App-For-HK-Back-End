@@ -42,7 +42,7 @@ const onMessageReceived = (message) => {
     const newMessage = new Message({
         _id: new ObjectId(),
         messageId: message.messageId,
-        senderId: message.user.id,
+        senderId: message.user._id,
         receiverId: 'server',
         text: message.text,
         createdAt: message.createdAt,
