@@ -7,7 +7,7 @@ const https = require('https');
 const { authRouter, testRouter, apiRouter, notifyMatchResultRouter } = require('./src/controllers');
 const { verifyJwt } = require('./src/middlewares/auth');
 const config = require('./config');
-const socket = require('./src/helpers/socket');
+const {onUserJoined, onMessageReceived} = require('./src/helpers/socket');
 
 const app = express();
 
@@ -97,5 +97,9 @@ if(process.env.PROD){
     });
 }
 
-socket.startSocketServer(httpServer);
-
+const websocket = require('socket.io')(httpServer);
+websocket.on('connection', (socket) => {
+    console.log('A client just joined on', socket.id);
+    socket.on('userJoined', (message) => onUserJoined(message, socket));
+    socket.on('message', (message) => onMessageReceived(message));
+});

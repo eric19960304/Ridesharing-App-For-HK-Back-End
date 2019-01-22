@@ -1,11 +1,10 @@
 
 const { Message } = require('../models');
 
-let globalSocket = null;  // for access opening socket outside the module
 let users = {};  // this is a list of socket ids for all users
 
 const onUserJoined = (message, socket) => {
-    //console.log(message);
+    console.log(message);
 
     let user = message.text;
     users[user] = socket.id;
@@ -52,19 +51,8 @@ const onMessageReceived = (message) => {
         });
 };
 
-const startSocketServer = (httpServer) => {
-    const websocket = require('socket.io')(httpServer);
-    websocket.on('connection', (socket) => {
-        globalSocket = socket;
-        console.log('A client just joined on', socket.id);
-        socket.on('userJoined', (message) => onUserJoined(message, socket));
-        socket.on('message', (message) => onMessageReceived(message));
-    });
-};
 
 module.exports = {
     onUserJoined,
     onMessageReceived,
-    startSocketServer,
-    globalSocket
 };

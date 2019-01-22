@@ -12,6 +12,7 @@ const createNewUserForDatabase = (data) => {
         email: data.email,
         password: data.password,
         nickname: data.nickname,
+        avatorSource: data.avatorSource,
     };
     return user;
 };
