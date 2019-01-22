@@ -20,16 +20,16 @@ const sendExistingMessages = (userEmail, socket) => {
             if (err){
                 console.log(err);
             }else{
-                console.log('sendExistingMessages:messages', messages);
                 if (!messages.length) return;
                 let _messages = [];
-                for(let i = 0; i < messages.length; i++){
-                    let m = Object.assign({}, messages[i]._doc);
-                    m.user = { _id: userEmail };
+                messages.forEach( message => {
+                    console.log(message);
+                    let m = Object.assign({}, message);
+                    m.user = { _id: message.senderId };
                     m._id = m.messageId;
                     delete m.messageId;
                     _messages.push(m);
-                }
+                });
                 socket.emit('message', _messages);
             }
         });
