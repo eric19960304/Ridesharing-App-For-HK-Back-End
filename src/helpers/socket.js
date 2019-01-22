@@ -14,7 +14,7 @@ const onUserJoined = (message, socket) => {
 
 const sendExistingMessages = (userEmail, socket) => {
 
-    Message.find({ $or: [ { 'senderId': userEmail }, { 'recieverId': userEmail } ]  })
+    Message.find({ $or: [ { 'senderId': userEmail }, { 'receiverId': userEmail } ]  })
         .sort({ 'createdAt': -1 })
         .exec( (err, messages) => {
             if (err){
