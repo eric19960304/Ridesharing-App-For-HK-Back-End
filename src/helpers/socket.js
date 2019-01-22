@@ -23,11 +23,10 @@ const sendExistingMessages = (userEmail, socket) => {
                 if (!messages.length) return;
                 let _messages = [];
                 messages.forEach( message => {
-                    console.log(message);
+                    console.log('message: ', message);
                     let m = Object.assign({}, message);
                     m.user = { _id: message.senderId };
                     m._id = m.messageId;
-                    delete m.messageId;
                     _messages.push(m);
                 });
                 socket.emit('message', _messages);
@@ -37,7 +36,7 @@ const sendExistingMessages = (userEmail, socket) => {
 
 const onMessageReceived = (message) => {
     
-    console.log('recieved message: ', message);
+    console.log('received message: ', message);
 
     const newMessage = new Message({
         _id: new ObjectId(),
