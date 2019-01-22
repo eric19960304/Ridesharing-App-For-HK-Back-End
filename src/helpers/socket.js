@@ -4,7 +4,6 @@ const ObjectId = mongoose.Types.ObjectId;
 const { Message } = require('../models');
 
 let users = {};  // this is a list of socket ids for all users
-let websocket = null; // this is a global websocket
 
 const onUserJoined = (message, socket) => {
 
@@ -21,7 +20,7 @@ const sendExistingMessages = (user, socket) => {
             if (err){
                 console.log(err);
             }else{
-                console('sendExistingMessages:messages', messages);
+                console.log('sendExistingMessages:messages', messages);
                 if (!messages.length) return;
                 let _messages = [];
                 for(let i = 0; i < messages.length; i++){
