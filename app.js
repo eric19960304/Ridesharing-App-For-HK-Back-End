@@ -91,5 +91,5 @@ const { onUserJoined, onMessageReceived } = require('./src/helpers/socket');
 websocket.on('connection', (socket) => {
     console.log('A client just joined on', socket.id);
     socket.on('userJoined', (message) => onUserJoined(message, socket));
-    socket.on('message', (message) => onMessageReceived(message, socket));
+    socket.on('message', (message) => onMessageReceived(message));
 });
