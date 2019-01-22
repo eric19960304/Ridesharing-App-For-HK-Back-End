@@ -1,4 +1,3 @@
-
 const { Message } = require('../models');
 
 let users = {};  // this is a list of socket ids for all users
@@ -24,7 +23,6 @@ const sendExistingMessages = (user, socket) => {
                 for(let i = 0; i < messages.length; i++){
                     let m = Object.assign({}, messages[i]._doc);
                     m.user = { id: user };
-                    m._id = m.messageId;
                     _messages.push(m);
                 }
                 //console.log(_messages);
@@ -35,14 +33,14 @@ const sendExistingMessages = (user, socket) => {
 
 const onMessageReceived = (message) => {
     
-    //console.log(message);
+    console.log('recieved message: ', message);
 
     const newMessage = new Message({
+        _id: message._id,
         senderId: message.user.id,
         receiverId: 'server',
         text: message.text,
         createdAt: message.createdAt,
-        messageId: message._id
     });
 
     newMessage.save()
@@ -51,8 +49,17 @@ const onMessageReceived = (message) => {
         });
 };
 
+const startSocketServer = (server) => {
+    const websocket = require('socket.io')(server);
+    websocket.on('connection', (socket) => {
+        console.log('A client just joined on', socket.id);
+        socket.on('userJoined', (message) => onUserJoined(message, socket));
+        socket.on('message', (message) => onMessageReceived(message));
+    });
+};
 
 module.exports = {
     onUserJoined,
     onMessageReceived,
+    startSocketServer
 };
