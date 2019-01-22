@@ -7,14 +7,14 @@ let users = {};  // this is a list of socket ids for all users
 
 const onUserJoined = (message, socket) => {
 
-    let user = message.text;
-    users[user] = socket.id;
-    sendExistingMessages(user, socket);
+    let userEmail = message.email;
+    users[userEmail] = socket.id;
+    sendExistingMessages(userEmail, socket);
 };
 
-const sendExistingMessages = (user, socket) => {
+const sendExistingMessages = (userEmail, socket) => {
 
-    Message.find({ $or: [ { 'senderId': user }, { 'recieverId': user } ]  })
+    Message.find({ $or: [ { 'senderId': userEmail }, { 'recieverId': userEmail } ]  })
         .sort({ 'createdAt': -1 })
         .exec( (err, messages) => {
             if (err){
@@ -25,7 +25,7 @@ const sendExistingMessages = (user, socket) => {
                 let _messages = [];
                 for(let i = 0; i < messages.length; i++){
                     let m = Object.assign({}, messages[i]._doc);
-                    m.user = { id: user };
+                    m.user = { _id: userEmail };
                     m._id = m.messageId;
                     delete m.messageId;
                     _messages.push(m);

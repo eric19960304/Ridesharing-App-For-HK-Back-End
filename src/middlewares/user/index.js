@@ -197,36 +197,8 @@ const findUsersPushTokens = (req, res, next) => {
 
 
 const findUsers = (req, res, next) => {
-    /*
-    consequence: req.users
-    {
-        rider: {
-            userId: string,
-            startLocation: {
-                latitude: number,
-                longitude: number
-            },
-            endLocation: {
-                latitude: number,
-                longitude: number
-            }
-            timestamp: number
-        },
-        driver: {
-            userId: string,
-            location:  {
-                "accuracy": number,
-                "altitude": number,
-                "altitudeAccuracy": number,
-                "heading": number,
-                "latitude": number,
-                "longitude": number,
-                "speed": number
-            },
-            timestamp: number
-        }
-    }
-    */
+
+    // consequence: req.users
 
     User.find({ '_id': { $in: req.userIds} })
         .exec()

@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 
 const notificationClient = require('../../helpers/notificationClient');
-const { findUsersPushTokens } = require('../../middlewares/user');
+const { findUsersPushTokens, findUsers } = require('../../middlewares/user');
 const redisClient = require('../../db/redisClient');
 const { REAL_TIME } = require('../../helpers/constants');
 const uuidv4 = require('uuid/v4');
@@ -37,7 +37,34 @@ const prepareForFindUsersPushTokens = (req, res, next) => {
 const sendNotificationToUsers = (req, res) => {
     /*
     req.body format:
-    
+    /*
+    {
+        rider: {
+            userId: string,
+            startLocation: {
+                latitude: number,
+                longitude: number
+            },
+            endLocation: {
+                latitude: number,
+                longitude: number
+            }
+            timestamp: number
+        },
+        driver: {
+            userId: string,
+            location:  {
+                "accuracy": number,
+                "altitude": number,
+                "altitudeAccuracy": number,
+                "heading": number,
+                "latitude": number,
+                "longitude": number,
+                "speed": number
+            },
+            timestamp: number
+        }
+    }
     */
 
     let pushTokens = [];
@@ -90,19 +117,21 @@ const sendNotificationToUsers = (req, res) => {
     messageForFrondEnd.messageId = messageForFrondEnd._id;
     delete messageForFrondEnd._id;
     
-    const newMessage = new Message({
-        _id: new ObjectId(),
-        messageId: messageForFrondEnd.messageId,
-        senderId: messageForFrondEnd.user._id,
-        receiverId: 'server',
-        text: messageForFrondEnd.text,
-        createdAt: messageForFrondEnd.createdAt,
-    });
-
-    newMessage.save()
-        .catch(err => {
-            console.log('insert message error: ', err);
+    req.users.forEach( user => {
+        const newMessage = new Message({
+            _id: new ObjectId(),
+            messageId: messageForFrondEnd.messageId,
+            senderId: messageForFrondEnd.user._id,
+            receiverId: user.email,
+            text: messageForFrondEnd.text,
+            createdAt: messageForFrondEnd.createdAt,
         });
+    
+        newMessage.save()
+            .catch(err => {
+                console.log('insert message error: ', err);
+            });
+    });
 
     return res.status(200).json({
         message: 'Notification sent'
@@ -117,7 +146,7 @@ router.post('/',
     checkIfRequestIsFromLocalhost,
     prepareForFindUsersPushTokens,
     findUsersPushTokens,
-    // findUsers,
+    findUsers,
     sendNotificationToUsers
 );
 
