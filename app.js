@@ -85,10 +85,19 @@ if(process.env.PROD){
         cert: certificate,
         ca
     };
+
     const httpsServer = https.createServer(credentials, app);
     httpsServer.listen(443, () => {
         console.log('Server is running on Port 443');
     });
+
+    const websocket = require('socket.io')(httpsServer);
+    websocket.on('connection', (socket) => {
+        console.log('A client just joined on', socket.id);
+        socket.on('userJoined', (message) => onUserJoined(message, socket));
+        socket.on('message', (message) => onMessageReceived(message));
+    });
+
 }else{
     console.log('development mode');
     
@@ -97,9 +106,3 @@ if(process.env.PROD){
     });
 }
 
-const websocket = require('socket.io')(httpServer);
-websocket.on('connection', (socket) => {
-    console.log('A client just joined on', socket.id);
-    socket.on('userJoined', (message) => onUserJoined(message, socket));
-    socket.on('message', (message) => onMessageReceived(message));
-});
