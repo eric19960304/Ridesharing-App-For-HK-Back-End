@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose');
 
 const notificationClient = require('../../helpers/notificationClient');
 const { findUsersPushTokens } = require('../../middlewares/user');
@@ -7,6 +8,7 @@ const { REAL_TIME } = require('../../helpers/constants');
 const uuidv4 = require('uuid/v4');
 const { Message } = require('../../models');
 
+const ObjectId = mongoose.Types.ObjectId;
 const router = express.Router();
 
 
@@ -48,6 +50,7 @@ const sendNotificationToUsers = (req, res) => {
         return pushTokens.indexOf(elem) === pos;
     });
 
+    console.log(pushTokens);
     notificationClient.notify(pushTokens, 'Ride match found! Please checkout message page for detail.');
 
     const driverId = req.body.driver.userId;
@@ -82,9 +85,26 @@ const sendNotificationToUsers = (req, res) => {
 
     const socketio = req.app.get('socketio');
     socketio.emit('message', broadcaseMessage);
-    
 
-    res.status(200).json({
+    let messageForFrondEnd = Object.assign({}, broadcaseMessage);
+    messageForFrondEnd.messageId = messageForFrondEnd._id;
+    delete messageForFrondEnd._id;
+    
+    const newMessage = new Message({
+        _id: new ObjectId(),
+        messageId: messageForFrondEnd.messageId,
+        senderId: messageForFrondEnd.user._id,
+        receiverId: 'server',
+        text: messageForFrondEnd.text,
+        createdAt: messageForFrondEnd.createdAt,
+    });
+
+    newMessage.save()
+        .catch(err => {
+            console.log('insert message error: ', err);
+        });
+
+    return res.status(200).json({
         message: 'Notification sent'
     });
 };

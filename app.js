@@ -32,7 +32,7 @@ mongoClient.connect();
 app.use(express.static('public'));
 
 // print request for all routes
-const printRequest = (req, res, next) => { console.log(req.url + ': ', req.body); next(); };
+const printRequest = (req, res, next) => { console.log(req.url); next(); };
 app.use(printRequest);
 
 /*
