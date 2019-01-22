@@ -1,11 +1,13 @@
 const express = require('express');
 
 const notificationClient = require('../../helpers/notificationClient');
-const { findUsersPushTokens } = require('../../middlewares/user');
+const { findUsersPushTokens, findUsers } = require('../../middlewares/user');
 const redisClient = require('../../db/redisClient');
 const { REAL_TIME } = require('../../helpers/constants');
 
 const router = express.Router();
+
+const socket = require('../../helpers/socket');
 
 /*
 
@@ -30,6 +32,10 @@ const prepareForFindUsersPushTokens = (req, res, next) => {
 };
 
 const sendNotificationToUsers = (req, res) => {
+    /*
+    req.body format:
+    
+    */
 
     let pushTokens = [];
     req.usersPushTokens.forEach(obj => {
@@ -43,12 +49,27 @@ const sendNotificationToUsers = (req, res) => {
 
     notificationClient.notify(pushTokens, 'Ride match found! Please checkout message page for detail.');
 
+    const driverId = req.body.driver.userId;
     const riderId = req.body.rider.userId;
     redisClient.hset(
         REAL_TIME.REDIS_KEYS.RIDE_STATUS, 
         riderId, 
         REAL_TIME.RIDE_STATUS.IDLE
     );
+
+    const users = req.users;
+    let rider = null;
+    let driver = null;
+    users.forEach( user => {
+        if(user._id === riderId){
+            rider = Object.assign({}, rider);
+        }
+        if(user._id === driverId){
+            driver = Object.assign({}, driver);
+        }
+    });
+
+    socket.globalSocket.emit('message', `rider name: ${rider.nickname}, driver name: ${driver.nickname}`);
 
     res.status(200).json({
         message: 'Notification sent'
@@ -63,6 +84,7 @@ router.post('/',
     checkIfRequestIsFromLocalhost,
     prepareForFindUsersPushTokens,
     findUsersPushTokens,
+    findUsers,
     sendNotificationToUsers
 );
 

@@ -7,8 +7,11 @@ const https = require('https');
 const { authRouter, testRouter, apiRouter, notifyMatchResultRouter } = require('./src/controllers');
 const { verifyJwt } = require('./src/middlewares/auth');
 const config = require('./config');
+const socket = require('./src/helpers/socket');
 
 const app = express();
+
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -16,6 +19,8 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.set('view engine', 'pug');
 app.set('views', './src/views');
+
+
 
 
 // db
@@ -92,11 +97,5 @@ if(process.env.PROD){
     });
 }
 
-const websocket = require('socket.io')(httpServer);
-const { onUserJoined, onMessageReceived } = require('./src/helpers/socket');
+socket.startSocketServer(httpServer);
 
-websocket.on('connection', (socket) => {
-    console.log('A client just joined on', socket.id);
-    socket.on('userJoined', (message) => onUserJoined(message, socket));
-    socket.on('message', (message) => onMessageReceived(message));
-});

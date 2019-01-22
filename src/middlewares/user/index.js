@@ -195,11 +195,62 @@ const findUsersPushTokens = (req, res, next) => {
         });
 };
 
+
+const findUsers = (req, res, next) => {
+    /*
+    consequence: req.users
+    {
+        rider: {
+            userId: string,
+            startLocation: {
+                latitude: number,
+                longitude: number
+            },
+            endLocation: {
+                latitude: number,
+                longitude: number
+            }
+            timestamp: number
+        },
+        driver: {
+            userId: string,
+            location:  {
+                "accuracy": number,
+                "altitude": number,
+                "altitudeAccuracy": number,
+                "heading": number,
+                "latitude": number,
+                "longitude": number,
+                "speed": number
+            },
+            timestamp: number
+        }
+    }
+    */
+
+    User.find({ '_id': { $in: req.userIds} })
+        .exec()
+        .then((users) => {
+
+            
+            req.users = users;
+            next();
+        })
+        .catch(err => {
+            console.log(err);
+            return res.status(500).json({
+                message: 'Something wrong! Please try again latter.'
+            });
+
+        });
+};
+
 module.exports = {
     fetchUserByEmail,
     fetchUserById,
     checkUserIsExist,
     createUnactivatedUser,
     updateUser,
-    findUsersPushTokens
+    findUsersPushTokens,
+    findUsers
 };
