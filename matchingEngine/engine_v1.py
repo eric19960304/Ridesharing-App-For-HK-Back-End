@@ -24,7 +24,6 @@ def startEngine():
     try:
         redisConn = redis.StrictRedis(host='localhost', port=6379)
         print('Connected to redis')
-        print('Flush All Cache')
     except Exception as ex:
         print('Error:', ex)
         exit('Failed to connect, terminating.')
