@@ -57,17 +57,17 @@ const sendNotificationToUsers = (req, res) => {
         REAL_TIME.RIDE_STATUS.IDLE
     );
 
-    const users = req.users;
-    let rider = null;
-    let driver = null;
-    users.forEach( user => {
-        if(user._id === riderId){
-            rider = Object.assign({}, rider);
-        }
-        if(user._id === driverId){
-            driver = Object.assign({}, driver);
-        }
-    });
+    // const users = req.users;
+    // let rider = null;
+    // let driver = null;
+    // users.forEach( user => {
+    //     if(user._id === riderId){
+    //         rider = Object.assign({}, rider);
+    //     }
+    //     if(user._id === driverId){
+    //         driver = Object.assign({}, driver);
+    //     }
+    // });
 
     let broadcaseMessage = {
         _id: uuidv4(),
@@ -75,7 +75,7 @@ const sendNotificationToUsers = (req, res) => {
             _id: 3,
             name: 'System'
         },
-        text: `Match found: rider name: ${rider.nickname}, driver name: ${driver.nickname}`,
+        text: `Match found: rider id: ${driverId}, driver id: ${riderId}`,
         createdAt: new Date(),
     };
 
@@ -95,7 +95,7 @@ router.post('/',
     checkIfRequestIsFromLocalhost,
     prepareForFindUsersPushTokens,
     findUsersPushTokens,
-    findUsers,
+    // findUsers,
     sendNotificationToUsers
 );
 
