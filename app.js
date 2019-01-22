@@ -8,7 +8,6 @@ const { authRouter, testRouter, apiRouter, notifyMatchResultRouter } = require('
 const { verifyJwt } = require('./src/middlewares/auth');
 const config = require('./config');
 
-
 const app = express();
 
 app.use(express.json());
@@ -61,7 +60,6 @@ app.use(
     testRouter
 );
 
-
 console.log('using config:', config);
 
 const httpServer = http.createServer(app);
@@ -93,3 +91,12 @@ if(process.env.PROD){
         console.log('Server is running on Port 80');
     });
 }
+
+const websocket = require('socket.io')(httpServer);
+const { onUserJoined, onMessageReceived } = require('./src/helpers/socket');
+
+websocket.on('connection', (socket) => {
+    console.log('A client just joined on', socket.id);
+    socket.on('userJoined', (message) => onUserJoined(message, socket));
+    socket.on('message', (message) => onMessageReceived(message));
+});
