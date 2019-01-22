@@ -8,7 +8,7 @@ const user = new Schema({
     password: { type: String, required: true },
     nickname: { type: String, required: true },
     activated: { type: Boolean, required: true },
-    avatorSource: { type: String },
+    avatarSource: { type: String },
     pushTokens: [{ type: String }]
 });
 
