@@ -4,10 +4,10 @@ const notificationClient = require('../../helpers/notificationClient');
 const { findUsersPushTokens, findUsers } = require('../../middlewares/user');
 const redisClient = require('../../db/redisClient');
 const { REAL_TIME } = require('../../helpers/constants');
+const uuidv4 = require('uuid/v4');
 
 const router = express.Router();
 
-const socket = require('../../helpers/socket');
 
 /*
 
@@ -69,7 +69,18 @@ const sendNotificationToUsers = (req, res) => {
         }
     });
 
-    socket.globalSocket.emit('message', `rider name: ${rider.nickname}, driver name: ${driver.nickname}`);
+    let broadcaseMessage = {
+        _id: uuidv4(),
+        user: {
+            _id: 3,
+            name: 'System'
+        },
+        text: `Match found: rider name: ${rider.nickname}, driver name: ${driver.nickname}`,
+        createdAt: new Date(),
+    };
+
+    const socketio = req.app.get('socketio');
+    socketio.broadcast.emit('message', broadcaseMessage);
 
     res.status(200).json({
         message: 'Notification sent'

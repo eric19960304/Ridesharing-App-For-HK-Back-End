@@ -4,9 +4,9 @@ const ObjectId = mongoose.Types.ObjectId;
 const { Message } = require('../models');
 
 let users = {};  // this is a list of socket ids for all users
+let websocket = null; // this is a global websocket
 
 const onUserJoined = (message, socket) => {
-    console.log(message);
 
     let user = message.text;
     users[user] = socket.id;
@@ -21,15 +21,16 @@ const sendExistingMessages = (user, socket) => {
             if (err){
                 console.log(err);
             }else{
+                console('sendExistingMessages:messages', messages);
                 if (!messages.length) return;
                 let _messages = [];
                 for(let i = 0; i < messages.length; i++){
                     let m = Object.assign({}, messages[i]._doc);
                     m.user = { id: user };
                     m._id = m.messageId;
+                    delete m.messageId;
                     _messages.push(m);
                 }
-                //console.log(_messages);
                 socket.emit('message', _messages);
             }
         });
@@ -54,17 +55,7 @@ const onMessageReceived = (message) => {
         });
 };
 
-const startSocketServer = (server) => {
-    const websocket = require('socket.io')(server);
-    websocket.on('connection', (socket) => {
-        console.log('A client just joined on', socket.id);
-        socket.on('userJoined', (message) => onUserJoined(message, socket));
-        socket.on('message', (message) => onMessageReceived(message));
-    });
-};
-
 module.exports = {
     onUserJoined,
     onMessageReceived,
-    startSocketServer
 };

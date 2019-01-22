@@ -7,7 +7,7 @@ const https = require('https');
 const { authRouter, testRouter, apiRouter, notifyMatchResultRouter } = require('./src/controllers');
 const { verifyJwt } = require('./src/middlewares/auth');
 const config = require('./config');
-const { startSocketServer } = require('./src/helpers/socket');
+const { onUserJoined, onMessageReceived } = require('./src/helpers/socket');
 
 const app = express();
 
@@ -69,6 +69,8 @@ console.log('using config:', config);
 
 const httpServer = http.createServer(app);
 
+let server = null;
+
 if(process.env.PROD){
     console.log('production mode');
 
@@ -91,7 +93,7 @@ if(process.env.PROD){
         console.log('Server is running on Port 443');
     });
 
-    startSocketServer(httpsServer);
+    server = httpsServer;
 
 }else{
     console.log('development mode');
@@ -100,6 +102,17 @@ if(process.env.PROD){
         console.log('Server is running on Port 80');
     });
 
-    startSocketServer(httpServer);
+    server = httpServer;
 }
+
+let socketio = require('socket.io')(server);
+app.set('socketio', socketio);
+
+socketio.on('connection', (socket) => {
+    console.log('A client just joined on', socket.id);
+    socket.on('userJoined', (message) => onUserJoined(message, socket));
+    socket.on('message', (message) => onMessageReceived(message));
+});
+
+
 
