@@ -3,7 +3,7 @@ const createUserForFrontend = (data) => {
     let user = {
         email: data.email,
         nickname: data.nickname,
-        avatarSource: null
+        avatarSource: data.avatarSource
     };
     return user;
 };
@@ -13,7 +13,7 @@ const createNewUserForDatabase = (data) => {
         email: data.email,
         password: data.password,
         nickname: data.nickname,
-        avatarSource: data.avatarSource,
+        avatarSource: data.avatarSource
     };
     return user;
 };
