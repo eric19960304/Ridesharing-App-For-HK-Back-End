@@ -1,10 +1,11 @@
 const express = require('express');
 
 const notificationClient = require('../../helpers/notificationClient');
-const { findUsersPushTokens, findUsers } = require('../../middlewares/user');
+const { findUsersPushTokens } = require('../../middlewares/user');
 const redisClient = require('../../db/redisClient');
 const { REAL_TIME } = require('../../helpers/constants');
 const uuidv4 = require('uuid/v4');
+const { Message } = require('../../models');
 
 const router = express.Router();
 
@@ -81,6 +82,7 @@ const sendNotificationToUsers = (req, res) => {
 
     const socketio = req.app.get('socketio');
     socketio.emit('message', broadcaseMessage);
+    
 
     res.status(200).json({
         message: 'Notification sent'
