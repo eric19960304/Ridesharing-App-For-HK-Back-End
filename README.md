@@ -14,6 +14,11 @@ prerequisite:
 4. redis running on port 6379 (default port)
 
 
+Recommandation:
+
+1. Use Linux-like system to execute all the command, for Windows user, please use Ubuntu subsystem
+
+
 Required enviroment variables in server (see config.js):
 * MONGODB_PASSWORD
 * PROD
