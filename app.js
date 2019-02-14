@@ -74,9 +74,6 @@ let server = null;
 if(process.env.PROD){
     console.log('production mode');
 
-    httpServer.listen(80, () => {
-        console.log('Server is running on Port 80');
-    });
 
     const fs = require('fs');
     const privateKey  = fs.readFileSync('/ssl_cert/server.key', 'utf8');
