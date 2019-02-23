@@ -7,7 +7,7 @@ const https = require('https');
 const { authRouter, testRouter, apiRouter, notifyMatchResultRouter } = require('./src/controllers');
 const { verifyJwt } = require('./src/middlewares/auth');
 const config = require('./config');
-const { onUserJoined, onMessageReceived } = require('./src/helpers/socket');
+const socketClient = require('./src/helpers/socketClient');
 
 const app = express();
 
@@ -47,6 +47,7 @@ All routes:
 /api/user/edit-profile [POST]
 /api/user/edit-profile-with-password [POST]
 /api/user/push-token [POST]
+/api/rider/real-time-ride-request [POST]
 /notify-match-result/real-time-ride [POST]
 */
 app.use('/auth', authRouter);
@@ -106,9 +107,8 @@ let socketio = require('socket.io')(server);
 app.set('socketio', socketio);
 
 socketio.on('connection', (socket) => {
-    console.log('A client just joined on', socket.id);
-    socket.on('userJoined', (message) => onUserJoined(message, socket));
-    socket.on('message', (message) => onMessageReceived(message));
+    socket.on('userJoined', (message) => socketClient.onUserJoined(message, socket));
+    socket.on('message', (message) => socketClient.onMessageReceived(message));
 });
 
 

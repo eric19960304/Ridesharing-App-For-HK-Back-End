@@ -33,12 +33,10 @@ const notify = async (pushTokens, messageToNotify, extraData = {}) => {
         // Send the chunks to the Expo push notification service. There are
         // different strategies you could use. A simple one is to send one chunk at a
         // time, which nicely spreads the load out over time:
-        let sentCount = 0;
         for (let chunk of chunks) {
             try {
                 let ticketChunk = await expo.sendPushNotificationsAsync(chunk);
                 tickets.push(...ticketChunk);
-                sentCount++;
                 // NOTE: If a ticket contains an error code in ticket.details.error, you
                 // must handle it appropriately. The error codes are listed in the Expo
                 // documentation:
@@ -47,7 +45,7 @@ const notify = async (pushTokens, messageToNotify, extraData = {}) => {
                 console.error(error);
             }
         }
-        console.log(`${sentCount}/${pushTokens.length} notifications are sent`);
+        console.log(`notifications are sent`);
     })();
 
     let receiptIds = [];

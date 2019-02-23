@@ -3,18 +3,17 @@ const ObjectId = mongoose.Types.ObjectId;
 
 const { Message } = require('../models');
 
-let users = {};  // this is a list of socket ids for all users
+let clientuserIdToSocketIdMapping = {}; // all appeared clients info, key: userId, value: socket id
 
 const onUserJoined = (message, socket) => {
-
-    let userEmail = message.email;
-    users[userEmail] = socket.id;
-    sendExistingMessages(userEmail, socket);
+    console.log('A client just joined on', socket.id);
+    clientuserIdToSocketIdMapping[message.userId] = socket.id;
+    sendExistingMessages(message.userId, socket);
 };
 
-const sendExistingMessages = (userEmail, socket) => {
+const sendExistingMessages = (userId, socket) => {
 
-    Message.find({ $or: [ { 'senderId': userEmail }, { 'receiverId': userEmail } ]  })
+    Message.find({ $or: [ { 'senderId': userId }, { 'receiverId': userId } ]  })
         .sort({ 'createdAt': -1 })
         .exec( (err, messages) => {
             if (err){
@@ -35,6 +34,7 @@ const sendExistingMessages = (userEmail, socket) => {
                     };
                     _messages.push(m);
                 });
+
                 socket.emit('message', _messages);
             }
         });
@@ -48,7 +48,7 @@ const onMessageReceived = (message) => {
         _id: new ObjectId(),
         messageId: message.messageId,
         senderId: message.user._id,
-        receiverId: 'server',
+        receiverId: 'system',
         text: message.text,
         createdAt: message.createdAt,
     });
@@ -60,6 +60,7 @@ const onMessageReceived = (message) => {
 };
 
 module.exports = {
+    clientuserIdToSocketIdMapping,
     onUserJoined,
     onMessageReceived,
 };

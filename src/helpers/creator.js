@@ -1,6 +1,7 @@
 
 const createUserForFrontend = (data) => {
     let user = {
+        userId: data._id.toString(),
         email: data.email,
         nickname: data.nickname,
         avatarSource: data.avatarSource

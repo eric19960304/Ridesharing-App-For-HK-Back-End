@@ -4,9 +4,11 @@ const mongoose = require('mongoose');
 const notificationClient = require('../../helpers/notificationClient');
 const { findUsersPushTokens, findUsers } = require('../../middlewares/user');
 const redisClient = require('../../db/redisClient');
-const { REAL_TIME } = require('../../helpers/constants');
+const { REDIS_KEYS } = require('../../helpers/constants');
 const uuidv4 = require('uuid/v4');
 const { Message } = require('../../models');
+const socketClient = require('../../helpers/socketClient');
+
 
 const ObjectId = mongoose.Types.ObjectId;
 const router = express.Router();
@@ -34,10 +36,9 @@ const prepareForFindUsersPushTokens = (req, res, next) => {
     next();
 };
 
-const sendNotificationToUsers = (req, res) => {
+const sendNotificationAndMessageToUsers = (req, res) => {
     /*
     req.body format:
-    /*
     {
         rider: {
             userId: string,
@@ -64,8 +65,7 @@ const sendNotificationToUsers = (req, res) => {
             },
             timestamp: number
         }
-    }
-    */
+    } */
 
     let pushTokens = [];
     req.usersPushTokens.forEach(obj => {
@@ -77,56 +77,71 @@ const sendNotificationToUsers = (req, res) => {
         return pushTokens.indexOf(elem) === pos;
     });
 
-    console.log(pushTokens);
+    // send notification
     notificationClient.notify(pushTokens, 'Ride match found! Please checkout message page for detail.');
 
-    const driverId = req.body.driver.userId;
-    const riderId = req.body.rider.userId;
-    redisClient.hset(
-        REAL_TIME.REDIS_KEYS.RIDE_STATUS, 
-        riderId, 
-        REAL_TIME.RIDE_STATUS.IDLE
-    );
-
-    // const users = req.users;
-    // let rider = null;
-    // let driver = null;
-    // users.forEach( user => {
-    //     if(user._id === riderId){
-    //         rider = Object.assign({}, rider);
-    //     }
-    //     if(user._id === driverId){
-    //         driver = Object.assign({}, driver);
-    //     }
-    // });
-
-    let broadcaseMessage = {
-        _id: uuidv4(),
-        user: {
-            _id: 3,
-            name: 'System'
-        },
-        text: `Match found: rider id: ${driverId}, driver id: ${riderId}`,
-        createdAt: new Date(),
-    };
-
-    const socketio = req.app.get('socketio');
-    socketio.emit('message', broadcaseMessage);
-
-    let messageForFrondEnd = Object.assign({}, broadcaseMessage);
-    messageForFrondEnd.messageId = messageForFrondEnd._id;
-    delete messageForFrondEnd._id;
     
-    req.users.forEach( user => {
+    const riderId = req.body.rider.userId;
+    const driverId = req.body.driver.userId;
+
+    // decrement the seat number of driver
+    redisClient.HINCRBY(REDIS_KEYS.SEAT_NUM, String(driverId), -1);
+
+    const users = req.users;
+    let riderName = null;
+    let driverName = null;
+    users.forEach( (user) => {
+        if(user._id.toString() === riderId){  // debugged for 2 hours to find out user._id is not string, fuck this shit
+            riderName = user.nickname;
+        }else{
+            driverName = user.nickname;
+        }
+    });
+    
+    const socketio = req.app.get('socketio');
+
+    let message = null;
+    users.forEach( (user) => {
+
+        const userId = user._id.toString();
+
+        let text = `Dear ${user.nickname}, you have a new ride match! `;
+
+        if(userId === riderId) {
+            text += `your driver is ${driverName}, contact: +85252252872`;
+        }else{
+            text += `your passenger is ${riderName}, contact: +85252252872`;
+        }
+
+        console.log(text);
+
+        message = {
+            _id: uuidv4(),
+            user: {
+                _id: 3,
+                name: 'system'
+            },
+            text,
+            createdAt: new Date(),
+        };
+
+        
+        // send message via socket
+        if(socketClient.clientuserIdToSocketIdMapping[userId]){
+            socketio.to(socketClient.clientuserIdToSocketIdMapping[userId]).emit('message', message);
+        }
+        
+
         const newMessage = new Message({
             _id: new ObjectId(),
-            messageId: messageForFrondEnd.messageId,
-            senderId: messageForFrondEnd.user._id,
-            receiverId: user.email,
-            text: messageForFrondEnd.text,
-            createdAt: messageForFrondEnd.createdAt,
+            messageId: message._id,
+            senderId: 'system',
+            receiverId: userId,
+            text: message.text,
+            createdAt: message.createdAt,
         });
     
+        // store message to DB
         newMessage.save()
             .catch(err => {
                 console.log('insert message error: ', err);
@@ -147,7 +162,7 @@ router.post('/',
     prepareForFindUsersPushTokens,
     findUsersPushTokens,
     findUsers,
-    sendNotificationToUsers
+    sendNotificationAndMessageToUsers
 );
 
 

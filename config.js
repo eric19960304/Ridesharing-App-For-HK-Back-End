@@ -14,7 +14,8 @@ const config = {
         pass: process.env.GMAIL_PASSWORD || 'password'
     },
     domainName,
-    google_map_api_key: process.env.GOOGLE_MAP_API_KEY || 'apikeyNotFound'
+    google_map_api_key: process.env.GOOGLE_MAP_API_KEY || 'apikeyNotFound',
+    default_seat_number: 4
 };
 
 module.exports = config;

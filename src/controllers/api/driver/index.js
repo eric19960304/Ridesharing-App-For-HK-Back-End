@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const redisClient = require('../../../db/redisClient');
 
-const { REAL_TIME } = require('../../../helpers/constants');
+const { REDIS_KEYS } = require('../../../helpers/constants');
+const config = require('../../../../config');
 
 
 /* 
@@ -25,12 +26,18 @@ expected req.body format:
 const storeLocationToCache = (req, res) => {
     const latitude = req.body.location.latitude;
     const longitude = req.body.location.longitude;
-    const userId = req.userIdentity._id;
+    const userId = req.userIdentity._id.toString();
 
     redisClient.hset(
-        REAL_TIME.REDIS_KEYS.DRIVER_LOCATION, 
+        REDIS_KEYS.DRIVER_LOCATION, 
         userId, 
         JSON.stringify(req.body)
+    );
+
+    redisClient.hset(
+        REDIS_KEYS.SEAT_NUM,
+        userId,
+        config.default_seat_number
     );
     
     return res.status(200).json({

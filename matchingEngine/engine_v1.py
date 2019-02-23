@@ -5,14 +5,9 @@ from time import sleep, gmtime, strftime, time
 import ujson
 import requests
 
-REAL_TIME_RIDE_STATUS__IDLE = 'idle'
-REAL_TIME_RIDE_STATUS__IN_QUEUE = 'inQueue'
-REAL_TIME_RIDE_STATUS__PROCESSING = 'processing'
-REAL_TIME_RIDE_STATUS__ON_RIDE = 'onRide'
-
-REDIS_KEYS__REAL_TIME_RIDE_STATUS = 'realTimeRideStatus'
-REDIS_KEYS__REAL_TIME_RIDE_REQUEST = 'realTimeRideRequest'
-REDIS_KEYS__DRIVER_LOCATION = 'driverLocation'
+RIDE_REQUEST = 'realTimeRideRequest'
+SEAT_NUM = 'seatNum'
+DRIVER_LOCATION = 'driverLocation'
 
 SERVER_ENDPOINT = 'http://localhost/notify-match-result/real-time-ride'
 
@@ -30,7 +25,7 @@ def startEngine():
 
     print("[{}] wait for ride request".format( getTimeStr() ))
     while True:
-        rideRequestJSONString = redisConn.lpop(REDIS_KEYS__REAL_TIME_RIDE_REQUEST)
+        rideRequestJSONString = redisConn.lpop(RIDE_REQUEST)
         if rideRequestJSONString == None:
             # when there is no item in list, the result retunrned from redis is None
             sleep(3)
@@ -41,7 +36,7 @@ def startEngine():
 
 
 def run_match(rideRequest, redisConn):
-    driverLocationsDirty = redisConn.hgetall(REDIS_KEYS__DRIVER_LOCATION)
+    driverLocationsDirty = redisConn.hgetall(DRIVER_LOCATION)
     
     print("[{}] wait for active driver".format( getTimeStr() ))
 
@@ -49,7 +44,7 @@ def run_match(rideRequest, redisConn):
         while True:
             # no driver yet, enter wait loop
             sleep(3)
-            driverLocationsDirty = redisConn.hgetall(REDIS_KEYS__DRIVER_LOCATION)
+            driverLocationsDirty = redisConn.hgetall(DRIVER_LOCATION)
             if len(driverLocationsDirty) > 0:
                 # driver appears, exit wait loop
                 break
@@ -62,11 +57,6 @@ def run_match(rideRequest, redisConn):
         driverLocations[userId] = location
 
     # ready to start matching
-    redisConn.hset(
-        REDIS_KEYS__REAL_TIME_RIDE_STATUS, 
-        rideRequest['userId'],
-        REAL_TIME_RIDE_STATUS__PROCESSING
-    )
 
     matchResult = find_one_match(rideRequest, list(driverLocations.items()))
     requests.post(url = SERVER_ENDPOINT, json = matchResult)
