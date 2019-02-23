@@ -14,11 +14,6 @@ prerequisite:
 4. redis running on port 6379 (default port)
 
 
-Recommandation:
-
-1. Use Linux-like system to execute all the command, for Windows user, please use Ubuntu subsystem
-
-
 Required enviroment variables in server (see config.js):
 * MONGODB_PASSWORD
 * PROD
@@ -27,7 +22,12 @@ Required enviroment variables in server (see config.js):
 * GOOGLE_MAP_API_KEY
 
 
-To install all the packages:
+For Windows users to install bcrypt (ref: https://stackoverflow.com/questions/41899719/how-to-npm-install-bcrypt-on-windows-7):
+* use powershell as admin to run `npm install --global --production windows-build-tools`
+* then run the following `npm install node-gyp -g`
+
+
+To install all the packages (under project's root directory):
 
 `yarn`
 
