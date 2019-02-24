@@ -107,21 +107,27 @@ def find_one_match(rideRequest, driverLocationsList):
     print('start location: lat=', startlatitude, 'long=', startlongitude)
     print('end location: lat=', endlatitude, 'long=', endlongitude)
 
-    for (userId, loc) in driverLocationsList:
-        print('userId', userId)
-        latitude = loc['location']['latitude']
-        longitude = loc['location']['longitude']
-        print('lat=', latitude, 'long=', longitude)
+    lastestDriverLocationIdx = None
+    i = 0
+    for _ in driverLocationsList:
+        # get lastest location index
+        if lastestDriverLocationIdx == None or driverLocationsList[i][1]['timestamp'] > driverLocationsList[lastestDriverLocationIdx][1]['timestamp']:
+            lastestDriverLocationIdx = i
+        i += 1
+
+    
 
     matchResult = {
         "rider": rideRequest,
         "driver": {
-            "userId": driverLocationsList[-1][0],
-            "location": driverLocationsList[-1][1]['location'],
-            "timestamp": driverLocationsList[-1][1]['timestamp']
+            "userId": driverLocationsList[lastestDriverLocationIdx][0],
+            "location": driverLocationsList[lastestDriverLocationIdx][1]['location'],
+            "timestamp": driverLocationsList[lastestDriverLocationIdx][1]['timestamp']
         },
         "timestamp": time()
     }
+
+    print('matchResult: ', matchResult)
     
     return matchResult
 

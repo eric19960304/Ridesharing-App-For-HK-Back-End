@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const { decodedJWT } = require('../../helpers/auth');
 
 const costFactor = 10;
