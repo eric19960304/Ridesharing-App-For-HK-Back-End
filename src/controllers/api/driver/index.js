@@ -45,9 +45,28 @@ const storeLocationToCache = (req, res) => {
     });
 };
 
+const getAllDriversLocations = (req, res) => {
+    
+    redisClient.hgetall(
+        REDIS_KEYS.DRIVER_LOCATION,
+        (err, locations) => {
+            let locationList = [];
+            for(const key in locations){
+                locationList.push(JSON.parse(locations[key]));
+            }
+            return res.status(200).json(locationList);
+        }
+    );
+
+    
+};
+
 router.post('/location-update',
     storeLocationToCache
 );
 
+router.post('/get-all-drivers-location',
+    getAllDriversLocations
+);
 
 module.exports = router;
