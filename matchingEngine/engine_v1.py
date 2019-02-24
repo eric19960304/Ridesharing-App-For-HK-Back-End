@@ -116,9 +116,9 @@ def find_one_match(rideRequest, driverLocationsList):
     matchResult = {
         "rider": rideRequest,
         "driver": {
-            "userId": driverLocationsList[0][0],
-            "location": driverLocationsList[0][1]['location'],
-            "timestamp": driverLocationsList[0][1]['timestamp']
+            "userId": driverLocationsList[-1][0],
+            "location": driverLocationsList[-1][1]['location'],
+            "timestamp": driverLocationsList[-1][1]['timestamp']
         },
         "timestamp": time()
     }
