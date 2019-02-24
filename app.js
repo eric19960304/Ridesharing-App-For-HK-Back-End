@@ -92,6 +92,10 @@ if(process.env.PROD){
         console.log('Server is running on Port 443');
     });
 
+    httpServer.listen(80, () => {
+        console.log('Server is running on Port 80');
+    });
+
     server = httpsServer;
 
 }else{
