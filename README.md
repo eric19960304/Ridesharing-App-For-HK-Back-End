@@ -22,10 +22,6 @@ Required enviroment variables in server (see config.js):
 * GOOGLE_MAP_API_KEY
 
 
-For Windows users to install bcrypt (ref: https://stackoverflow.com/questions/41899719/how-to-npm-install-bcrypt-on-windows-7):
-* use powershell as admin to run `npm install --global --production windows-build-tools`
-* then run `npm install node-gyp -g` and `npm install bcrypt -g`
-
 
 To install all the packages (under project's root directory):
 
