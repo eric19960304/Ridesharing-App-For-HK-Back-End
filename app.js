@@ -44,6 +44,7 @@ All routes:
 /auth/reset-password/:token [POST]
 /api/secret/google-map-api-key [POST]
 /api/driver/location-update [POST]
+/api/driver/get-all-drivers-location [POST]
 /api/user/edit-profile [POST]
 /api/user/edit-profile-with-password [POST]
 /api/user/push-token [POST]
