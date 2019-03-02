@@ -9,7 +9,10 @@ const user = new Schema({
     nickname: { type: String, required: true },
     activated: { type: Boolean, required: true },
     avatarSource: { type: String },
-    pushTokens: [{ type: String }]
+    pushTokens: [{ type: String }],
+    carplate:{ type: String},
+    contact:{ type: String},
+    isDriver:{ type: Boolean},
 });
 
 module.exports = mongoose.model('User', user);
