@@ -23,44 +23,39 @@ def startEngine():
         print('Error:', ex)
         exit('Failed to connect, terminating.')
 
-    print("[{}] wait for ride request".format( getTimeStr() ))
     while True:
-        rideRequestJSONString = redisConn.lpop(RIDE_REQUEST)
-        if rideRequestJSONString == None:
-            # when there is no item in list, the result retunrned from redis is None
-            sleep(3)
-        else:
+        
+        queueLen = redisConn.llen(RIDE_REQUEST)
+        onlineDriverCount =   redisConn.hlen(DRIVER_LOCATION)
+
+        if queueLen > 0 and onlineDriverCount > 0:
+            # consume one request from queue
+            rideRequestJSONString = redisConn.lpop(RIDE_REQUEST)
             rideRequest = ujson.loads( rideRequestJSONString.decode('utf-8') )
-            run_match(rideRequest, redisConn)
-            print("[{}] wait for ride request".format( getTimeStr() ))
 
+            # get all driver locations
+            driverLocationsRaw = redisConn.hgetall(DRIVER_LOCATION)
+            driverLocations = dict()
+            for (userIdDirty, locationDirty) in driverLocationsRaw.items():
+                userId = userIdDirty.decode('utf-8')
+                location = ujson.loads( locationDirty.decode('utf-8') )
 
-def run_match(rideRequest, redisConn):
-    driverLocationsDirty = redisConn.hgetall(DRIVER_LOCATION)
-    
-    print("[{}] wait for active driver".format( getTimeStr() ))
+                if( isDriverOnline(location) ):
+                    driverLocations[userId] = location
+                else:
+                    # the driver is currently offline, delete his/her location
+                    redisConn.hdel(DRIVER_LOCATION, userId)
 
-    if len(driverLocationsDirty) == 0:
-        while True:
-            # no driver yet, enter wait loop
+            # ready to start matching
+            matchResult = find_one_match(rideRequest, list(driverLocations.items()))
+            requests.post(url = SERVER_ENDPOINT, json = matchResult)
+        else:
             sleep(3)
-            driverLocationsDirty = redisConn.hgetall(DRIVER_LOCATION)
-            if len(driverLocationsDirty) > 0:
-                # driver appears, exit wait loop
-                break
 
-    # clean up the data from redis
-    driverLocations = dict()
-    for (userIdDirty, locationDirty) in driverLocationsDirty.items():
-        userId = userIdDirty.decode('utf-8')
-        location = ujson.loads( locationDirty.decode('utf-8') )
-        driverLocations[userId] = location
-
-    # ready to start matching
-
-    matchResult = find_one_match(rideRequest, list(driverLocations.items()))
-    requests.post(url = SERVER_ENDPOINT, json = matchResult)
-
+def isDriverOnline(driverLocation):
+    print('location time: ', driverLocation[1]['timestamp'])
+    currentTime = time()
+    return bool(currentTime - driverLocation[1]['timestamp'] < 5.0)
 
 def find_one_match(rideRequest, driverLocationsList):
     '''
@@ -98,14 +93,6 @@ def find_one_match(rideRequest, driverLocationsList):
         ...
     ]
     '''
-    print('rideRequest', rideRequest)
-    print('userId', rideRequest['userId'])
-    startlatitude = rideRequest['startLocation']['latitude']
-    startlongitude = rideRequest['startLocation']['longitude']
-    endlatitude = rideRequest['endLocation']['latitude']
-    endlongitude = rideRequest['endLocation']['longitude']
-    print('start location: lat=', startlatitude, 'long=', startlongitude)
-    print('end location: lat=', endlatitude, 'long=', endlongitude)
 
     lastestDriverLocationIdx = None
     i = 0
@@ -114,8 +101,6 @@ def find_one_match(rideRequest, driverLocationsList):
         if lastestDriverLocationIdx == None or driverLocationsList[i][1]['timestamp'] > driverLocationsList[lastestDriverLocationIdx][1]['timestamp']:
             lastestDriverLocationIdx = i
         i += 1
-
-    
 
     matchResult = {
         "rider": rideRequest,
@@ -127,7 +112,7 @@ def find_one_match(rideRequest, driverLocationsList):
         "timestamp": time()
     }
 
-    print('matchResult: ', matchResult)
+    print("[{}] matchResult: ".format( getTimeStr() ), matchResult)
     
     return matchResult
 
