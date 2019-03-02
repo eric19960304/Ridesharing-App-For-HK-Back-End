@@ -143,7 +143,7 @@ const updateUser = (req, res, next) => {
     */
 
     for(const key in req.updatedUserInfo){
-        if(req.updatedUserInfo[key]!=null&&req.updatedUserInfo[key]!=''){
+        if(req.updatedUserInfo[key] !== null && req.updatedUserInfo[key]!=='' && req.updatedUserInfo[key]!==undefined){
             req.user[key] = req.updatedUserInfo[key];
         }
     }
