@@ -4,7 +4,10 @@ const createUserForFrontend = (data) => {
         userId: data._id.toString(),
         email: data.email,
         nickname: data.nickname,
-        avatarSource: data.avatarSource
+        avatarSource: data.avatarSource,
+        carplate:data.carplate,
+        contact:data.contact,
+        isDriver:data.isDriver,
     };
     return user;
 };
@@ -14,7 +17,10 @@ const createNewUserForDatabase = (data) => {
         email: data.email,
         password: data.password,
         nickname: data.nickname,
-        avatarSource: data.avatarSource
+        avatarSource: data.avatarSource,
+        carplate:data.carplate,
+        contact:data.contact,
+        isDriver:data.isDriver,
     };
     return user;
 };
