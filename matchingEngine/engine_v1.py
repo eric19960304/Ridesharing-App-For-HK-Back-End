@@ -1,6 +1,4 @@
 import redis
-from sanic import Sanic
-from sanic import response
 from time import sleep, gmtime, strftime, time
 import ujson
 import requests
@@ -17,7 +15,7 @@ def getTimeStr():
 def startEngine():
     # connect to redis
     try:
-        redisConn = redis.StrictRedis(host='localhost', port=6379)
+        redisConn = redis.StrictRedis(host='localhost', port=6379, decode_responses=True)
         print('Connected to redis')
     except Exception as ex:
         print('Error:', ex)
@@ -30,16 +28,13 @@ def startEngine():
 
         if queueLen > 0 and onlineDriverCount > 0:
             # consume one request from queue
-            rideRequestJSONString = redisConn.lpop(RIDE_REQUEST)
-            rideRequest = ujson.loads( rideRequestJSONString.decode('utf-8') )
+            
+            rideRequest = redisConn.lpop(RIDE_REQUEST)
 
             # get all driver locations
-            driverLocationsRaw = redisConn.hgetall(DRIVER_LOCATION)
-            driverLocations = dict()
-            for (userIdDirty, locationDirty) in driverLocationsRaw.items():
-                userId = userIdDirty.decode('utf-8')
-                location = ujson.loads( locationDirty.decode('utf-8') )
-
+            driverLocations = redisConn.hgetall(DRIVER_LOCATION)
+            for (userId, locationJson) in driverLocations.items():
+                location = ujson.loads( locationJson )
                 if( isDriverOnline(location) ):
                     driverLocations[userId] = location
                 else:
@@ -53,9 +48,9 @@ def startEngine():
             sleep(3)
 
 def isDriverOnline(driverLocation):
-    print('location time: ', driverLocation[1]['timestamp'])
+    print("[{}] matchResult: ".format( getTimeStr() ), ' location time: ', driverLocation['timestamp'])
     currentTime = time()
-    return bool(currentTime - driverLocation[1]['timestamp'] < 5.0)
+    return bool(currentTime - driverLocation['timestamp'] < 5.0)
 
 def find_one_match(rideRequest, driverLocationsList):
     '''

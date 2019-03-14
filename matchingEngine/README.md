@@ -20,3 +20,14 @@ To install all the packages:
 To run the server "engine_v1":
 
 `python3 engine_v1.py`
+
+
+
+
+List of used Redis keys
+
+1. realTimeRideRequest
+
+2. driverLocation
+
+3. seatNum
