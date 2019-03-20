@@ -33,12 +33,6 @@ const storeLocationToCache = (req, res) => {
         userId, 
         JSON.stringify(req.body)
     );
-
-    redisClient.hset(
-        REDIS_KEYS.SEAT_NUM,
-        userId,
-        config.default_seat_number
-    );
     
     return res.status(200).json({
         result: `user location updated: userId=${userId}, lat=${longitude}, long=${latitude}`

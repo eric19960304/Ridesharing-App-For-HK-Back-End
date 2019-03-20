@@ -3,9 +3,10 @@ from time import sleep, gmtime, strftime, time
 import ujson
 import requests
 
+# redis key name, refer to README for the data struture
 RIDE_REQUEST = 'realTimeRideRequest'
-SEAT_NUM = 'seatNum'
 DRIVER_LOCATION = 'driverLocation'
+DRIVER_MATCHED_DETAILS = 'driverMatchedDetail'
 
 SERVER_ENDPOINT = 'http://localhost/notify-match-result/real-time-ride'
 
@@ -53,41 +54,6 @@ def isDriverOnline(driverLocation):
     return bool(currentTime - driverLocation['timestamp'] < 5.0)
 
 def find_one_match(rideRequest, driverLocationsList):
-    '''
-    rideRequest format:
-    {
-        userId: string,
-        startLocation: {
-            latitude: number,
-            longitude: number
-        },
-        endLocation: {
-            latitude: number,
-            longitude: number
-        }
-        timestamp: number
-    }
-
-    driverLocationsList format list of tuple (string, dict):
-    [
-        (
-            string,  <--- userId
-            {
-                "location":  {
-                    "accuracy": number,
-                    "altitude": number,
-                    "altitudeAccuracy": number,
-                    "heading": number,
-                    "latitude": number,
-                    "longitude": number,
-                    "speed": number
-                },
-                "timestamp": number
-            }
-        ),
-        ...
-    ]
-    '''
 
     lastestDriverLocationIdx = None
     i = 0

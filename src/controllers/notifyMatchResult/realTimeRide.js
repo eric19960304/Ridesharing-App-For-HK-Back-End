@@ -36,6 +36,39 @@ const prepareForFindUsersPushTokens = (req, res, next) => {
     next();
 };
 
+const storeRideDetails = (req, res, next) => {
+    const driverId = req.body.driver.userId;
+
+    req.users.forEach( (user) => {
+        if(user._id.toString() === driverId){  // debugged for 2 hours to find out user._id is not string, fuck this shit
+            req.driver = Object.assign({}, user);
+        }else{
+            req.rider = Object.assign({}, user);
+        }
+    });
+
+    let driverMatchedDetailList;
+    redisClient.HGET(REDIS_KEYS.DRIVER_MATCHED_DETAILS, driverId, (err, data)=>{
+        if(data===null){
+            // key not exist.
+            driverMatchedDetailList = [];
+        }else{
+            driverMatchedDetailList =  JSON.parse(data);
+            let rideDetails = Object.assign({},req.body.rider);
+            rideDetails.requestedDate = (new Date(rideDetails.timestamp)).toISOString(); // added for readibility
+            rideDetails.matchedDate = (new Date()).toISOString();  // added for readibility
+            driverMatchedDetailList.push(rideDetails);
+        }
+
+        redisClient.HSET(REDIS_KEYS.DRIVER_MATCHED_DETAILS, driverId, JSON.stringify(driverMatchedDetailList));
+
+        next();
+    });
+    
+
+    
+};
+
 const sendNotificationAndMessageToUsers = (req, res) => {
     /*
     req.body format:
@@ -80,37 +113,22 @@ const sendNotificationAndMessageToUsers = (req, res) => {
     // send notification
     notificationClient.notify(pushTokens, 'Ride match found! Please checkout message page for detail.');
 
-    
-    const riderId = req.body.rider.userId;
     const driverId = req.body.driver.userId;
-
-    // decrement the seat number of driver
-    redisClient.HINCRBY(REDIS_KEYS.SEAT_NUM, String(driverId), -1);
-
-    const users = req.users;
-    let riderName = null;
-    let driverName = null;
-    users.forEach( (user) => {
-        if(user._id.toString() === riderId){  // debugged for 2 hours to find out user._id is not string, fuck this shit
-            riderName = user.nickname;
-        }else{
-            driverName = user.nickname;
-        }
-    });
-    
+    const rider = req.rider;
+    const driver = req.driver;
     const socketio = req.app.get('socketio');
 
     let message = null;
-    users.forEach( (user) => {
+    req.users.forEach( (user) => {
 
         const userId = user._id.toString();
 
         let text = `Dear ${user.nickname}, you have a new ride match! `;
 
-        if(userId === riderId) {
-            text += `your driver is ${driverName}, contact: +85252252872`;
+        if(userId === driverId) {
+            text += `your passenger is ${rider.nickname}, contact: +852${rider.contact}`;
         }else{
-            text += `your passenger is ${riderName}, contact: +85252252872`;
+            text += `your driver is ${driver.nickname}, contact: +852${driver.contact}`;
         }
 
         console.log(text);
@@ -162,6 +180,7 @@ router.post('/',
     prepareForFindUsersPushTokens,
     findUsersPushTokens,
     findUsers,
+    storeRideDetails,
     sendNotificationAndMessageToUsers
 );
 

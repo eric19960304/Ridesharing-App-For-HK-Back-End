@@ -10,12 +10,12 @@ const config = {
     mongodb_url,
     jwt_secret: process.env.JWT_SECRET || 'threeriders',
     mailConfig: {
-        user: 'hkucsfyp2018threeriders@gmail.com',
+        user: process.env.GMAIL_ADDRESS || 'hkucsfyp2018threeriders@gmail.com',
         pass: process.env.GMAIL_PASSWORD || 'password'
     },
     domainName,
     google_map_api_key: process.env.GOOGLE_MAP_API_KEY || 'apikeyNotFound',
-    default_seat_number: 4
+    default_driver_seat_number: 4
 };
 
 module.exports = config;

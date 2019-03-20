@@ -41,9 +41,9 @@ To run the server in production mode (all env variables should be set):
 
 prerequisite:
 
-1. Python >= 3.5.2
+1. Python >=3.6
 
-2. pip is for above python version command avaliable in your terminal
+2. pip3 (which is for python 3) command avaliable in your terminal
 
 3. clean mongodb running on localhost:27017 ( [Windows](https://stackoverflow.com/questions/20796714/how-do-i-start-mongo-db-from-windows) | [Mac](https://stackoverflow.com/questions/18452023/installing-and-running-mongodb-on-osx) )
 
@@ -53,8 +53,76 @@ prerequisite:
 
 To install all the packages (under /matchingEngine directory):
 
-`pip install -r requirements.txt`
+`pip3 install -r requirements.txt`
 
-To run the server "engine_v1" (under /matchingEngine directory):
+To run the server "engine_v1":
 
-`python engine_v1.py`
+`python3 engine_v1.py`
+
+
+
+
+List of used Redis keys
+
+1. realTimeRideRequest
+
+A redis list that act as a match queue, where each element in list is a JSON string representing a ride request from passengers.
+
+Structure of a ride request:
+```
+{
+    userId: string,
+    startLocation: {
+        latitude: number,
+        longitude: number
+    },
+    endLocation: {
+        latitude: number,
+        longitude: number
+    }
+    timestamp: number
+}
+```
+
+2. driverLocation
+
+A redis hash with driver's userId as key, his/her location as value.
+
+Structure of a location:
+```
+{
+    "location":  {
+        "accuracy": number,
+        "altitude": number,
+        "altitudeAccuracy": number,
+        "heading": number,
+        "latitude": number,
+        "longitude": number,
+        "speed": number
+    },
+    "timestamp": number
+}
+```
+
+3. driverMatchedDetail
+
+A redis hash with driver's userId as key, a JSON string representing a list of his/her matched ride(s) details as value
+
+Structure of the list:
+```
+[
+    {
+        userId: string,   // matched rider id
+        startLocation: {
+            latitude: number,
+            longitude: number
+        },
+        endLocation: {
+            latitude: number,
+            longitude: number
+        }
+        timestamp: number
+    },
+    ...
+]
+```
