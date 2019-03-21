@@ -30,7 +30,7 @@ def startEngine():
         if queueLen > 0 and onlineDriverCount > 0:
             # consume one request from queue
             
-            rideRequest = redisConn.lpop(RIDE_REQUEST)
+            rideRequest = ujson.loads(redisConn.lpop(RIDE_REQUEST))
 
             # get all driver locations
             driverLocations = redisConn.hgetall(DRIVER_LOCATION)

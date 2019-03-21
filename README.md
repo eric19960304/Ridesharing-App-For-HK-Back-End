@@ -68,7 +68,7 @@ List of used Redis keys
 
 A redis list that act as a match queue, where each element in list is a JSON string representing a ride request from passengers.
 
-Structure of a ride request:
+Structure of a ride request JSON:
 ```
 {
     userId: string,
@@ -86,9 +86,9 @@ Structure of a ride request:
 
 2. driverLocation
 
-A redis hash with driver's userId as key, his/her location as value.
+A redis hash with driver's userId as key, a JSON string representing his/her location as value.
 
-Structure of a location:
+Structure of the location JSON:
 ```
 {
     "location":  {
@@ -108,7 +108,7 @@ Structure of a location:
 
 A redis hash with driver's userId as key, a JSON string representing a list of his/her matched ride(s) details as value
 
-Structure of the list:
+Structure of the ride details JSON:
 ```
 [
     {

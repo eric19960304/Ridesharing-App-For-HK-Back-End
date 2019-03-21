@@ -2,6 +2,10 @@ const { Expo } = require('expo-server-sdk');
 let expo = new Expo();
 
 const notify = async (pushTokens, messageToNotify, extraData = {}) => {
+    if(pushTokens.length===0){
+        return;
+    }
+
     let messages = [];
     const data = {
         message: messageToNotify,

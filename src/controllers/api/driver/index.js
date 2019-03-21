@@ -41,17 +41,48 @@ const storeLocationToCache = (req, res) => {
 
 const getAllDriversLocations = (req, res) => {
     
+    const userId = req.userIdentity._id.toString();
+    let isUserMatchedToADriver = false;
+    let driverId = null;
+
     redisClient.hgetall(
-        REDIS_KEYS.DRIVER_LOCATION,
-        (err, locations) => {
-            let locationList = [];
-            for(const key in locations){
-                locationList.push(JSON.parse(locations[key]));
+        REDIS_KEYS.DRIVER_MATCHED_DETAILS,
+        (err, details) => {
+            if(details !== null){
+                for(const key in details){
+                    if(details[key].userId === userId){
+                        driverId = key;
+                        isUserMatchedToADriver = true;
+                        break;
+                    }
+                }
             }
-            return res.status(200).json(locationList);
+
+            if(isUserMatchedToADriver){
+                // only return the matched driver location
+                redisClient.hget(
+                    REDIS_KEYS.DRIVER_LOCATION,
+                    driverId,
+                    (err, location) => {
+                        return res.status(200).json([JSON.parse(location)]);
+                    }
+                );
+            }else{
+                // return all driver location
+                redisClient.hgetall(
+                    REDIS_KEYS.DRIVER_LOCATION,
+                    (err, locations) => {
+                        let locationList = [];
+                        for(const key in locations){
+                            locationList.push(JSON.parse(locations[key]));
+                        }
+                        return res.status(200).json(locationList);
+                    }
+                );
+            }
+            
         }
     );
-
     
 };
 

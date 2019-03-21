@@ -16,8 +16,35 @@ const router = express.Router();
 
 /*
 
-User request format example:
-*/
+req.body format for /notify-match-result/real-time-ride:
+{
+    rider: {
+        userId: string,
+        startLocation: {
+            latitude: number,
+            longitude: number
+        },
+        endLocation: {
+            latitude: number,
+            longitude: number
+        }
+        timestamp: number
+    },
+    driver: {
+        userId: string,
+        location:  {
+            "accuracy": number,
+            "altitude": number,
+            "altitudeAccuracy": number,
+            "heading": number,
+            "latitude": number,
+            "longitude": number,
+            "speed": number
+        },
+        timestamp: number
+    }
+} */
+
 
 const checkIfRequestIsFromLocalhost = (req, res, next) => {
     if(req.headers.host!=='localhost' && req.headers.host!=='127.0.0.1'){
@@ -54,11 +81,11 @@ const storeRideDetails = (req, res, next) => {
             driverMatchedDetailList = [];
         }else{
             driverMatchedDetailList =  JSON.parse(data);
-            let rideDetails = Object.assign({},req.body.rider);
-            rideDetails.requestedDate = (new Date(rideDetails.timestamp)).toISOString(); // added for readibility
-            rideDetails.matchedDate = (new Date()).toISOString();  // added for readibility
-            driverMatchedDetailList.push(rideDetails);
         }
+        let rideDetails = Object.assign({},req.body.rider);
+        rideDetails.requestedDate = (new Date(rideDetails.timestamp)).toISOString(); // added for readibility
+        rideDetails.matchedDate = (new Date()).toISOString();  // added for readibility
+        driverMatchedDetailList.push(rideDetails);
 
         redisClient.HSET(REDIS_KEYS.DRIVER_MATCHED_DETAILS, driverId, JSON.stringify(driverMatchedDetailList));
 
@@ -70,36 +97,6 @@ const storeRideDetails = (req, res, next) => {
 };
 
 const sendNotificationAndMessageToUsers = (req, res) => {
-    /*
-    req.body format:
-    {
-        rider: {
-            userId: string,
-            startLocation: {
-                latitude: number,
-                longitude: number
-            },
-            endLocation: {
-                latitude: number,
-                longitude: number
-            }
-            timestamp: number
-        },
-        driver: {
-            userId: string,
-            location:  {
-                "accuracy": number,
-                "altitude": number,
-                "altitudeAccuracy": number,
-                "heading": number,
-                "latitude": number,
-                "longitude": number,
-                "speed": number
-            },
-            timestamp: number
-        }
-    } */
-
     let pushTokens = [];
     req.usersPushTokens.forEach(obj => {
         pushTokens.push(...obj.pushTokens);
