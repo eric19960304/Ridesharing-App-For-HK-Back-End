@@ -10,6 +10,8 @@ DRIVER_ON_GOING_RIDE = 'driverOngoingRide'
 
 SERVER_ENDPOINT = 'http://localhost/notify-match-result/real-time-ride'
 
+ALGO_VERSION = 'v1'
+
 def getTimeStr():
     return strftime("%Y-%m-%d %H:%M:%S", gmtime())
 
@@ -70,7 +72,8 @@ def find_one_match(rideRequest, driverLocationsList):
             "location": driverLocationsList[lastestDriverLocationIdx][1]['location'],
             "timestamp": driverLocationsList[lastestDriverLocationIdx][1]['timestamp']
         },
-        "timestamp": time()
+        "timestamp": time(),
+        "algoVersion": ALGO_VERSION
     }
 
     print("[{}] matchResult: ".format( getTimeStr() ), matchResult)

@@ -6,7 +6,7 @@ const tempLink = new Schema({
     _id: ObjectId,
     token: { type: String, unique: true, required: true },
     purpose: { type: String, required: true },
-    expiryDate: { type: String, required: true },
+    expiryDate: { type: Date, required: true },
     userId: { type: ObjectId, required: true, ref: 'User' }
 });
 

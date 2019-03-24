@@ -69,7 +69,7 @@ const fetchTempLinkAndUserIdentity = (req, res, next) => {
         .then((tempLink) => {
 
             if (tempLink && 
-                new Date() < new Date(tempLink.expiryDate) ) {
+                new Date() < tempLink.expiryDate ) {
 
                 const userIdentity = {
                     _id: tempLink.userId,

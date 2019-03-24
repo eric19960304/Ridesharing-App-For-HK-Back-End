@@ -42,7 +42,8 @@ req.body format for /notify-match-result/real-time-ride:
             "speed": number
         },
         timestamp: number
-    }
+    },
+    algoVersion: string
 } */
 
 
@@ -68,9 +69,9 @@ const storeRideDetailsToRedis = (req, res, next) => {
 
     req.users.forEach( (user) => {
         if(user._id.toString() === driverId){ 
-            req.driver = Object.assign({}, user);
+            req.driver = user;
         }else{
-            req.rider = Object.assign({}, user);
+            req.rider = user;
         }
     });
 
@@ -82,10 +83,10 @@ const storeRideDetailsToRedis = (req, res, next) => {
         }else{
             driverOngoingRideList =  JSON.parse(data);
         }
-        let rideDetails = Object.assign({},req.body.rider);
-        rideDetails.requestedDate = (new Date(rideDetails.timestamp)).toISOString(); // added for readibility
-        rideDetails.matchedDate = (new Date()).toISOString();  // added for readibility
-        driverOngoingRideList.push(rideDetails);
+        let rideReq = Object.assign({}, req.body.rider);
+        rideReq.requestedDate = (new Date(rideReq.timestamp)).toISOString(); // added for readibility
+        rideReq.matchedDate = (new Date()).toISOString();  // added for readibility
+        driverOngoingRideList.push(rideReq);
 
         redisClient.HSET(REDIS_KEYS.DRIVER_ON_GOING_RIDE, driverId, JSON.stringify(driverOngoingRideList));
 
@@ -94,23 +95,25 @@ const storeRideDetailsToRedis = (req, res, next) => {
 };
 
 const saveRideLogsToDB = (req, res, next) => {
-    const driver = req.driver;
-    const rider = req.rider;
     
+    const riderReq = req.body.rider;
+    const driverReq = req.body.driver;
+
     const newRideLogs = new RideLogs({
         _id: new ObjectId(),
-        driverId: driver.userId,
-        riderId: rider.userId,
+        driverId: driverReq.userId,
+        riderId: riderReq.userId,
         startLocation: {
-            latitude: rider.startLocation.latitude,
-            longitude: rider.startLocation.longitude
+            latitude: riderReq.startLocation.latitude,
+            longitude: riderReq.startLocation.longitude
         },
         endLocation: {
-            latitude: rider.endLocation.latitude,
-            longitude: rider.endLocation.longitude
+            latitude: riderReq.endLocation.latitude,
+            longitude: riderReq.endLocation.longitude
         },
-        requestedDate: new Date(rider.timestamp),
-        matchedDate: new Date()
+        requestedDate: new Date(riderReq.timestamp),
+        matchedDate: new Date(),
+        algoVersion: req.body.algoVersion
     });
 
     // store ride logs to DB
@@ -149,9 +152,9 @@ const sendNotificationAndMessageToUsers = (req, res) => {
         let text = `Dear ${user.nickname}, you have a new ride match! `;
 
         if(userId === driverId) {
-            text += `your passenger is ${rider.nickname}, contact: +852${rider.contact}`;
+            text += `your passenger is [${rider.nickname}], contact: +852${rider.contact}`;
         }else{
-            text += `your driver is ${driver.nickname}, contact: +852${driver.contact}`;
+            text += `your driver is [${driver.nickname}], contact: +852${driver.contact}`;
         }
 
         console.log(text);

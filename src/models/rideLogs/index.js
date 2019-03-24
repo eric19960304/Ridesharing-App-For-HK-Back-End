@@ -6,6 +6,7 @@ const rideLogs = new Schema({
     _id: ObjectId,
     driverId: { type: ObjectId, required: true, ref: 'User' },
     riderId: { type: ObjectId, required: true, ref: 'User' },
+    algoVersion: { type: String, required: true },
     startLocation: {
         type: {
             latitude: { type: Number },

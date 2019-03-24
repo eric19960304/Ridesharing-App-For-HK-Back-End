@@ -4,6 +4,7 @@ const router = express.Router();
 const redisClient = require('../../../db/redisClient');
 const { REDIS_KEYS } = require('../../../helpers/constants');
 const { isDriverOnline } = require('../../../helpers/driver');
+const { haversineDistance } = require('../../../helpers/distance');
 
 
 /* 
@@ -23,7 +24,51 @@ expected req.body format:
 }
 */
 
+const detectAndHandleEndOfRide = (req, res, next) => {
+    const userId = req.userIdentity._id.toString();
 
+    redisClient.hget(
+        REDIS_KEYS.DRIVER_ON_GOING_RIDE,
+        userId,
+        (err, rideDetails) => {
+            if(rideDetails===null){
+                next();
+            }else{
+                const originRideDetails = JSON.parse(rideDetails);
+                let newRideDetails = JSON.parse(rideDetails);
+                newRideDetails = newRideDetails.filter( (rideDetail) => {
+                    const endLocation = rideDetail.endLocation;
+                    const currentLocation = req.body.location;
+                    const distance = haversineDistance(currentLocation, endLocation);
+                    return Boolean(distance > 0.5);
+                });
+
+                if(newRideDetails.length===0){
+                    redisClient.hdel(
+                        REDIS_KEYS.DRIVER_ON_GOING_RIDE, 
+                        userId,
+                        () => {
+                            next();
+                        }
+                    );
+                }else{
+                    if(newRideDetails.length !== originRideDetails.length){
+                        redisClient.hset(
+                            REDIS_KEYS.DRIVER_ON_GOING_RIDE, 
+                            userId, 
+                            JSON.stringify(newRideDetails),
+                            () => {
+                                next();
+                            }
+                        );
+                    }else{
+                        next();
+                    }
+                }
+            }
+        }
+    );
+};
 
 const storeLocationToCache = (req, res) => {
     const latitude = req.body.location.latitude;
@@ -33,12 +78,13 @@ const storeLocationToCache = (req, res) => {
     redisClient.hset(
         REDIS_KEYS.DRIVER_LOCATION, 
         userId, 
-        JSON.stringify(req.body)
+        JSON.stringify(req.body),
+        () => {
+            return res.status(200).json({
+                result: `user location updated: userId=${userId}, lat=${longitude}, long=${latitude}`
+            });
+        }
     );
-    
-    return res.status(200).json({
-        result: `user location updated: userId=${userId}, lat=${longitude}, long=${latitude}`
-    });
 };
 
 const getAllDriversLocations = (req, res) => {
@@ -49,16 +95,18 @@ const getAllDriversLocations = (req, res) => {
 
     redisClient.hgetall(
         REDIS_KEYS.DRIVER_ON_GOING_RIDE,
-        (err, rideDetails) => {
+        (err, allDriversRideDetails) => {
 
             // check if current user has matched ride
-            if(rideDetails !== null){
-                for(const key in rideDetails){
-                    if(rideDetails[key].userId === userId){
-                        driverId = key;
-                        isUserMatchedToADriver = true;
-                        break;
-                    }
+            if(allDriversRideDetails !== null){
+                for(const key in allDriversRideDetails){
+                    const rideDetails = JSON.parse(allDriversRideDetails[key]);
+                    rideDetails.forEach( (ride)=>{
+                        if(ride.userId === userId){
+                            driverId = key;
+                            isUserMatchedToADriver = true;
+                        }
+                    });
                 }
             }
 
@@ -99,6 +147,7 @@ const getAllDriversLocations = (req, res) => {
 };
 
 router.post('/location-update',
+    detectAndHandleEndOfRide,
     storeLocationToCache
 );
 
