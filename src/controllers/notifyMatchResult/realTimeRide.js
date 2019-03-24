@@ -6,7 +6,7 @@ const { findUsersPushTokens, findUsers } = require('../../middlewares/user');
 const redisClient = require('../../db/redisClient');
 const { REDIS_KEYS } = require('../../helpers/constants');
 const uuidv4 = require('uuid/v4');
-const { Message } = require('../../models');
+const { Message, RideLogs } = require('../../models');
 const socketClient = require('../../helpers/socketClient');
 
 
@@ -63,37 +63,63 @@ const prepareForFindUsersPushTokens = (req, res, next) => {
     next();
 };
 
-const storeRideDetails = (req, res, next) => {
+const storeRideDetailsToRedis = (req, res, next) => {
     const driverId = req.body.driver.userId;
 
     req.users.forEach( (user) => {
-        if(user._id.toString() === driverId){  // debugged for 2 hours to find out user._id is not string, fuck this shit
+        if(user._id.toString() === driverId){ 
             req.driver = Object.assign({}, user);
         }else{
             req.rider = Object.assign({}, user);
         }
     });
 
-    let driverMatchedDetailList;
-    redisClient.HGET(REDIS_KEYS.DRIVER_MATCHED_DETAILS, driverId, (err, data)=>{
+    let driverOngoingRideList;
+    redisClient.HGET(REDIS_KEYS.DRIVER_ON_GOING_RIDE, driverId, (err, data)=>{
         if(data===null){
             // key not exist.
-            driverMatchedDetailList = [];
+            driverOngoingRideList = [];
         }else{
-            driverMatchedDetailList =  JSON.parse(data);
+            driverOngoingRideList =  JSON.parse(data);
         }
         let rideDetails = Object.assign({},req.body.rider);
         rideDetails.requestedDate = (new Date(rideDetails.timestamp)).toISOString(); // added for readibility
         rideDetails.matchedDate = (new Date()).toISOString();  // added for readibility
-        driverMatchedDetailList.push(rideDetails);
+        driverOngoingRideList.push(rideDetails);
 
-        redisClient.HSET(REDIS_KEYS.DRIVER_MATCHED_DETAILS, driverId, JSON.stringify(driverMatchedDetailList));
+        redisClient.HSET(REDIS_KEYS.DRIVER_ON_GOING_RIDE, driverId, JSON.stringify(driverOngoingRideList));
 
         next();
     });
-    
+};
 
+const saveRideLogsToDB = (req, res, next) => {
+    const driver = req.driver;
+    const rider = req.rider;
     
+    const newRideLogs = new RideLogs({
+        _id: new ObjectId(),
+        driverId: driver.userId,
+        riderId: rider.userId,
+        startLocation: {
+            latitude: rider.startLocation.latitude,
+            longitude: rider.startLocation.longitude
+        },
+        endLocation: {
+            latitude: rider.endLocation.latitude,
+            longitude: rider.endLocation.longitude
+        },
+        requestedDate: new Date(rider.timestamp),
+        matchedDate: new Date()
+    });
+
+    // store ride logs to DB
+    newRideLogs.save()
+        .catch(err => {
+            console.log('insert ride logs error: ', err);
+        });
+    
+    next();
 };
 
 const sendNotificationAndMessageToUsers = (req, res) => {
@@ -102,7 +128,7 @@ const sendNotificationAndMessageToUsers = (req, res) => {
         pushTokens.push(...obj.pushTokens);
     });
 
-    // remove duplications
+    // remove duplications tokens
     pushTokens = pushTokens.filter((elem, pos) => {
         return pushTokens.indexOf(elem) === pos;
     });
@@ -110,7 +136,7 @@ const sendNotificationAndMessageToUsers = (req, res) => {
     // send notification
     notificationClient.notify(pushTokens, 'Ride match found! Please checkout message page for detail.');
 
-    const driverId = req.body.driver.userId;
+    const driverId = req.driver.userId;
     const rider = req.rider;
     const driver = req.driver;
     const socketio = req.app.get('socketio');
@@ -177,7 +203,8 @@ router.post('/',
     prepareForFindUsersPushTokens,
     findUsersPushTokens,
     findUsers,
-    storeRideDetails,
+    storeRideDetailsToRedis,
+    saveRideLogsToDB,
     sendNotificationAndMessageToUsers
 );
 

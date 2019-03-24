@@ -104,9 +104,9 @@ Structure of the location JSON:
 }
 ```
 
-3. driverMatchedDetail
+3. driverOngoingRide
 
-A redis hash with driver's userId as key, a JSON string representing a list of his/her matched ride(s) details as value
+A redis hash with driver's userId as key, a JSON string representing a list of his/her matched and ongoing ride(s) details as value
 
 Structure of the ride details JSON:
 ```

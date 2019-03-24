@@ -1,7 +1,7 @@
 const REDIS_KEYS = {
     RIDE_REQUEST: 'realTimeRideRequest',
     DRIVER_LOCATION: 'driverLocation',
-    DRIVER_MATCHED_DETAILS: 'driverMatchedDetail',
+    DRIVER_ON_GOING_RIDE: 'driverOngoingRide',
 };
 
 module.exports = {

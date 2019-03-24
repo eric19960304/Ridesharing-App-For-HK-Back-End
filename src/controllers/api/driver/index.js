@@ -48,13 +48,13 @@ const getAllDriversLocations = (req, res) => {
     let driverId = null;
 
     redisClient.hgetall(
-        REDIS_KEYS.DRIVER_MATCHED_DETAILS,
-        (err, details) => {
+        REDIS_KEYS.DRIVER_ON_GOING_RIDE,
+        (err, rideDetails) => {
 
             // check if current user has matched ride
-            if(details !== null){
-                for(const key in details){
-                    if(details[key].userId === userId){
+            if(rideDetails !== null){
+                for(const key in rideDetails){
+                    if(rideDetails[key].userId === userId){
                         driverId = key;
                         isUserMatchedToADriver = true;
                         break;

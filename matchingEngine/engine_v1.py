@@ -6,7 +6,7 @@ import requests
 # redis key name, refer to README for the data struture
 RIDE_REQUEST = 'realTimeRideRequest'
 DRIVER_LOCATION = 'driverLocation'
-DRIVER_MATCHED_DETAILS = 'driverMatchedDetail'
+DRIVER_ON_GOING_RIDE = 'driverOngoingRide'
 
 SERVER_ENDPOINT = 'http://localhost/notify-match-result/real-time-ride'
 
