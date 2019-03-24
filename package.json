@@ -7,9 +7,10 @@
     "prod": "PROD=true nodemon app"
   },
   "dependencies": {
-    "bcryptjs":"^2.4.3",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
     "cookie-parser": "~1.4.3",
+    "cron": "^1.7.0",
     "debug": "~2.6.9",
     "expo-server-sdk": "^3.1.0",
     "express": "^4.16.4",

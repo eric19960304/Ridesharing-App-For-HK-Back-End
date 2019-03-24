@@ -50,8 +50,8 @@ def startEngine():
 
 def isDriverOnline(driverLocation):
     print("[{}] matchResult: ".format( getTimeStr() ), ' location time: ', driverLocation['timestamp'])
-    currentTime = time()
-    return bool(currentTime - driverLocation['timestamp'] < 5.0)
+    currentTime = time()*1000
+    return bool(currentTime - driverLocation['timestamp'] <= 7000.0)
 
 def find_one_match(rideRequest, driverLocationsList):
 

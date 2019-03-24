@@ -8,6 +8,7 @@ const { authRouter, testRouter, apiRouter, notifyMatchResultRouter } = require('
 const { verifyJwt } = require('./src/middlewares/auth');
 const config = require('./config');
 const socketClient = require('./src/helpers/socketClient');
+const cronjobs = require('./src/helpers/cronjob');
 
 const app = express();
 
@@ -117,4 +118,4 @@ socketio.on('connection', (socket) => {
 });
 
 
-
+cronjobs.startAllCronJobs();

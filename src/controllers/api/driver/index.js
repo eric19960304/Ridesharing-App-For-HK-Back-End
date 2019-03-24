@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const redisClient = require('../../../db/redisClient');
 
+const redisClient = require('../../../db/redisClient');
 const { REDIS_KEYS } = require('../../../helpers/constants');
-const config = require('../../../../config');
+const { isDriverOnline } = require('../../../helpers/driver');
 
 
 /* 
@@ -22,6 +22,8 @@ expected req.body format:
 	"timestamp": number
 }
 */
+
+
 
 const storeLocationToCache = (req, res) => {
     const latitude = req.body.location.latitude;
@@ -48,6 +50,8 @@ const getAllDriversLocations = (req, res) => {
     redisClient.hgetall(
         REDIS_KEYS.DRIVER_MATCHED_DETAILS,
         (err, details) => {
+
+            // check if current user has matched ride
             if(details !== null){
                 for(const key in details){
                     if(details[key].userId === userId){
@@ -64,7 +68,11 @@ const getAllDriversLocations = (req, res) => {
                     REDIS_KEYS.DRIVER_LOCATION,
                     driverId,
                     (err, location) => {
-                        return res.status(200).json([JSON.parse(location)]);
+                        let locationList = [];
+                        if(location!==null){
+                            locationList = [JSON.parse(location)].filter( x => isDriverOnline(x));
+                        }
+                        return res.status(200).json(locationList);
                     }
                 );
             }else{
@@ -73,9 +81,13 @@ const getAllDriversLocations = (req, res) => {
                     REDIS_KEYS.DRIVER_LOCATION,
                     (err, locations) => {
                         let locationList = [];
-                        for(const key in locations){
-                            locationList.push(JSON.parse(locations[key]));
+
+                        if(locations!==null){
+                            locationList = Object.keys(locations)
+                                .map( (key) => JSON.parse(locations[key]))
+                                .filter( x => isDriverOnline(x));
                         }
+
                         return res.status(200).json(locationList);
                     }
                 );
