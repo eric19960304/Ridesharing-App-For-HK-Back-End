@@ -24,7 +24,7 @@ def getDistance(origin, destination):
 def getDistanceMatrix(origins, destinations):
     '''
     Return the distance matrix as 2D list
-    return [ [ int ] ]
+    return [ [ (int, int) ] ]
     '''
     response = gmaps.distance_matrix(origins=origins, destinations=destinations)
     
