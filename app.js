@@ -33,25 +33,13 @@ mongoClient.connect();
 app.use(express.static('public'));
 
 // print request for all routes
-const printRequest = (req, res, next) => { console.log(req.url); next(); };
-app.use(printRequest);
+const printRequest = (req, res, next) => { 
+    console.log(`[${(new Date()).toLocaleDateString()}] ${req.url}`); 
+    next(); 
+};
 
-/*
-All routes:
-/auth/login [POST]
-/auth/signup [POST]
-/auth/reset-password/request [POST]
-/auth/reset-password/:token [GET]
-/auth/reset-password/:token [POST]
-/api/secret/google-map-api-key [POST]
-/api/driver/location-update [POST]
-/api/driver/get-all-drivers-location [POST]
-/api/user/edit-profile [POST]
-/api/user/edit-profile-with-password [POST]
-/api/user/push-token [POST]
-/api/rider/real-time-ride-request [POST]
-/notify-match-result/real-time-ride [POST]
-*/
+
+app.use(printRequest);
 app.use('/auth', authRouter);
 app.use(
     '/api', 

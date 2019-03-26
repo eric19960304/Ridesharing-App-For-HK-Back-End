@@ -8,7 +8,7 @@ const { haversineDistance } = require('../../../helpers/distance');
 
 
 /* 
-/api/driver/location-update
+/api/driver/update
 expected req.body format:
 {
 	"location":  {
@@ -23,6 +23,19 @@ expected req.body format:
 	"timestamp": number
 }
 */
+
+const storeLocationToCache = (req, res, next) => {
+    const userId = req.userIdentity._id.toString();
+
+    redisClient.hset(
+        REDIS_KEYS.DRIVER_LOCATION, 
+        userId, 
+        JSON.stringify(req.body),
+        () => {
+            next();
+        }
+    );
+};
 
 const detectAndHandleEndOfRide = (req, res, next) => {
     const userId = req.userIdentity._id.toString();
@@ -43,7 +56,10 @@ const detectAndHandleEndOfRide = (req, res, next) => {
                     return Boolean(distance > 0.5);
                 });
 
+                res.newRideDetails = newRideDetails;
+
                 if(newRideDetails.length===0){
+                    // no ongoing ride
                     redisClient.hdel(
                         REDIS_KEYS.DRIVER_ON_GOING_RIDE, 
                         userId,
@@ -52,6 +68,7 @@ const detectAndHandleEndOfRide = (req, res, next) => {
                         }
                     );
                 }else{
+                    // has at least one ongoing ride
                     if(newRideDetails.length !== originRideDetails.length){
                         redisClient.hset(
                             REDIS_KEYS.DRIVER_ON_GOING_RIDE, 
@@ -70,21 +87,8 @@ const detectAndHandleEndOfRide = (req, res, next) => {
     );
 };
 
-const storeLocationToCache = (req, res) => {
-    const latitude = req.body.location.latitude;
-    const longitude = req.body.location.longitude;
-    const userId = req.userIdentity._id.toString();
-
-    redisClient.hset(
-        REDIS_KEYS.DRIVER_LOCATION, 
-        userId, 
-        JSON.stringify(req.body),
-        () => {
-            return res.status(200).json({
-                result: `user location updated: userId=${userId}, lat=${longitude}, long=${latitude}`
-            });
-        }
-    );
+const responseOnGoingRideDetails = (req, res) => {
+    return res.status(200).json(res.newRideDetails);
 };
 
 const getAllDriversLocations = (req, res) => {
@@ -146,9 +150,10 @@ const getAllDriversLocations = (req, res) => {
     
 };
 
-router.post('/location-update',
+router.post('/update',
+    storeLocationToCache,
     detectAndHandleEndOfRide,
-    storeLocationToCache
+    responseOnGoingRideDetails
 );
 
 router.post('/get-all-drivers-location',

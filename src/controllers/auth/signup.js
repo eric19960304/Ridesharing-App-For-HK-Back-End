@@ -63,7 +63,7 @@ const sendActivationEmail = (req, res, next) => {
 
 /* 
 /auth/signup
-/auth/signup/activate/:token
+/auth/signup/activate/:token [GET]
 */
 
 router.post('/',
