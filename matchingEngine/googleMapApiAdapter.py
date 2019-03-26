@@ -5,7 +5,7 @@ import ujson
 # 'rows': contains lists of distances from an origin to each destinations
 # 'elements': each elements is a distance from the ith origin to jth destinations
 # e.g. origins = [A B], destinations = [C D E]
-# results (not the real format, also see distance_matrix_response_format.txt):
+# results (also see distance_matrix_response_format.txt for the original google map api response format):
 # [ [ A->C, A->D, A->E ],
 #   [ B->C, B->D, B->E ] ]
 
