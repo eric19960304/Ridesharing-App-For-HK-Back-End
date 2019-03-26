@@ -45,9 +45,12 @@ const detectAndHandleEndOfRide = (req, res, next) => {
         userId,
         (err, rideDetails) => {
             if(rideDetails===null){
+                // no ongoing ride
+                let newRideDetails = [];
+                res.newRideDetails = newRideDetails;
                 next();
             }else{
-                const originRideDetails = JSON.parse(rideDetails);
+                // has at least one ongoing ride
                 let newRideDetails = JSON.parse(rideDetails);
                 newRideDetails = newRideDetails.filter( (rideDetail) => {
                     const endLocation = rideDetail.endLocation;
@@ -57,31 +60,7 @@ const detectAndHandleEndOfRide = (req, res, next) => {
                 });
 
                 res.newRideDetails = newRideDetails;
-
-                if(newRideDetails.length===0){
-                    // no ongoing ride
-                    redisClient.hdel(
-                        REDIS_KEYS.DRIVER_ON_GOING_RIDE, 
-                        userId,
-                        () => {
-                            next();
-                        }
-                    );
-                }else{
-                    // has at least one ongoing ride
-                    if(newRideDetails.length !== originRideDetails.length){
-                        redisClient.hset(
-                            REDIS_KEYS.DRIVER_ON_GOING_RIDE, 
-                            userId, 
-                            JSON.stringify(newRideDetails),
-                            () => {
-                                next();
-                            }
-                        );
-                    }else{
-                        next();
-                    }
-                }
+                next();
             }
         }
     );
