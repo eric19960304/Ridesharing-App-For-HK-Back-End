@@ -8,11 +8,11 @@ const user = new Schema({
     password: { type: String, required: true },
     nickname: { type: String, required: true },
     activated: { type: Boolean, required: true },
+    isDriver:{ type: Boolean , required: true, default: false },
+    contact:{ type: String, required: true},
     avatarSource: { type: String },
     pushTokens: [{ type: String }],
-    carplate:{ type: String},
-    contact:{ type: String},
-    isDriver:{ type: Boolean},
+    carplate:{ type: String}
 });
 
 module.exports = mongoose.model('User', user);
