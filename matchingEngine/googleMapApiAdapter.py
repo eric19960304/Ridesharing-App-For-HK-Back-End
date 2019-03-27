@@ -6,7 +6,7 @@ gmaps = googlemaps.Client(key=os.environ['GOOGLE_MAP_API_KEY'])
 
 def getDistance(origin, destination):
     '''
-    Return the distance/duration pair from a origin to a destination in km
+    Return the distance/duration pair from a origin to a destination
     return (distance in km : int, duration in seconds : int)
     '''
     response = gmaps.distance_matrix(origins=origin, destinations=destination)
