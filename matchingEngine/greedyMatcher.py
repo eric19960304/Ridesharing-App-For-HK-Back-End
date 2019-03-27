@@ -76,7 +76,7 @@ class GreedyMatcher:
                     minDist = dist[i]
                     minDistDriverIdx = i
             
-            mappings.append( (drivers_candidate[minDistDriverIdx]['userId'], request) )
+            mappings.append( (request, drivers_candidate[minDistDriverIdx]['userId']) )
             drivers_candidate[minDistDriverIdx]['ongoingRide'].append(request)
         
         return (mappings, remainingRequests)
@@ -124,10 +124,11 @@ def greedyMatcherTest():
     ]
 
     gMatcher = GreedyMatcher(None)
-    print('empty Q and D result: ', gMatcher.match([], []))
     M, R = gMatcher.match(requests, drivers)
     print('Q=[hku] D=[cu,polyu] test result: ')
-    print('mapping: ', M)
+    print('mapping: ')
+    for q, d in M:
+        print("  %s -> %s" %(q['userId'], d))
     print('remaining requests: ', R)
 
 if __name__ == "__main__":
