@@ -6,6 +6,9 @@ gmaps = googlemaps.Client(key=os.environ['GOOGLE_MAP_API_KEY'])
 
 def getDistance(origin, destination):
     '''
+    Format of origin and destination:
+    { "latitude": int, "longitude": int }
+
     Return the distance/duration pair from a origin to a destination
     return (distance in km : int, duration in seconds : int)
     '''
@@ -16,6 +19,9 @@ def getDistance(origin, destination):
 
 def getDistanceMatrix(origins, destinations):
     '''
+    Format of origins and destinations:
+    [ { "latitude": int, "longitude": int } ]
+
     Return the distance matrix as 2D list
     return [ [ (distance in km : int, duration in seconds : int) ] ]
     # e.g. origins = [A, B], destinations = [C, D, E]
