@@ -2,19 +2,12 @@ import googlemaps
 import os
 import ujson
 
-# 'rows': contains lists of distances from an origin to each destinations
-# 'elements': each elements is a distance from the ith origin to jth destinations
-# e.g. origins = [A B], destinations = [C D E]
-# results (also see distance_matrix_response_format.txt for the original google map api response format):
-# [ [ A->C, A->D, A->E ],
-#   [ B->C, B->D, B->E ] ]
-
 gmaps = googlemaps.Client(key=os.environ['GOOGLE_MAP_API_KEY'])
 
 def getDistance(origin, destination):
     '''
     Return the distance/duration pair from a origin to a destination in km
-    return (int, int)
+    return (distance in km : int, duration in seconds : int)
     '''
     response = gmaps.distance_matrix(origins=origin, destinations=destination)
     
@@ -24,7 +17,11 @@ def getDistance(origin, destination):
 def getDistanceMatrix(origins, destinations):
     '''
     Return the distance matrix as 2D list
-    return [ [ (int, int) ] ]
+    return [ [ (distance in km : int, duration in seconds : int) ] ]
+    # e.g. origins = [A, B], destinations = [C, D, E]
+    # return:
+    # [ [ A->C, A->D, A->E ],
+    #   [ B->C, B->D, B->E ] ] where A->C means the distance/duration tuple from point A to point C
     '''
     response = gmaps.distance_matrix(origins=origins, destinations=destinations)
     
