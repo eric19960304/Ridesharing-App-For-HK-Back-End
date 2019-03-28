@@ -33,20 +33,9 @@ class GreedyMatcher:
 
     def match(self, requests, drivers):
         '''
-        drivers format:
-        [{
-            "userId": string,
-            "location":  {
-                "latitude": number,
-                "longitude": number
-            },
-            "ongoingRide": [ requests ],
-            "maxSeat": number
-        }]
-
+        Input
         requests format:
-        [{
-            "userId": string,
+        [{  "userId": string,
             "startLocation": {
                 "latitude": number,
                 "longitude": number
@@ -55,8 +44,20 @@ class GreedyMatcher:
                 "latitude": number,
                 "longitude": number
             }
-            "timestamp": number
-        }]
+            "timestamp": number         }]
+        drivers format:
+        [{  "userId": string,
+            "location":  {
+                "latitude": number,
+                "longitude": number
+            },
+            "ongoingRide": [ requests ],
+            "maxSeat": number           }]
+        
+        output
+        (M, R) format:
+        ( [{request, driver}], [request] )
+
         '''
         if(len(requests)==0 or len(drivers)==0):
             return ([], requests)
@@ -86,7 +87,7 @@ class GreedyMatcher:
                     minDist = candidatesDistTuple[i][1]
                     nearestCandidateIdx = i
             
-            mappings.append( (request, candidatesDistTuple[nearestCandidateIdx][0]['userId']) )
+            mappings.append( (request, candidatesDistTuple[nearestCandidateIdx][0]) )
             candidatesDistTuple[nearestCandidateIdx][0]['ongoingRide'].append(request)
 
         return (mappings, remainingRequests)
@@ -151,7 +152,7 @@ def greedyMatcherTest():
     M, R = gMatcher.match(requests, drivers)
     print('mapping (passenger->driver): ')
     for q, d in M:
-        print("  %s -> %s" %(q['userId'], d))
+        print("  %s -> %s" %(q['userId'], d['userId']))
     print('remaining requests: ', len(R))
 
 if __name__ == "__main__":

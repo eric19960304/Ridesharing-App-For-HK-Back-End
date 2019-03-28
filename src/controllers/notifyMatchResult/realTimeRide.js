@@ -17,8 +17,7 @@ const router = express.Router();
 /*
 
 req.body format for /notify-match-result/real-time-ride:
-{
-    rider: {
+{   rider: {
         userId: string,
         startLocation: {
             latitude: number,
@@ -33,18 +32,12 @@ req.body format for /notify-match-result/real-time-ride:
     driver: {
         userId: string,
         location:  {
-            "accuracy": number,
-            "altitude": number,
-            "altitudeAccuracy": number,
-            "heading": number,
             "latitude": number,
-            "longitude": number,
-            "speed": number
-        },
-        timestamp: number
+            "longitude": number
+        }
     },
-    algoVersion: string
-} */
+    algoVersion: string             }
+*/
 
 
 const checkIfRequestIsFromLocalhost = (req, res, next) => {
