@@ -1,13 +1,14 @@
 import googleMapApiAdapter as gMapApi
 import univLoc
+from utils import haversineDistance, isShareable
 
 class GreedyMatcher:
     '''
-    Executed in every time frame
+    A simple greedy algorithm for real time ride matching executed in every time frame
     
-    A simple greedy algorithm for real time ride matching
     Input: a set of requests Q, a set of drivers D
     Output: a set of unhandled requests R, a set of mapping M
+    
     Steps:
     1. Q <- all requests, D <- all drivers, R <- {}, M <- {}
     2. for each q ∈ Q:
@@ -17,11 +18,18 @@ class GreedyMatcher:
     6.          continue loop
     7.      u <- argmin s ∈ S ( distance(s.current_location, q.start_location) )
     8.      u.emptySeat <- u.emptySeat - 1
-    8.      M.add( (q,u) )
-    9. return M, R
+    9.      M.add( (q,u) )
+   10. return M, R
     '''
     def __init__(self, constraints_param):
-        self.constraints_param = constraints_param
+        '''
+        constraints_param format:
+        {
+            # max distance between driver's location and request's start point allowed to be matched
+            "maxMatchDistance": number    
+        }
+        '''
+        self.maxMatchDistance = constraints_param['maxMatchDistance']
 
     def match(self, requests, drivers):
         '''
@@ -62,32 +70,48 @@ class GreedyMatcher:
 
         for (request, dist) in zip(requests, distMatrix):
             # dist = [ (distance in km, duration in seconds) ]
-            drivers_candidate = [ driver for driver in drivers if self.isSatisfyConstraints(request, driver) ]
+            candidatesDistTuple = [ 
+                (driver, d[0]) for (driver, d) in zip(drivers, dist) if self.isSatisfyConstraints(request, driver) 
+            ]
             
-            if len(drivers_candidate)==0:
+            if len(candidatesDistTuple)==0:
                 remainingRequests.append(request)
                 continue
             
             # find driver index with min dist
-            minDist = dist[0]
-            minDistDriverIdx = 0
-            for i in range(1, len(dist)):
-                if(dist[i][0] < minDist[0]):
-                    minDist = dist[i]
-                    minDistDriverIdx = i
+            minDist = candidatesDistTuple[0][1]
+            nearestCandidateIdx = 0
+            for i in range(1, len(candidatesDistTuple)):
+                if(candidatesDistTuple[i][1] < minDist):
+                    minDist = candidatesDistTuple[i][1]
+                    nearestCandidateIdx = i
             
-            mappings.append( (request, drivers_candidate[minDistDriverIdx]['userId']) )
-            drivers_candidate[minDistDriverIdx]['ongoingRide'].append(request)
-        
+            mappings.append( (request, candidatesDistTuple[nearestCandidateIdx][0]['userId']) )
+            candidatesDistTuple[nearestCandidateIdx][0]['ongoingRide'].append(request)
+
         return (mappings, remainingRequests)
             
 
     def isSatisfyConstraints(self, request, driver):
         '''
         1. driver.emptySeat > 0
-        2. dist(driver.currentLocation, request.startLocation) < 1km
-        3. if there is already passenger(s) in car ->  distance of best shared route < sum of 
+        2. dist(driver.currentLocation, request.startLocation) <= maxMatchDistance
+        3. there is already passenger(s) in car -> at least one ongoing request in car that is sharable with the request being match. (two requests are shareable if the distance of best shared route < sum of the individual trip distances)
         '''
+        if driver['maxSeat'] <= len(driver['ongoingRide']):
+            return False
+        
+        # if haversineDistance(request['startLocation'], driver['location']) > self.maxMatchDistance:
+        #     return False
+
+        if len(driver['ongoingRide']) > 0:
+            onGoingReqs = [ (l['startLocation'], l['endLocation']) for l in driver['ongoingRide'] ]
+            for onGoingReq in onGoingReqs:
+                if isShareable(request['startLocation'], request['endLocation'], onGoingReq[0], onGoingReq[1]):
+                    return True
+            return False
+        
+        # not violating any constraint
         return True
 
 
@@ -123,13 +147,12 @@ def greedyMatcherTest():
         }
     ]
 
-    gMatcher = GreedyMatcher(None)
+    gMatcher = GreedyMatcher({ 'maxMatchDistance': 2 })
     M, R = gMatcher.match(requests, drivers)
-    print('Q=[hku] D=[cu,polyu] test result: ')
-    print('mapping: ')
+    print('mapping (passenger->driver): ')
     for q, d in M:
         print("  %s -> %s" %(q['userId'], d))
-    print('remaining requests: ', R)
+    print('remaining requests: ', len(R))
 
 if __name__ == "__main__":
     greedyMatcherTest()
