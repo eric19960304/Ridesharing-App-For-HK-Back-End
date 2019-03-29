@@ -51,6 +51,7 @@ All Restful API endpoints:
 /api/user/edit-profile \[POST]
 /api/user/edit-profile-with-password \[POST]
 /api/user/push-token \[POST]
+/api/user/unread-messages-count \[POST]
 /notify-match-result/real-time-ride \[POST]  // for internal use only
 ```
 

@@ -1,7 +1,7 @@
 import redis
 from time import sleep, gmtime, strftime, time
 import ujson
-import requests
+import requests as requestsClient
 from greedyMatcher import GreedyMatcher
 
 # redis key name, refer to README for the data struture
@@ -32,20 +32,27 @@ def startEngine():
         
         # get all requests
         rideRequest = redisConn.lrange(RIDE_REQUEST, 0, -1)
+        numOfReq = len(rideRequest)
+        # remove the received request
+        redisConn.ltrim(RIDE_REQUEST, numOfReq, -1)
         requests = [ ujson.loads(r) for r in rideRequest ]
         
         # get all driver locations
         driverLocationDict = redisConn.hgetall(DRIVER_LOCATION)
-        for (userId, locationJson) in driverLocationDict.items():
+        for (driverId, locationJson) in driverLocationDict.items():
             location = ujson.loads( locationJson )
 
             if( isDriverOnline(location) ):
-                ongoingRideListJson = redisConn.lrange(DRIVER_ON_GOING_RIDE, 0, -1)
-                ongoingRideList = [ ujson.loads(l) for l in  ongoingRideListJson]
+                ongoingRideListJson = redisConn.hget(DRIVER_ON_GOING_RIDE, driverId)
+                if(ongoingRideListJson!=None):
+                    ongoingRideList = ujson.loads(ongoingRideListJson)
+                else:
+                    ongoingRideList = []
+                # print(len(ongoingRideList))
 
                 drivers.append({
-                    "userId": userId,
-                    "location": location,
+                    "userId": driverId,
+                    "location": location['location'],
                     "maxSeat": 4,
                     "ongoingRide": ongoingRideList
                 })
@@ -70,20 +77,20 @@ def startEngine():
                     "timestamp": time(),
                     "algoVersion": ALGO_VERSION
                 }
-                requests.post(url = SERVER_ENDPOINT, json = matchResult)
+                requestsClient.post(url = SERVER_ENDPOINT, json = matchResult)
             
             # push back the unhandled requests
             if len(remainingRequests)>0:
                 remainingRequestJsons = [ ujson.dumps(r) for r in remainingRequests ]
-                redisConn.rpush(DRIVER_ON_GOING_RIDE, *remainingRequestJsons)
+                redisConn.rpush(RIDE_REQUEST, *remainingRequestJsons)
 
         sleep(5)
 
 
 def isDriverOnline(driverLocation):
-    print("[{}] : ".format( getTimeStr() ), ' location time: ', driverLocation['timestamp'])
+    # print("[{}] : ".format( getTimeStr() ), ' location time: ', driverLocation['timestamp'])
     currentTime = time()*1000
-    return bool(currentTime - driverLocation['timestamp'] <= 7000.0)
+    return bool(currentTime - float(driverLocation['timestamp']) <= 7000.0)
 
 
 if __name__ == '__main__':

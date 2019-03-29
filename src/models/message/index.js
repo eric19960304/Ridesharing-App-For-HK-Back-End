@@ -8,7 +8,8 @@ const message = new Schema({
     senderId: {type: String, required: true},
     receiverId: {type: String, required: true},
     text: {type: String, required: true},
-    createdAt: {type: Date, required: true}
+    createdAt: {type: Date, required: true},
+    isRead: { type: Boolean, default: false, required: true }
 });
 
 module.exports = mongoose.model('Message', message);

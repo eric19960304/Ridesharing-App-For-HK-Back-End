@@ -176,6 +176,7 @@ const sendNotificationAndMessageToUsers = (req, res) => {
             receiverId: userId,
             text: message.text,
             createdAt: message.createdAt,
+            isRead: Boolean(socketClient.clientuserIdToSocketIdMapping[userId])
         });
     
         // store message to DB

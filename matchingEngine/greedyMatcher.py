@@ -102,15 +102,15 @@ class GreedyMatcher:
         if driver['maxSeat'] <= len(driver['ongoingRide']):
             return False
         
-        # if haversineDistance(request['startLocation'], driver['location']) > self.maxMatchDistance:
-        #     return False
-
-        if len(driver['ongoingRide']) > 0:
-            onGoingReqs = [ (l['startLocation'], l['endLocation']) for l in driver['ongoingRide'] ]
-            for onGoingReq in onGoingReqs:
-                if isShareable(request['startLocation'], request['endLocation'], onGoingReq[0], onGoingReq[1]):
-                    return True
+        if haversineDistance(request['startLocation'], driver['location']) > self.maxMatchDistance:
             return False
+
+        # if len(driver['ongoingRide']) > 0:
+        #     onGoingReqs = [ (l['startLocation'], l['endLocation']) for l in driver['ongoingRide'] ]
+        #     for onGoingReq in onGoingReqs:
+        #         if isShareable(request['startLocation'], request['endLocation'], onGoingReq[0], onGoingReq[1]):
+        #             return True
+        #     return False
         
         # not violating any constraint
         return True

@@ -4,6 +4,7 @@ const router = express.Router();
 const { authenticateUserLogin, encryptPassword } = require('../../../middlewares/auth');
 const { fetchUserById, updateUser } = require('../../../middlewares/user');
 const { createNewUserForDatabase } = require('../../../helpers/creator');
+const Message = require('../../../models/message');
 
 /* 
 /api/user/edit-profile
@@ -63,6 +64,18 @@ const storePushToken = (req, res, next) => {
     next();
 };
 
+const getUnreadMessagesCount = (req, res) => {
+    const userId = req.userIdentity._id.toString();
+
+    Message.count(
+        { $and: [ {$or: [ { 'senderId': userId }, { 'receiverId': userId } ]}, {'isRead': false} ] },
+        (error, count) =>{
+            return res.status(400).json({
+                count: count
+            });
+        }
+    );
+};
 
 router.post('/edit-profile',
     fetchUserById,
@@ -85,6 +98,10 @@ router.post('/push-token',
     fetchUserById,
     storePushToken,
     returnResponse
+);
+
+router.post('/unread-messages-count',
+    getUnreadMessagesCount
 );
 
 module.exports = router;

@@ -12,7 +12,7 @@ const onUserJoined = (message, socket) => {
 };
 
 const sendExistingMessages = (userId, socket) => {
-
+    
     Message.find({ $or: [ { 'senderId': userId }, { 'receiverId': userId } ]  })
         .sort({ 'createdAt': -1 })
         .exec( (err, messages) => {
@@ -34,8 +34,17 @@ const sendExistingMessages = (userId, socket) => {
                     };
                     _messages.push(m);
                 });
-
                 socket.emit('message', _messages);
+                Message.update(
+                    { $or: [ { 'senderId': userId }, { 'receiverId': userId } ]  }, 
+                    { 'isRead': true }, 
+                    {multi: true},
+                    (error)=>{
+                        if(error){
+                            console.log();
+                        }
+                    }
+                );
             }
         });
 };
