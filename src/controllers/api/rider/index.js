@@ -39,8 +39,19 @@ const storeRideRequest = (req, res) => {
     });
 };
 
+const getAllRealTimeRideRequest = (req, res) => {
+    redisClient.lrange(REDIS_KEYS.RIDE_REQUEST, 0, -1, (error, requests)=>{
+        console.log(requests);
+        return res.status(200).json(requests);
+    });
+};
+
 router.post('/real-time-ride-request',
     storeRideRequest
+);
+
+router.post('/get-all-real-time-ride-request',
+    getAllRealTimeRideRequest
 );
 
 

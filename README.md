@@ -143,7 +143,8 @@ Structure of the ride details JSON:
             latitude: number,
             longitude: number
         }
-        timestamp: number
+        timestamp: number,
+        isOnCar: false,
     },
     ...
 ]

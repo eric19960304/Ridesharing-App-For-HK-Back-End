@@ -11,7 +11,7 @@ def getDistance(origin, destination):
     { "latitude": int, "longitude": int }
 
     Return the distance/duration pair from a origin to a destination
-    return (distance in km : int, duration in seconds : int)
+    return (distance in m : int, duration in seconds : int)
     '''
     response = gmaps.distance_matrix(mode='driving', origins=origin, destinations=destination)
     
@@ -24,7 +24,7 @@ def getDistanceMatrix(origins, destinations):
     [ { "latitude": int, "longitude": int } ]
 
     Return the distance matrix as 2D list
-    return [ [ (distance in km : int, duration in seconds : int) ] ]
+    return [ [ (distance in m : int, duration in seconds : int) ] ]
     # e.g. origins = [A, B], destinations = [C, D, E]
     # return:
     # [ [ A->C, A->D, A->E ],

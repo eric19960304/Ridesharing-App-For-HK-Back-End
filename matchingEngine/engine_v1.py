@@ -27,6 +27,14 @@ def startEngine():
 
     while True:
 
+        sleep(5)
+
+        queueLen = redisConn.llen(RIDE_REQUEST)
+        onlineDriverCount =   redisConn.hlen(DRIVER_LOCATION)
+
+        if queueLen==0 or onlineDriverCount==0:
+            continue
+
         requests = []
         drivers = []
         
@@ -56,6 +64,8 @@ def startEngine():
                     "maxSeat": 4,
                     "ongoingRide": ongoingRideList
                 })
+            # end of if
+        # end of for
         
         if len(requests)>0 and len(drivers)>0:
             # match
@@ -78,13 +88,15 @@ def startEngine():
                     "algoVersion": ALGO_VERSION
                 }
                 requestsClient.post(url = SERVER_ENDPOINT, json = matchResult)
+            # end of for
             
             # push back the unhandled requests
             if len(remainingRequests)>0:
                 remainingRequestJsons = [ ujson.dumps(r) for r in remainingRequests ]
                 redisConn.rpush(RIDE_REQUEST, *remainingRequestJsons)
-
-        sleep(5)
+            # end of if
+        # end of if
+    # end of while
 
 
 def isDriverOnline(driverLocation):
