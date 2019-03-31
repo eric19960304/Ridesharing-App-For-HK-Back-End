@@ -65,7 +65,7 @@ class RVGraph:
     '''
     return data structure example
     {
-               (userID, Distance)
+               (userID, delayDistance)
     'driver1':[('request1', 140),('request2', 118),('request3', 75)],
     'driver2':[('request1', 172),('request2', 220)],
     }
@@ -76,11 +76,13 @@ class RVGraph:
     def RVGraphPairwiseDriverRequest(rideRequests, driverLocationsList):
         driverOnGoing = redisConn.hgetall(DRIVER_ON_GOING_RIDE)
         for (driverId, driverLocationJson) in driverLocationsList:
+            edgeList = []
+
             if driverId not in driverOnGoing:
-                self.rvGraph[driverId] = []
+                
                 for (riderId, riderLocationJson) in rideRequests:
                     riderDriverDistance, riderDriverTime = getDistance(driverLocationJson, riderLocationJson)
-                    self.rvGraph[driverId].append( (riderId, riderDriverDistance) )
+                    edgeList.append( (riderId, riderDriverDistance) )
             else:
                 driverPassagerList = driverOnGoing[driverId]
 
@@ -92,17 +94,53 @@ class RVGraph:
                 driverLocation[longitude] = driverLocationJson[location][longitude]
 
                 if len(driverPassagerList) < 2:
+                    #TWO RIDERS ONLY
                     passagerLocationList = []
-                    for passagerJson in driverPassagerList:
-                        if not riverPassagerList[isOnRide]:
-                            passagerLocationList.append(passagerJson[startLocation])
-                        passagerLocationList.append(passagerJson[endLocation])
+                    #request is not on ride
+                    if not driverPassagerList[0][isOnRide]:
+                        passagerLocationList.append(driverPassagerList[0][startLocation])
+                    passagerLocationList.append(driverPassagerList[0][endLocation])
                     for (riderId, riderLocationJson) in rideRequests:
                         locationList = []
                         locationList.append(riderLocationJson[startLocation])
                         locationList.append(riderLocationJson[endLocation])
                         locationList.append(driverLocation)
+                        locationList += passagerLocationList
+
                         
-                        distanceMatrix = getDistanceMatrix(locationList, locationList + passagerLocationList)
-                        #TSP
+                        distanceMatrix = getDistanceMatrix(locationList, locationList)
+
+                        delayDistance = 100000
+                        if not riverPassagerList[isOnRide]:
+                            20 03 34 41
+                            20 03 31 14
+                            23 30 04 41
+                            23 30 01 14
+                            min([distanceMatrix[2][0] + distanceMatrix[0][3] + distanceMatrix[3][4] + distanceMatrix[4][1],
+                            distanceMatrix[2][0] + distanceMatrix[0][3] + distanceMatrix[3][1] + distanceMatrix[1][4],
+                            distanceMatrix[2][3] + distanceMatrix[3][0] + distanceMatrix[0][4] + distanceMatrix[4][1],
+                            distanceMatrix[2][3] + distanceMatrix[3][0] + distanceMatrix[0][1] + distanceMatrix[1][4]])
+
+                            delayDistance = minimumShareDistance - distanceMatrix[2][3] + distanceMatrix[3][4] 
+                        else:
+                            delayDistance = distanceMatrix[2][0] + distanceMatrix[0][1] + distanceMatrix[2][3] - distanceMatrix[2][3]
+
+                        #delay
+                        if delayDistance < 5000:
+                            edgeList.append( (riderId, delayDistance) )
+
+                    # passagerLocationList = []
+                    # for passagerJson in driverPassagerList:
+                    #     if not riverPassagerList[isOnRide]:
+                    #         passagerLocationList.append(passagerJson[startLocation])
+                    #     passagerLocationList.append(passagerJson[endLocation])
+                    # for (riderId, riderLocationJson) in rideRequests:
+                    #     locationList = []
+                    #     locationList.append(riderLocationJson[startLocation])
+                    #     locationList.append(riderLocationJson[endLocation])
+                    #     locationList.append(driverLocation)
                         
+                    #     distanceMatrix = getDistanceMatrix(locationList, locationList + passagerLocationList)
+                    #     #TSP
+                        
+            self.rvGraph[driverId] = edgeList
