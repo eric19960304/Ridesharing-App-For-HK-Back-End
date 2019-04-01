@@ -27,7 +27,10 @@ req.body format for /notify-match-result/real-time-ride:
             latitude: number,
             longitude: number
         }
-        timestamp: number
+        timestamp: number,
+        estimatedOptimal: {
+            distance: number, duration: number
+        }
     },
     driver: {
         userId: string,
@@ -79,6 +82,7 @@ const storeRideDetailsToRedis = (req, res, next) => {
         let rideReq = Object.assign({}, req.body.rider);
         rideReq.requestedDate = (new Date(rideReq.timestamp)).toISOString(); // added for readibility
         rideReq.matchedDate = (new Date()).toISOString();  // added for readibility
+        rideReq.isOnCar = false;
         driverOngoingRideList.push(rideReq);
 
         redisClient.HSET(REDIS_KEYS.DRIVER_ON_GOING_RIDE, driverId, JSON.stringify(driverOngoingRideList));
@@ -104,9 +108,10 @@ const saveRideLogsToDB = (req, res, next) => {
             latitude: riderReq.endLocation.latitude,
             longitude: riderReq.endLocation.longitude
         },
+        estimatedOptimal: riderReq.estimatedOptimal,
         requestedDate: new Date(riderReq.timestamp),
         matchedDate: new Date(),
-        algoVersion: req.body.algoVersion
+        algoVersion: req.body.algoVersion,
     });
 
     // store ride logs to DB
@@ -129,8 +134,7 @@ const sendNotificationAndMessageToUsers = (req, res) => {
         return pushTokens.indexOf(elem) === pos;
     });
 
-    // send notification
-    notificationClient.notify(pushTokens, 'Ride match found! Please checkout message page for detail.');
+    let messagesToNotify = [];
 
     const driverId = req.driver.userId;
     const rider = req.rider;
@@ -144,11 +148,18 @@ const sendNotificationAndMessageToUsers = (req, res) => {
 
         let text = `Dear ${user.nickname}, you have a new ride match! `;
 
+        let displayNickname, displayContact, displayDistance, displayDuration;
         if(userId === driverId) {
-            text += `your passenger is [${rider.nickname}], contact: +852${rider.contact}`;
+            displayNickname = rider.nickname;
+            displayContact = rider.contact;
         }else{
-            text += `your driver is [${driver.nickname}], contact: +852${driver.contact}`;
+            displayNickname = driver.nickname;
+            displayContact = driver.contact;
         }
+        displayDistance = req.body.rider.estimatedOptimal.distance;
+        displayDuration = Math.round(req.body.rider.estimatedOptimal.duration/60);
+        text += `your passenger is [${displayNickname}], contact: +852${displayContact}. Travel distance is ${displayDistance} m and estimated duration is ${displayDuration} mins`;
+        messagesToNotify.push('New Message:\n'+text);
 
         console.log(text);
 
@@ -162,13 +173,11 @@ const sendNotificationAndMessageToUsers = (req, res) => {
             createdAt: new Date(),
         };
 
-        
         // send message via socket
         if(socketClient.clientuserIdToSocketIdMapping[userId]){
             socketio.to(socketClient.clientuserIdToSocketIdMapping[userId]).emit('message', message);
         }
         
-
         const newMessage = new Message({
             _id: new ObjectId(),
             messageId: message._id,
@@ -185,6 +194,9 @@ const sendNotificationAndMessageToUsers = (req, res) => {
                 console.log('insert message error: ', err);
             });
     });
+
+    // send notification
+    notificationClient.notify(pushTokens, messagesToNotify);
 
     return res.status(200).json({
         message: 'Notification sent'

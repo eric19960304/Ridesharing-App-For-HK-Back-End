@@ -70,3 +70,4 @@ __pycache__
 /.vscode
 
 *.pyc
+dump.rdb

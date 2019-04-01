@@ -24,9 +24,6 @@ const sendExistingMessages = (userId, socket) => {
                 messages.forEach( message => {
                     let m = {
                         _id: message.messageId,
-                        user: { 
-                            _id: message.senderId
-                        },
                         senderId: message.senderId,
                         receiverId: message.receiverId,
                         text: message.text,

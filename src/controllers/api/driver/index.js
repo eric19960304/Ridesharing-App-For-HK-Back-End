@@ -37,30 +37,63 @@ const storeLocationToCache = (req, res, next) => {
     );
 };
 
-const detectAndHandleEndOfRide = (req, res, next) => {
+const detectAndHandleStartAndEndRide = (req, res, next) => {
     const userId = req.userIdentity._id.toString();
 
     redisClient.hget(
         REDIS_KEYS.DRIVER_ON_GOING_RIDE,
         userId,
-        (err, rideDetails) => {
-            if(rideDetails===null){
-                // no ongoing ride
-                let newRideDetails = [];
-                res.newRideDetails = newRideDetails;
-                next();
+        (err, data) => {
+            let rideDetails = [];
+            let newRideDetails = [];
+
+            if(data!==undefined && data!==null){
+                rideDetails = JSON.parse(data);
+            }
+
+            if(rideDetails.length === 0){
+                // no ongoing ride, return all ride requests
+                redisClient.lrange(REDIS_KEYS.RIDE_REQUEST, 0, -1, (error, requests)=>{
+                    res.newRideDetails = requests;
+                    next();
+                });
+                
             }else{
                 // has at least one ongoing ride
-                let newRideDetails = JSON.parse(rideDetails);
-                newRideDetails = newRideDetails.filter( (rideDetail) => {
+                let isModified = false;
+
+                // filter out ride that already ended and change isOnCar flag of started ride
+                rideDetails.forEach( (rideDetail) => {
                     const endLocation = rideDetail.endLocation;
                     const currentLocation = req.body.location;
                     const distance = haversineDistance(currentLocation, endLocation);
-                    return Boolean(distance > 0.5);
+                    if(distance <= 0.5){
+                        if(!rideDetail.isOnCar){
+                            // the rider is on car
+                            rideDetail.isOnCar = true;
+                            newRideDetails.push(rideDetail);
+                            isModified = true;
+                        }
+                    }else{
+                        newRideDetails.push(rideDetail);
+                    }
                 });
 
                 res.newRideDetails = newRideDetails;
-                next();
+
+                if(isModified){
+                    redisClient.hset(
+                        REDIS_KEYS.DRIVER_ON_GOING_RIDE, 
+                        userId, 
+                        JSON.stringify(newRideDetails),
+                        () => {
+                            next();
+                        }
+                    );
+                }else{
+                    next();
+                }
+                
             }
         }
     );
@@ -131,7 +164,7 @@ const getAllDriversLocations = (req, res) => {
 
 router.post('/update',
     storeLocationToCache,
-    detectAndHandleEndOfRide,
+    detectAndHandleStartAndEndRide,
     responseOnGoingRideDetails
 );
 

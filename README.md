@@ -102,7 +102,8 @@ Structure of a ride request JSON:
         latitude: number,
         longitude: number
     }
-    timestamp: number
+    timestamp: number,
+    estimatedOptimal: { distance: number, duration: number }   //  distance in meters, duration in seconds
 }
 ```
 

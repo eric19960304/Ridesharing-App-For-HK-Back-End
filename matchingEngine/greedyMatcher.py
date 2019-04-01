@@ -44,7 +44,11 @@ class GreedyMatcher:
                 "latitude": number,
                 "longitude": number
             }
-            "timestamp": number         }]
+            "timestamp": number,
+            "estimatedOptimal": [ 
+                "distance": number, 
+                "duration": number 
+            ]                           }]
         drivers format:
         [{  "userId": string,
             "location":  {

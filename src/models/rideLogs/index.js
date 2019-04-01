@@ -23,7 +23,14 @@ const rideLogs = new Schema({
     },
     requestedDate: {type: Date, required: true},
     matchedDate: {type: Date},
-    finishedDate: {type: Date}
+    finishedDate: {type: Date},
+    estimatedOptimal: {
+        type: {
+            distance: { type: Number},
+            duration: { type: Number }
+        },
+        required: true
+    }
 });
 
 module.exports = mongoose.model('RideLogs', rideLogs);
