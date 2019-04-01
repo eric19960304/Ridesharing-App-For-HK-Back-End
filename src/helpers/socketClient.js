@@ -6,7 +6,6 @@ const { Message } = require('../models');
 let clientuserIdToSocketIdMapping = {}; // all appeared clients info, key: userId, value: socket id
 
 const onUserJoined = (message, socket) => {
-    console.log('A client just joined on', socket.id);
     clientuserIdToSocketIdMapping[message.userId] = socket.id;
     sendExistingMessages(message.userId, socket);
 };
@@ -46,27 +45,41 @@ const sendExistingMessages = (userId, socket) => {
         });
 };
 
-const onMessageReceived = (message) => {
-    
-    console.log('received message: ', message);
-
-    const newMessage = new Message({
-        _id: new ObjectId(),
-        messageId: message.messageId,
-        senderId: message.user._id,
-        receiverId: 'system',
-        text: message.text,
-        createdAt: message.createdAt,
-    });
-
-    newMessage.save()
-        .catch(err => {
-            console.log('insert message error: ', err);
-        });
+const onUserClearUnread = (message) => {
+    Message.update(
+        { $or: [ { 'senderId': message.userId }, { 'receiverId': message.userId } ]  }, 
+        { 'isRead': true }, 
+        {multi: true},
+        (error)=>{
+            if(error){
+                console.log();
+            }
+        }
+    );
 };
+
+// const onMessageReceived = (message) => {
+    
+//     console.log('received message: ', message);
+
+//     const newMessage = new Message({
+//         _id: new ObjectId(),
+//         messageId: message.messageId,
+//         senderId: message.user._id,
+//         receiverId: 'system',
+//         text: message.text,
+//         createdAt: message.createdAt,
+//     });
+
+//     newMessage.save()
+//         .catch(err => {
+//             console.log('insert message error: ', err);
+//         });
+// };
 
 module.exports = {
     clientuserIdToSocketIdMapping,
     onUserJoined,
-    onMessageReceived,
+    // onMessageReceived,
+    onUserClearUnread,
 };

@@ -102,7 +102,7 @@ app.set('socketio', socketio);
 
 socketio.on('connection', (socket) => {
     socket.on('userJoined', (message) => socketClient.onUserJoined(message, socket));
-    socket.on('message', (message) => socketClient.onMessageReceived(message));
+    socket.on('userClearUnread', (message) => socketClient.onUserClearUnread(message));
 });
 
 

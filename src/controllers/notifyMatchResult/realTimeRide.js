@@ -141,7 +141,6 @@ const sendNotificationAndMessageToUsers = (req, res) => {
     const driver = req.driver;
     const socketio = req.app.get('socketio');
 
-    let message = null;
     req.users.forEach( (user) => {
 
         const userId = user._id.toString();
@@ -163,12 +162,10 @@ const sendNotificationAndMessageToUsers = (req, res) => {
 
         console.log(text);
 
-        message = {
+        const message = {
             _id: uuidv4(),
-            user: {
-                _id: 3,
-                name: 'system'
-            },
+            senderId: 'system',
+            receiverId: userId,
             text,
             createdAt: new Date(),
         };
@@ -185,7 +182,7 @@ const sendNotificationAndMessageToUsers = (req, res) => {
             receiverId: userId,
             text: message.text,
             createdAt: message.createdAt,
-            isRead: Boolean(socketClient.clientuserIdToSocketIdMapping[userId])
+            isRead: false
         });
     
         // store message to DB
