@@ -84,8 +84,8 @@ class GreedyMatcher:
         requests_startLocations = [ request['startLocation'] for request in requests ]
         drivers_locations = [ driver['location'] for driver in drivers ]
         distMatrix = gMapApi.getDistanceMatrix(requests_startLocations, drivers_locations)
-
-        if len(requests)==0 <= len(drivers):
+        print(distMatrix)
+        if len(requests) <= len(drivers):
 
             for (request, dist) in zip(requests, distMatrix):
                 # dist = [ (distance in km, duration in seconds) ]
@@ -99,7 +99,7 @@ class GreedyMatcher:
                 mappings.append( (request, driverToMatch) )
                 driverToMatch['ongoingRide'].append(request)
         else:
-            distMatrix_transposed = [list(*zip(*distMatrix))]
+            distMatrix_transposed = list(map(list, zip(*distMatrix)))
             for (driver, dist) in zip(drivers, distMatrix_transposed):
                 costRequestTuples = [ 
                     (c[0], request) for (request, c) in zip(requests, dist) 

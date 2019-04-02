@@ -23,7 +23,7 @@ def startEngine():
         print('Error:', ex)
         exit('Failed to connect, terminating.')
 
-    matcher = GreedyMatcher({ 'maxMatchDistance': 5 })
+    matcher = GreedyMatcher({ 'maxMatchDistance': 2 })
 
     while True:
 
