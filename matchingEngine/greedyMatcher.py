@@ -47,7 +47,8 @@ class GreedyMatcher:
         '''
         Input
         requests format:
-        [{  "userId": string,
+        [{  "id": string,
+            "userId": string,
             "startLocation": {
                 "latitude": number,
                 "longitude": number
@@ -57,10 +58,14 @@ class GreedyMatcher:
                 "longitude": number
             }
             "timestamp": number,
-            "estimatedOptimal": [ 
+            "estimatedOptimal": { 
                 "distance": number, 
                 "duration": number 
-            ]                           }]
+            },
+            "estimatedWaitingTime": { 
+                "distance": number, 
+                "duration": number }  
+            }]
         drivers format:
         [{  "userId": string,
             "location":  {
@@ -90,26 +95,27 @@ class GreedyMatcher:
             for (request, dist) in zip(requests, distMatrix):
                 # dist = [ (distance in km, duration in seconds) ]
                 costDriverTuples = [ 
-                    (c[0], driver) for (driver, c) in zip(drivers, dist) 
+                    (c, driver) for (driver, c) in zip(drivers, dist) 
                         if self.isSatisfyConstraints(request, driver) 
                 ]
                 costDriverTuples.sort()
                 
                 driverToMatch = costDriverTuples[0][1]
+                request['estimatedWaitingTime'] = costDriverTuples[0][0]
                 mappings.append( (request, driverToMatch) )
-                driverToMatch['ongoingRide'].append(request)
+                driverToMatch['ongoingRide'].append(request) 
         else:
             distMatrix_transposed = list(map(list, zip(*distMatrix)))
             for (driver, dist) in zip(drivers, distMatrix_transposed):
                 costRequestTuples = [ 
-                    (c[0], request) for (request, c) in zip(requests, dist) 
+                    (c, request) for (request, c) in zip(requests, dist) 
                         if self.isSatisfyConstraints(request, driver) 
                 ]
                 costRequestTuples.sort()
 
                 remainingSeats = driver['maxSeat'] - len(driver['ongoingRide'])
-                requestsToMatch = [ r for c,r in costRequestTuples[:remainingSeats] ]
-                for r in requestsToMatch:
+                for c,r in costRequestTuples[:remainingSeats]:
+                    r['estimatedWaitingTime'] = c
                     mappings.append( (r, driver) )
                     driver['ongoingRide'].append(r)
         

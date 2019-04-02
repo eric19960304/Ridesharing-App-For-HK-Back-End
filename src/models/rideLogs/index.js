@@ -28,8 +28,13 @@ const rideLogs = new Schema({
         type: {
             distance: { type: Number},
             duration: { type: Number }
-        },
-        required: true
+        }
+    },
+    estimatedWaitingTime: {
+        type: {
+            distance: { type: Number},
+            duration: { type: Number }
+        }
     }
 });
 

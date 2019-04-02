@@ -5,6 +5,7 @@ const redisClient = require('../../../db/redisClient');
 const { REDIS_KEYS } = require('../../../helpers/constants');
 const { isDriverOnline } = require('../../../helpers/driver');
 const { haversineDistance } = require('../../../helpers/distance');
+const { RideLogs } = require('../../../models');
 
 
 /* 
@@ -44,13 +45,15 @@ const detectAndHandleStartAndEndRide = (req, res, next) => {
         REDIS_KEYS.DRIVER_ON_GOING_RIDE,
         userId,
         (err, data) => {
+            
+
             let rideDetails = [];
             let newRideDetails = [];
 
             if(data!==undefined && data!==null){
                 rideDetails = JSON.parse(data);
             }
-
+            console.log(rideDetails);
             if(rideDetails.length === 0){
                 // no ongoing ride, return all ride requests
                 redisClient.lrange(REDIS_KEYS.RIDE_REQUEST, 0, -1, (error, requests)=>{
@@ -61,40 +64,48 @@ const detectAndHandleStartAndEndRide = (req, res, next) => {
                 });
                 
             }else{
-                // has at least one ongoing ride
-                let isModified = false;
 
                 // filter out ride that already ended and change isOnCar flag of started ride
                 rideDetails.forEach( (rideDetail) => {
-                    const endLocation = rideDetail.endLocation;
                     const currentLocation = req.body.location;
-                    const distance = haversineDistance(currentLocation, endLocation);
-                    if(distance <= 0.5){
-                        if(!rideDetail.isOnCar){
-                            // the rider is on car
-                            rideDetail.isOnCar = true;
-                            newRideDetails.push(rideDetail);
-                            isModified = true;
-                        }
+                    const startDistance = haversineDistance(currentLocation, rideDetail.startLocation);
+                    const endDistance = haversineDistance(currentLocation, rideDetail.endLocation);
+                    const delta = 0.5;
+                    if(startDistance <= delta && rideDetail.isOnCar===false){
+                        // rider on car
+                        rideDetail.isOnCar = true;
+                        newRideDetails.push(rideDetail);
+                    }else if(endDistance <= delta && rideDetail.isOnCar){
+                        // ended ride, do not add to
+                        RideLogs.findOneAndUpdate(
+                            { $or: [ { 'id': rideDetail.id} ]  }, 
+                            { 'finishedDate': new Date() }, 
+                            {},
+                            (error)=>{
+                                if(error){
+                                    console.log(error);
+                                }else{
+                                    console.log('updated ridelogs');
+                                }
+                            }
+                        );
+                        return;
                     }else{
+                        // nothing happened
                         newRideDetails.push(rideDetail);
                     }
                 });
 
                 res.newRideDetails = newRideDetails;
 
-                if(isModified){
-                    redisClient.hset(
-                        REDIS_KEYS.DRIVER_ON_GOING_RIDE, 
-                        userId, 
-                        JSON.stringify(newRideDetails),
-                        () => {
-                            next();
-                        }
-                    );
-                }else{
-                    next();
-                }
+                redisClient.hset(
+                    REDIS_KEYS.DRIVER_ON_GOING_RIDE, 
+                    userId, 
+                    JSON.stringify(newRideDetails),
+                    () => {
+                        next();
+                    }
+                );
                 
             }
         }

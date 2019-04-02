@@ -43,7 +43,7 @@ const sendExistingMessages = (userId, socket) => {
                     {multi: true},
                     (error)=>{
                         if(error){
-                            console.log();
+                            console.log(error);
                         }
                     }
                 );
@@ -58,7 +58,7 @@ const onUserClearUnread = (message) => {
         {multi: true},
         (error)=>{
             if(error){
-                console.log();
+                console.log(error);
             }
         }
     );

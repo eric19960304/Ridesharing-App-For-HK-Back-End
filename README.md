@@ -93,6 +93,7 @@ A redis list that act as a match queue, where each element in list is a JSON str
 Structure of a ride request JSON:
 ```
 {
+    id: string,
     userId: string,
     startLocation: {
         latitude: number,
@@ -103,7 +104,8 @@ Structure of a ride request JSON:
         longitude: number
     }
     timestamp: number,
-    estimatedOptimal: { distance: number, duration: number }   //  distance in meters, duration in seconds
+    estimatedOptimal: { distance: number, duration: number },   //  distance in meters, duration in seconds
+    estimatedWaitingTime: { distance: number, duration: number }
 }
 ```
 
@@ -135,6 +137,7 @@ Structure of the ride details JSON:
 ```
 [
     {
+        id: string,
         userId: string,   // matched rider id
         startLocation: {
             latitude: number,

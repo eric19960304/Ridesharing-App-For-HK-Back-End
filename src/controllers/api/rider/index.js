@@ -1,9 +1,11 @@
 const express = require('express');
+const mongoose = require('mongoose');
 
 const redisClient = require('../../../db/redisClient');
 const { REDIS_KEYS } = require('../../../helpers/constants');
 
 const router = express.Router();
+const ObjectId = mongoose.Types.ObjectId;
 
 /* 
 /api/rider/real-time-ride-request
@@ -23,11 +25,10 @@ expected req.body format: {
 
 const storeRideRequest = (req, res) => {
     const userId = req.userIdentity._id.toString();
-    const startLocation = req.body.startLocation;
-    const endLocation = req.body.endLocation;
 
     let completeRequest = Object.assign({}, req.body);
     completeRequest.userId = userId;
+    completeRequest.id = new ObjectId();
 
     redisClient.rpush(
         REDIS_KEYS.RIDE_REQUEST, 
@@ -35,7 +36,7 @@ const storeRideRequest = (req, res) => {
     );
 
     return res.status(200).json({
-        result: `real-time-ride-request received: userId=${userId}, start location: (lat=${startLocation.latitude}, long=${startLocation.longitude}), end Location: (lat=${endLocation.latitude}, long=${endLocation.longitude})`
+        result: "ok"
     });
 };
 

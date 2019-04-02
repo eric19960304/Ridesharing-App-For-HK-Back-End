@@ -18,6 +18,7 @@ const router = express.Router();
 
 req.body format for /notify-match-result/real-time-ride:
 {   rider: {
+        id: string,
         userId: string,
         startLocation: {
             latitude: number,
@@ -79,10 +80,12 @@ const storeRideDetailsToRedis = (req, res, next) => {
         }else{
             driverOngoingRideList =  JSON.parse(data);
         }
+
         let rideReq = Object.assign({}, req.body.rider);
         rideReq.requestedDate = (new Date(rideReq.timestamp)).toISOString(); // added for readibility
         rideReq.matchedDate = (new Date()).toISOString();  // added for readibility
         rideReq.isOnCar = false;
+        
         driverOngoingRideList.push(rideReq);
 
         redisClient.HSET(REDIS_KEYS.DRIVER_ON_GOING_RIDE, driverId, JSON.stringify(driverOngoingRideList));
@@ -97,7 +100,7 @@ const saveRideLogsToDB = (req, res, next) => {
     const driverReq = req.body.driver;
 
     const newRideLogs = new RideLogs({
-        _id: new ObjectId(),
+        _id: riderReq.id,
         driverId: driverReq.userId,
         riderId: riderReq.userId,
         startLocation: {
