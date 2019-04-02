@@ -124,19 +124,8 @@ const saveRideLogsToDB = (req, res, next) => {
 };
 
 const sendNotificationAndMessageToUsers = (req, res) => {
-    let pushTokens = [];
-    req.usersPushTokens.forEach(obj => {
-        pushTokens.push(...obj.pushTokens);
-    });
 
-    // remove duplications tokens
-    pushTokens = pushTokens.filter((elem, pos) => {
-        return pushTokens.indexOf(elem) === pos;
-    });
-
-    let messagesToNotify = [];
-
-    const driverId = req.driver.userId;
+    const driverId = req.body.driver.userId;
     const rider = req.rider;
     const driver = req.driver;
     const socketio = req.app.get('socketio');
@@ -147,32 +136,41 @@ const sendNotificationAndMessageToUsers = (req, res) => {
 
         let text = `Dear ${user.nickname}, you have a new ride match! `;
 
-        let displayNickname, displayContact, displayDistance, displayDuration;
-        if(userId === driverId) {
-            displayNickname = rider.nickname;
-            displayContact = rider.contact;
-        }else{
-            displayNickname = driver.nickname;
-            displayContact = driver.contact;
-        }
+        let displayDistance, displayDuration;
         displayDistance = req.body.rider.estimatedOptimal.distance;
         displayDuration = Math.round(req.body.rider.estimatedOptimal.duration/60);
-        text += `your passenger is [${displayNickname}], contact: +852${displayContact}. Travel distance is ${displayDistance} m and estimated duration is ${displayDuration} mins`;
-        messagesToNotify.push('New Message:\n'+text);
+        console.log(userId, driverId);
+        if(userId === driverId) {
+            text += `your passenger is [${rider.nickname}], contact: +852${rider.contact}. Travel distance is ${displayDistance} m and estimated duration is ${displayDuration} mins`;
+        }else{
+            text += `your driver is [${driver.nickname}], contact: +852${driver.contact}. Travel distance is ${displayDistance} m and estimated duration is ${displayDuration} mins`;
+        }
+        
+        let tokensForThisUser = req.usersPushTokens.filter( t => t.userId.toString()===userId)[0];
+        tokensForThisUser = tokensForThisUser.pushTokens;
+        
+        // remove duplications tokens
+        tokensForThisUser = tokensForThisUser.filter((elem, pos) => {
+            return tokensForThisUser.indexOf(elem) === pos;
+        });
+
+        notificationClient.notify(tokensForThisUser, 'New Message:\n' + text);
 
         console.log(text);
 
         const message = {
             _id: uuidv4(),
-            senderId: 'system',
-            receiverId: userId,
+            user: {
+                _id: 2,
+                name: 'System'
+            },
             text,
             createdAt: new Date(),
         };
 
         // send message via socket
         if(socketClient.clientuserIdToSocketIdMapping[userId]){
-            socketio.to(socketClient.clientuserIdToSocketIdMapping[userId]).emit('message', message);
+            socketio.to(socketClient.clientuserIdToSocketIdMapping[userId]).emit('message', [message]);
         }
         
         const newMessage = new Message({
@@ -191,9 +189,6 @@ const sendNotificationAndMessageToUsers = (req, res) => {
                 console.log('insert message error: ', err);
             });
     });
-
-    // send notification
-    notificationClient.notify(pushTokens, messagesToNotify);
 
     return res.status(200).json({
         message: 'Notification sent'

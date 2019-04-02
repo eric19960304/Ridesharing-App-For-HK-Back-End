@@ -6,20 +6,32 @@ class GreedyMatcher:
     '''
     A simple greedy algorithm for real time ride matching executed in every time frame
     
-    Input: a set of requests Q, a set of drivers D
-    Output: a set of unhandled requests R, a set of mapping M
+    Input: 
+        Q: a set of requests
+        D: a set of drivers
+    Output: 
+        R: a set of unhandled requests
+        M: a set of mapping
     
     Steps:
-    1. Q <- all requests, D <- all drivers, R <- {}, M <- {}
-    2. for each q ∈ Q:
-    3.      S <- { d ∈ D | d satistfy constraints Z regarding q }
-    4.      if isEmpty(S):
-    5.          R.add(q)
-    6.          continue loop
-    7.      u <- argmin s ∈ S ( distance(s.current_location, q.start_location) )
-    8.      u.emptySeat <- u.emptySeat - 1
-    9.      M.add( (q,u) )
-   10. return M, R
+    Q <- all requests, D <- all drivers, R <- {}, M <- {}
+    if |Q| <= |D|:
+        for each q ∈ Q:
+            S <- { d | d ∈ D , d satistfy constraints Z regarding q }
+            u <- argmin<s ∈ S>( distance(s.current_location, q.start_location) )
+            u.emptySeat <- u.emptySeat - 1
+            M.add( (q,u) )
+    else:
+        for each d ∈ D:
+            S <- { q | q ∈ Q , d satistfy constraints Z regarding q }
+            sort S in asc order of distance(d.current_location, s.start_location) ) where s ∈ S
+            k = min(|S|, d.emptySeat)
+            U <- first k elements in S
+            d.emptySeat <- d.emptySeat - k 
+            for u ∈ U:
+                M.add( (u,d) )
+    R <- { q | q ∈ Q , q not in { a | (a,b) ∈ M } }
+    return M, R
     '''
     def __init__(self, constraints_param):
         '''
@@ -73,27 +85,36 @@ class GreedyMatcher:
         drivers_locations = [ driver['location'] for driver in drivers ]
         distMatrix = gMapApi.getDistanceMatrix(requests_startLocations, drivers_locations)
 
-        for (request, dist) in zip(requests, distMatrix):
-            # dist = [ (distance in km, duration in seconds) ]
-            candidatesDistTuple = [ 
-                (driver, d[0]) for (driver, d) in zip(drivers, dist) if self.isSatisfyConstraints(request, driver) 
-            ]
-            
-            if len(candidatesDistTuple)==0:
-                remainingRequests.append(request)
-                continue
-            
-            # find driver index with min dist
-            minDist = candidatesDistTuple[0][1]
-            nearestCandidateIdx = 0
-            for i in range(1, len(candidatesDistTuple)):
-                if(candidatesDistTuple[i][1] < minDist):
-                    minDist = candidatesDistTuple[i][1]
-                    nearestCandidateIdx = i
-            
-            mappings.append( (request, candidatesDistTuple[nearestCandidateIdx][0]) )
-            candidatesDistTuple[nearestCandidateIdx][0]['ongoingRide'].append(request)
+        if len(requests)==0 <= len(drivers):
 
+            for (request, dist) in zip(requests, distMatrix):
+                # dist = [ (distance in km, duration in seconds) ]
+                costDriverTuples = [ 
+                    (c[0], driver) for (driver, c) in zip(drivers, dist) 
+                        if self.isSatisfyConstraints(request, driver) 
+                ]
+                costDriverTuples.sort()
+                
+                driverToMatch = costDriverTuples[0][1]
+                mappings.append( (request, driverToMatch) )
+                driverToMatch['ongoingRide'].append(request)
+        else:
+            distMatrix_transposed = [list(*zip(*distMatrix))]
+            for (driver, dist) in zip(drivers, distMatrix_transposed):
+                costRequestTuples = [ 
+                    (c[0], request) for (request, c) in zip(requests, dist) 
+                        if self.isSatisfyConstraints(request, driver) 
+                ]
+                costRequestTuples.sort()
+
+                remainingSeats = driver['maxSeat'] - len(driver['ongoingRide'])
+                requestsToMatch = [ r for c,r in costRequestTuples[:remainingSeats] ]
+                for r in requestsToMatch:
+                    mappings.append( (r, driver) )
+                    driver['ongoingRide'].append(r)
+        
+        matchedRequsts = [ r for (r,d) in mappings ]
+        remainingRequests = [ r for r in requests if r not in matchedRequsts ]
         return (mappings, remainingRequests)
             
 
@@ -118,7 +139,7 @@ class GreedyMatcher:
         
         # not violating any constraint
         return True
-
+    
 
 def greedyMatcherTest():
 

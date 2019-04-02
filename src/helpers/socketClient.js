@@ -10,6 +10,10 @@ const onUserJoined = (message, socket) => {
     sendExistingMessages(message.userId, socket);
 };
 
+const onUserLeft = (message) => {
+    delete clientuserIdToSocketIdMapping[message.userId];
+};
+
 const sendExistingMessages = (userId, socket) => {
     
     Message.find({ $or: [ { 'senderId': userId }, { 'receiverId': userId } ]  })
@@ -23,8 +27,10 @@ const sendExistingMessages = (userId, socket) => {
                 messages.forEach( message => {
                     let m = {
                         _id: message.messageId,
-                        senderId: message.senderId,
-                        receiverId: message.receiverId,
+                        user: {
+                            _id: 2,
+                            name: 'System'
+                        },
                         text: message.text,
                         createdAt: message.createdAt
                     };
@@ -80,6 +86,7 @@ const onUserClearUnread = (message) => {
 module.exports = {
     clientuserIdToSocketIdMapping,
     onUserJoined,
+    onUserLeft,
     // onMessageReceived,
     onUserClearUnread,
 };

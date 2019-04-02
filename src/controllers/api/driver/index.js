@@ -54,7 +54,9 @@ const detectAndHandleStartAndEndRide = (req, res, next) => {
             if(rideDetails.length === 0){
                 // no ongoing ride, return all ride requests
                 redisClient.lrange(REDIS_KEYS.RIDE_REQUEST, 0, -1, (error, requests)=>{
-                    res.newRideDetails = requests;
+                    const parsedRequests = requests.map( (q)=> JSON.parse(q));
+                    res.newRideDetails = parsedRequests;
+                    
                     next();
                 });
                 

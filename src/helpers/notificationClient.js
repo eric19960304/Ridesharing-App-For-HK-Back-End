@@ -1,14 +1,12 @@
 const { Expo } = require('expo-server-sdk');
 let expo = new Expo();
 
-const notify = async (pushTokens, messagesToNotify, extraData = {}) => {
+const notify = async (pushTokens, messageToNotify, extraData = {}) => {
     if(pushTokens.length===0){
         return;
     }
 
     let messages = [];
-
-    let i=0;
 
     for (let pushToken of pushTokens) {
         // Each push token looks like ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]
@@ -23,15 +21,14 @@ const notify = async (pushTokens, messagesToNotify, extraData = {}) => {
         messages.push({
             to: pushToken,
             sound: 'default',
-            body: messagesToNotify[i],
+            body: messageToNotify,
             badge: 1,
             data: {
-                message: messagesToNotify[i],
+                message: messageToNotify,
                 ...extraData
             },
         });
 
-        i++;
     }
 
     let chunks = expo.chunkPushNotifications(messages);
