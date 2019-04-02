@@ -80,7 +80,7 @@ class GreedyMatcher:
 
         remainingRequests = []
         mappings = []
-
+        print(drivers)
         requests_startLocations = [ request['startLocation'] for request in requests ]
         drivers_locations = [ driver['location'] for driver in drivers ]
         distMatrix = gMapApi.getDistanceMatrix(requests_startLocations, drivers_locations)

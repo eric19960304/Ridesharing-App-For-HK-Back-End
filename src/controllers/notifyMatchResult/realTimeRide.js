@@ -139,11 +139,10 @@ const sendNotificationAndMessageToUsers = (req, res) => {
         let displayDistance, displayDuration;
         displayDistance = req.body.rider.estimatedOptimal.distance;
         displayDuration = Math.round(req.body.rider.estimatedOptimal.duration/60);
-        console.log(userId, driverId);
         if(userId === driverId) {
             text += `your passenger is [${rider.nickname}], contact: +852${rider.contact}. Travel distance is ${displayDistance} m and estimated duration is ${displayDuration} mins`;
         }else{
-            text += `your driver is [${driver.nickname}], contact: +852${driver.contact}. Travel distance is ${displayDistance} m and estimated duration is ${displayDuration} mins`;
+            text += `your driver is [${driver.nickname}], contact: +852${driver.contact}, carplate: ${driver.carplate}. Travel distance is ${displayDistance} m and estimated duration is ${displayDuration} mins`;
         }
         
         let tokensForThisUser = req.usersPushTokens.filter( t => t.userId.toString()===userId)[0];
