@@ -30,7 +30,7 @@ const rideLogs = new Schema({
             duration: { type: Number }
         }
     },
-    estimatedWaitingTime: {
+    estimatedWaitingCost: {
         type: {
             distance: { type: Number},
             duration: { type: Number }

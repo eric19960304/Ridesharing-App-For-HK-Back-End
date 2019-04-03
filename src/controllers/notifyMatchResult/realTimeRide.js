@@ -140,8 +140,14 @@ const sendNotificationAndMessageToUsers = (req, res) => {
         let text = `Dear ${user.nickname}, you have a new ride match! `;
 
         let displayDistance, displayDuration;
-        displayDistance = req.body.rider.estimatedOptimal.distance;
-        displayDuration = Math.round(req.body.rider.estimatedOptimal.duration/60);
+        if(req.body.rider.estimatedOptimal){
+            displayDistance = req.body.rider.estimatedOptimal.distance;
+            displayDuration = Math.round(req.body.rider.estimatedOptimal.duration/60);
+        }else{
+            displayDistance = 0;
+            displayDuration = 0;
+        }
+        
         if(userId === driverId) {
             text += `your passenger is [${rider.nickname}], contact: +852${rider.contact}. Travel distance is ${displayDistance} m and estimated duration is ${displayDuration} mins`;
         }else{

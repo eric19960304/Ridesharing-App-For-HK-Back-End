@@ -104,8 +104,7 @@ Structure of a ride request JSON:
         longitude: number
     }
     timestamp: number,
-    estimatedOptimal: { distance: number, duration: number },   //  distance in meters, duration in seconds
-    estimatedWaitingTime: { distance: number, duration: number }
+    estimatedOptimal: { distance: number, duration: number },   //  distance in meters, duration in seconds, calculated in front-end
 }
 ```
 
@@ -148,7 +147,9 @@ Structure of the ride details JSON:
             longitude: number
         }
         timestamp: number,
-        isOnCar: false,
+        isOnCar: false,     // indicate if the passenger is on the car. Detected everytime driver upload its location to server, assumming that the driver will pick up the passengers when they are close geographically
+        estimatedOptimal: { distance: number, duration: number },  //  distance in meters, duration in seconds, calculated in front-end
+        estimatedWaitingCost: { distance: number, duration: number }, // distance in meters, duration in seconds, calculated during matching
     },
     ...
 ]

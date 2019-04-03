@@ -38,6 +38,16 @@ const storeLocationToCache = (req, res, next) => {
     );
 };
 
+const getAllRequests = (req, res, next) => {
+
+    redisClient.lrange(REDIS_KEYS.RIDE_REQUEST, 0, -1, (error, requests)=>{
+        const parsedRequests = requests.map( (q)=> JSON.parse(q));
+        res.allRideRequests = parsedRequests;
+        
+        next();
+    });
+};
+
 const detectAndHandleStartAndEndRide = (req, res, next) => {
     const userId = req.userIdentity._id.toString();
 
@@ -47,26 +57,22 @@ const detectAndHandleStartAndEndRide = (req, res, next) => {
         (err, data) => {
             
 
-            let rideDetails = [];
-            let newRideDetails = [];
+            let prevOnGoingRideDetails = [];
+            let onGoingRideDetails = [];
 
             if(data!==undefined && data!==null){
-                rideDetails = JSON.parse(data);
+                prevOnGoingRideDetails = JSON.parse(data);
             }
-            console.log(rideDetails);
-            if(rideDetails.length === 0){
-                // no ongoing ride, return all ride requests
-                redisClient.lrange(REDIS_KEYS.RIDE_REQUEST, 0, -1, (error, requests)=>{
-                    const parsedRequests = requests.map( (q)=> JSON.parse(q));
-                    res.newRideDetails = parsedRequests;
-                    
-                    next();
-                });
-                
+
+            
+            if(prevOnGoingRideDetails.length === 0){
+                res.onGoingRideDetails = [];
+                next();
+
             }else{
 
                 // filter out ride that already ended and change isOnCar flag of started ride
-                rideDetails.forEach( (rideDetail) => {
+                prevOnGoingRideDetails.forEach( (rideDetail) => {
                     const currentLocation = req.body.location;
                     const startDistance = haversineDistance(currentLocation, rideDetail.startLocation);
                     const endDistance = haversineDistance(currentLocation, rideDetail.endLocation);
@@ -74,7 +80,7 @@ const detectAndHandleStartAndEndRide = (req, res, next) => {
                     if(startDistance <= delta && rideDetail.isOnCar===false){
                         // rider on car
                         rideDetail.isOnCar = true;
-                        newRideDetails.push(rideDetail);
+                        onGoingRideDetails.push(rideDetail);
                     }else if(endDistance <= delta && rideDetail.isOnCar){
                         // ended ride, do not add to
                         RideLogs.findOneAndUpdate(
@@ -92,16 +98,16 @@ const detectAndHandleStartAndEndRide = (req, res, next) => {
                         return;
                     }else{
                         // nothing happened
-                        newRideDetails.push(rideDetail);
+                        onGoingRideDetails.push(rideDetail);
                     }
                 });
 
-                res.newRideDetails = newRideDetails;
+                res.onGoingRideDetails = onGoingRideDetails;
 
                 redisClient.hset(
                     REDIS_KEYS.DRIVER_ON_GOING_RIDE, 
                     userId, 
-                    JSON.stringify(newRideDetails),
+                    JSON.stringify(onGoingRideDetails),
                     () => {
                         next();
                     }
@@ -113,7 +119,10 @@ const detectAndHandleStartAndEndRide = (req, res, next) => {
 };
 
 const responseOnGoingRideDetails = (req, res) => {
-    return res.status(200).json(res.newRideDetails);
+    return res.status(200).json({
+        allRideRequests: res.allRideRequests,
+        onGoingRides: res.onGoingRideDetails
+    });
 };
 
 const getAllDriversLocations = (req, res) => {
@@ -177,6 +186,7 @@ const getAllDriversLocations = (req, res) => {
 
 router.post('/update',
     storeLocationToCache,
+    getAllRequests,
     detectAndHandleStartAndEndRide,
     responseOnGoingRideDetails
 );

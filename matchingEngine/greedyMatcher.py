@@ -43,6 +43,9 @@ class GreedyMatcher:
         '''
         self.maxMatchDistance = constraints_param['maxMatchDistance']
 
+    def _getCostMatrix(self, origins, destinations):
+        return gMapApi.getDistanceMatrix(origins, destinations)
+
     def match(self, requests, drivers):
         '''
         Input
@@ -57,15 +60,7 @@ class GreedyMatcher:
                 "latitude": number,
                 "longitude": number
             }
-            "timestamp": number,
-            "estimatedOptimal": { 
-                "distance": number, 
-                "duration": number 
-            },
-            "estimatedWaitingTime": { 
-                "distance": number, 
-                "duration": number }  
-            }]
+            "timestamp": number]
         drivers format:
         [{  "userId": string,
             "location":  {
@@ -83,46 +78,33 @@ class GreedyMatcher:
         if(len(requests)==0 or len(drivers)==0):
             return ([], requests)
 
-        remainingRequests = []
         mappings = []
-        print(drivers)
         requests_startLocations = [ request['startLocation'] for request in requests ]
         drivers_locations = [ driver['location'] for driver in drivers ]
-        distMatrix = gMapApi.getDistanceMatrix(requests_startLocations, drivers_locations)
-        print(distMatrix)
-        if len(requests) <= len(drivers):
+        distMatrix = self._getCostMatrix(drivers_locations, requests_startLocations)
 
-            for (request, dist) in zip(requests, distMatrix):
-                # dist = [ (distance in km, duration in seconds) ]
-                costDriverTuples = [ 
-                    (c, driver) for (driver, c) in zip(drivers, dist) 
-                        if self.isSatisfyConstraints(request, driver) 
-                ]
-                costDriverTuples.sort()
-                
-                driverToMatch = costDriverTuples[0][1]
-                request['estimatedWaitingTime'] = costDriverTuples[0][0]
-                mappings.append( (request, driverToMatch) )
-                driverToMatch['ongoingRide'].append(request) 
-        else:
-            distMatrix_transposed = list(map(list, zip(*distMatrix)))
-            for (driver, dist) in zip(drivers, distMatrix_transposed):
-                costRequestTuples = [ 
-                    (c, request) for (request, c) in zip(requests, dist) 
-                        if self.isSatisfyConstraints(request, driver) 
-                ]
-                costRequestTuples.sort()
-
-                remainingSeats = driver['maxSeat'] - len(driver['ongoingRide'])
-                for c,r in costRequestTuples[:remainingSeats]:
-                    r['estimatedWaitingTime'] = c
-                    mappings.append( (r, driver) )
-                    driver['ongoingRide'].append(r)
+        possibleMappings = []  # ( (distance, duration) , request, driver)
+        for i in range(len(drivers)):
+            for j in range(len(requests)):
+                mapping = (distMatrix[i][j], requests[j], drivers[i])
+                possibleMappings.append(mapping)
         
-        matchedRequsts = [ r for (r,d) in mappings ]
-        remainingRequests = [ r for r in requests if r not in matchedRequsts ]
-        return (mappings, remainingRequests)
+        possibleMappings.sort(key=lambda x: x[0][0]) # sort by distance
+        matchedRquestIDs = set()
+
+        print(possibleMappings)
+
+        for cost, r, d in possibleMappings:
+            if r['id'] in matchedRquestIDs or (not self.isSatisfyConstraints(r,d)):
+                continue
             
+            r['estimatedWaitingCost'] = cost
+            d['ongoingRide'].append(r)
+            mappings.append( (r,d) )
+            matchedRquestIDs.add(r['id'])
+        
+        remainingRequests = [ r for r in requests if r['id'] not in matchedRquestIDs ]
+        return (mappings, remainingRequests)
 
     def isSatisfyConstraints(self, request, driver):
         '''
@@ -151,12 +133,14 @@ def greedyMatcherTest():
 
     requests = [
         {
+            "id": '1',
             "userId": 'Eric',
             "startLocation": univLoc.hku,
             "endLocation": univLoc.cu,
             'timestamp': 1553701200965
         },
         {
+            "id": '2',
             "userId": 'Tony',
             "startLocation": univLoc.cu,
             "endLocation": univLoc.hku,
@@ -179,7 +163,7 @@ def greedyMatcherTest():
         }
     ]
 
-    gMatcher = GreedyMatcher({ 'maxMatchDistance': 2 })
+    gMatcher = GreedyMatcher({ 'maxMatchDistance': 1 })
     M, R = gMatcher.match(requests, drivers)
     print('mapping (passenger->driver): ')
     for q, d in M:
