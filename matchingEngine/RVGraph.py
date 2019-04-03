@@ -27,7 +27,7 @@ class RVGraph:
         self.rvGraph = {}
         self.requestsGraph = {}                       
 
-    def RVGraphPairwiseRequests(rideRequests):
+    def RVGraphPairwiseRequests(self, rideRequests):
         for (riderId, riderLocationJson) in rideRequests:
             for (riderId2, riderLocationJson2) in rideRequests:
                 if (riderId, riderId2) in self.requestsGraph or (riderId2, riderId) in self.requestsGraph:
@@ -54,8 +54,8 @@ class RVGraph:
                                 if k == l:
                                     continue
                                 pathDistance = distanceMatrix[i][j] + distanceMatrix[j][k] + distanceMatrix[k][l]
-                                possibleDistance.append( (pathDistance, i, l) )
-                shareRideDistance, startOrder, endOrder = min(possibleDistance)
+                                possibleDistance.append( pathDistance )
+                shareRideDistance = min(possibleDistance)
 
                 if shareRideDistance < spearatedRideDistance:
                     self.requestsGraph[(riderId, riderId2)] = shareRideDistance
@@ -73,7 +73,7 @@ class RVGraph:
 
     '''TSP Link:https://pypi.org/project/tsp/'''
 
-    def RVGraphPairwiseDriverRequest(rideRequests, driverLocationsList):
+    def RVGraphPairwiseDriverRequest(self, rideRequests, driverLocationsList):
         driverOnGoing = redisConn.hgetall(DRIVER_ON_GOING_RIDE)
         for (driverId, driverLocationJson) in driverLocationsList:
             edgeList = []
@@ -112,10 +112,6 @@ class RVGraph:
 
                         delayDistance = 100000
                         if not riverPassagerList[isOnRide]:
-                            20 03 34 41
-                            20 03 31 14
-                            23 30 04 41
-                            23 30 01 14
                             min([distanceMatrix[2][0] + distanceMatrix[0][3] + distanceMatrix[3][4] + distanceMatrix[4][1],
                             distanceMatrix[2][0] + distanceMatrix[0][3] + distanceMatrix[3][1] + distanceMatrix[1][4],
                             distanceMatrix[2][3] + distanceMatrix[3][0] + distanceMatrix[0][4] + distanceMatrix[4][1],
