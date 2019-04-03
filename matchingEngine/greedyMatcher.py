@@ -1,6 +1,8 @@
+from itertools import permutations
+
 import googleMapApiAdapter as gMapApi
 import univLoc
-from utils import haversineDistance, isShareable
+from utils import haversineDistance
 
 class GreedyMatcher:
     '''
@@ -10,30 +12,23 @@ class GreedyMatcher:
         Q: a set of requests
         D: a set of drivers
     Output: 
-        R: a set of unhandled requests
+        R: a set of remaining requests
         M: a set of mapping
     
     Steps:
     Q <- all requests, D <- all drivers, R <- {}, M <- {}
-    if |Q| <= |D|:
-        for each q ∈ Q:
-            S <- { d | d ∈ D , d satistfy constraints Z regarding q }
-            u <- argmin<s ∈ S>( distance(s.current_location, q.start_location) )
-            u.emptySeat <- u.emptySeat - 1
-            M.add( (q,u) )
-    else:
-        for each d ∈ D:
-            S <- { q | q ∈ Q , d satistfy constraints Z regarding q }
-            sort S in asc order of distance(d.current_location, s.start_location) ) where s ∈ S
-            k = min(|S|, d.emptySeat)
-            U <- first k elements in S
-            d.emptySeat <- d.emptySeat - k 
-            for u ∈ U:
-                M.add( (u,d) )
-    R <- { q | q ∈ Q , q not in { a | (a,b) ∈ M } }
+    C <- { (q, d ) | q ∈ Q ∧ d ∈ D }
+    sort C in ascending order by distance(q.start_location, s.current_location)
+    S <- {}
+    for each c ∈ C:
+        (cost, q, d) <- c
+        if (q ∉ S) AND (q and d satistfy constraints Z):
+            M.add( (q,d) )
+            S.add( q )
+    R <- { q | q ∈ Q ∧ q ∉ S }
     return M, R
     '''
-    def __init__(self, constraints_param):
+    def __init__(self, constraints_param, useGridWorld=False):
         '''
         constraints_param format:
         {
@@ -42,9 +37,14 @@ class GreedyMatcher:
         }
         '''
         self.maxMatchDistance = constraints_param['maxMatchDistance']
+        self.useGridWorld = useGridWorld
 
-    def _getCostMatrix(self, origins, destinations):
-        return gMapApi.getDistanceMatrix(origins, destinations)
+    def _getDistanceMatrix(self, origins, destinations):
+        if self.useGridWorld:
+            # TODO
+            return None
+        else:
+            return gMapApi.getDistanceMatrix(origins, destinations)
 
     def match(self, requests, drivers):
         '''
@@ -68,7 +68,7 @@ class GreedyMatcher:
                 "longitude": number
             },
             "ongoingRide": [ requests ],
-            "maxSeat": number           }]
+            "capacity": number           }]
         
         output
         (M, R) format:
@@ -81,21 +81,19 @@ class GreedyMatcher:
         mappings = []
         requests_startLocations = [ request['startLocation'] for request in requests ]
         drivers_locations = [ driver['location'] for driver in drivers ]
-        distMatrix = self._getCostMatrix(drivers_locations, requests_startLocations)
+        distMatrix = self._getDistanceMatrix(drivers_locations, requests_startLocations)
 
-        possibleMappings = []  # ( (distance, duration) , request, driver)
+        possibleMappings = []  # ( distance, request, driver)
         for i in range(len(drivers)):
             for j in range(len(requests)):
                 mapping = (distMatrix[i][j], requests[j], drivers[i])
                 possibleMappings.append(mapping)
-        
-        possibleMappings.sort(key=lambda x: x[0][0]) # sort by distance
+
+        possibleMappings.sort()
         matchedRquestIDs = set()
 
-        print(possibleMappings)
-
         for cost, r, d in possibleMappings:
-            if r['id'] in matchedRquestIDs or (not self.isSatisfyConstraints(r,d)):
+            if r['id'] in matchedRquestIDs or (not self._isSatisfyConstraints(r,d)):
                 continue
             
             r['estimatedWaitingCost'] = cost
@@ -106,27 +104,67 @@ class GreedyMatcher:
         remainingRequests = [ r for r in requests if r['id'] not in matchedRquestIDs ]
         return (mappings, remainingRequests)
 
-    def isSatisfyConstraints(self, request, driver):
+    def _isSatisfyConstraints(self, request, driver):
         '''
-        1. driver.emptySeat > 0
+        1. driver.capacity > 0
         2. dist(driver.currentLocation, request.startLocation) <= maxMatchDistance
-        3. there is already passenger(s) in car -> at least one ongoing request in car that is sharable with the request being match. (two requests are shareable if the distance of best shared route < sum of the individual trip distances)
+        3. there is already passenger(s) in car ->  check if the total length of the best shared route would be longer than the sum of the single routes
         '''
-        if driver['maxSeat'] <= len(driver['ongoingRide']):
+        if driver['capacity'] <= len(driver['ongoingRide']):
             return False
         
         if haversineDistance(request['startLocation'], driver['location']) > self.maxMatchDistance:
             return False
 
-        # if len(driver['ongoingRide']) > 0:
-        #     onGoingReqs = [ (l['startLocation'], l['endLocation']) for l in driver['ongoingRide'] ]
-        #     for onGoingReq in onGoingReqs:
-        #         if isShareable(request['startLocation'], request['endLocation'], onGoingReq[0], onGoingReq[1]):
-        #             return True
-        #     return False
+        if len(driver['ongoingRide']) > 0:
+            # at least one ongoign ride is sharable with current request
+            for onGoingRide in driver['ongoingRide']:
+                if self._isShareable(driver['location'], request, onGoingRide):
+                    return True
+            return False
         
         # not violating any constraint
         return True
+    
+    def _isShareable(self, driverLoc, requestToMatch, onGoingRide):
+        print('requestToMatch', requestToMatch)
+        s1 = requestToMatch['startLocation']
+        t1 = requestToMatch['endLocation']
+        s2 = onGoingRide['startLocation']
+        t2 = onGoingRide['endLocation']
+        if onGoingRide['isOnCar']:
+            origins = [s1, t1, t2, driverLoc]
+            destinations = [s1, t1, t2]
+            n = 3
+        else:
+            origins = [s1, t1, s2, t2, driverLoc]
+            destinations = [s1, t1, s2, t2]
+            n = 4
+        
+        distMatrix = self._getDistanceMatrix(origins, destinations)
+        print('distMatrix', distMatrix)
+        
+        # calculate the cost fo all possible routes
+        allCostPathTuples = []
+        for path in permutations(list(range(n))):
+            cost = distMatrix[n][path[0]]
+            for i in range(n-1):
+                cost += distMatrix[ path[i] ][ path[i+1] ]
+            allCostPathTuples.append( (cost, path) )
+        
+        print('allCostPathTuples', allCostPathTuples)
+    
+        (bestRouteCost, bestRoutePath) = min(allCostPathTuples)
+        
+        if onGoingRide['isOnCar']:
+            sumOfSingleRouteCost = distMatrix[0][1] + distMatrix[3][2]
+        else:
+            sumOfSingleRouteCost = distMatrix[0][1] + distMatrix[1][2] + distMatrix[2][3] + distMatrix[3][bestRoutePath[0]]
+
+        print(bestRouteCost, sumOfSingleRouteCost)
+        return bestRouteCost <= sumOfSingleRouteCost
+
+        
     
 
 def greedyMatcherTest():
@@ -137,29 +175,38 @@ def greedyMatcherTest():
             "userId": 'Eric',
             "startLocation": univLoc.hku,
             "endLocation": univLoc.cu,
-            'timestamp': 1553701200965
+            "timestamp": 1553701200965
         },
         {
             "id": '2',
             "userId": 'Tony',
             "startLocation": univLoc.cu,
             "endLocation": univLoc.hku,
-            'timestamp': 1553701760965
+            "timestamp": 1553701760965
         }
     ]
+
+    onGoingReq1 = {
+        "id": '3',
+        "userId": 'David',
+        "startLocation": univLoc.cu,
+        "endLocation": univLoc.hku,
+        "timestamp": 1553701060965,
+        "isOnCar": False
+    }
 
     drivers = [
         {
             "userId": 'Antony',
             "location":  univLoc.cu,
-            "ongoingRide": [],
-            "maxSeat": 4
+            "ongoingRide": [onGoingReq1],
+            "capacity": 4
         },
         {
             "userId": 'Elven',
             "location":  univLoc.polyu,
             "ongoingRide": [],
-            "maxSeat": 4
+            "capacity": 4
         }
     ]
 

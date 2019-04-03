@@ -61,7 +61,7 @@ def startEngine():
                 drivers.append({
                     "userId": driverId,
                     "location": location['location'],
-                    "maxSeat": 4,
+                    "capacity": 4,
                     "ongoingRide": ongoingRideList
                 })
             # end of if

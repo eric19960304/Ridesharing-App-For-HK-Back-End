@@ -5,7 +5,7 @@ import univLoc
 
 gmaps = googlemaps.Client(key=os.environ['GOOGLE_MAP_API_KEY'])
 
-def getDistance(origin, destination):
+def getDistance(origin, destination, getDuration=False):
     '''
     Format of origin and destination:
     { "latitude": int, "longitude": int }
@@ -14,11 +14,14 @@ def getDistance(origin, destination):
     return (distance in m : int, duration in seconds : int)
     '''
     response = gmaps.distance_matrix(mode='driving', origins=origin, destinations=destination)
-    
-    return (response['rows'][0]['elements'][0]['distance']['value'],
-            response['rows'][0]['elements'][0]['duration']['value'] ) 
 
-def getDistanceMatrix(origins, destinations):
+    duration_or_distance = 'distance'
+    if(getDuration):
+        duration_or_distance = 'duration'
+
+    return response['rows'][0]['elements'][0][duration_or_distance]['value']
+
+def getDistanceMatrix(origins, destinations, getDuration=False):
     '''
     Format of origins and destinations:
     [ { "latitude": int, "longitude": int } ]
@@ -30,26 +33,36 @@ def getDistanceMatrix(origins, destinations):
     # [ [ A->C, A->D, A->E ],
     #   [ B->C, B->D, B->E ] ] where A->C means the distance/duration tuple from point A to point C
     '''
+    matrixSize = len(origins)*len(destinations)
+    if(matrixSize>81):
+        raise Exception('matrix size='+ str(matrixSize) +' exceeds the limit (we don\' have enough credit in Google Cloud!')
+
     response = gmaps.distance_matrix(mode='driving', origins=origins, destinations=destinations)
     
     rowList = [ row['elements'] for row in response['rows'] ]
+
+    duration_or_distance = 'distance'
+    if(getDuration):
+        duration_or_distance = 'duration'
+
     matrix = [ 
-        [ (element['distance']['value'], element['duration']['value'] ) for element in elements ] 
+        [ element[duration_or_distance]['value'] for element in elements ] 
         for elements in rowList
     ]
     return matrix
 
 def getDistanceTest():
-    print(getDistance(univLoc.hku, univLoc.cu))
+    print(getDistance(univLoc.hku, univLoc.hku))
 
 def getDistanceMatrixTest():
-    origins = [univLoc.hku, univLoc.cu]
-    destinations = [ univLoc.ust, univLoc.polyu, univLoc.cityu ]
+    origins = [univLoc.hku, univLoc.cu, univLoc.ust]
+    # destinations = [ univLoc.ust, univLoc.polyu, univLoc.cityu ]
+    destinations = origins
     matrix = getDistanceMatrix(origins, destinations)
     print(matrix)
 
 if __name__ == "__main__":
     print('Test all methods:')
-    getDistanceTest()
+    # getDistanceTest()
     getDistanceMatrixTest()
     print('Tests passed.')

@@ -21,10 +21,6 @@ def haversineDistance(location1, location2):
     r = 6371 # Radius of earth in kilometers. Use 3956 for miles
     return c * r
 
-def isShareable(startLoc1, endLoc1, startLoc2, endLoc2):
-    # TODO
-    return True
-
 if __name__ == "__main__":
     print('test')
     print(haversineDistance(univLoc.hku, univLoc.cu))
