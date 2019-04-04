@@ -74,7 +74,7 @@ def createTestUsersIfNotExists():
         print('Test Users already exists')
 
 if __name__ == "__main__":
-    # createTestUsersIfNotExists()
+    createTestUsersIfNotExists()
 
     t1 = TestUser(1)
     t1.updateDriverLocation(loc['cu'])

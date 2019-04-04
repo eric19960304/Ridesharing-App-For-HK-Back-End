@@ -67,7 +67,20 @@ class GreedyMatcher:
                 "latitude": number,
                 "longitude": number
             },
-            "ongoingRide": [ requests ],
+            "ongoingRide": [ {
+                "id": string,
+                "userId": string,
+                "startLocation": {
+                    "latitude": number,
+                    "longitude": number
+                },
+                "endLocation": {
+                    "latitude": number,
+                    "longitude": number
+                }
+                "timestamp": number,
+                "isOnCar": boolean,         <---- if passenger on the car
+            } ],
             "capacity": number,
             "timestamp": number           }]
         
@@ -90,7 +103,7 @@ class GreedyMatcher:
                 mapping = (distMatrix[i][j], requests[j], drivers[i])
                 possibleMappings.append(mapping)
 
-        possibleMappings.sort()
+        possibleMappings.sort(key=lambda x: x[0])
         matchedRquestIDs = set()
 
         for cost, r, d in possibleMappings:

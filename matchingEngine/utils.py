@@ -3,7 +3,7 @@ import loc
 
 def haversineDistance(location1, location2):
     """
-    Calculate the great circle distance between two points 
+    Calculate the great circle distance between two points in meters
     on the earth (specified in decimal degrees)
     """
     # convert decimal degrees to radians 
@@ -19,7 +19,7 @@ def haversineDistance(location1, location2):
     a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
     c = 2 * asin(sqrt(a)) 
     r = 6371 # Radius of earth in kilometers. Use 3956 for miles
-    return c * r
+    return c * r * 1000
 
 if __name__ == "__main__":
     print('test')

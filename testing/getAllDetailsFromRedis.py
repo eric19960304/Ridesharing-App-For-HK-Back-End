@@ -5,6 +5,12 @@ RIDE_REQUEST = 'realTimeRideRequest'
 DRIVER_LOCATION = 'driverLocation'
 DRIVER_ON_GOING_RIDE = 'driverOngoingRide'
 
+def prettyPrint(data):
+    print(ujson.dumps(data, indent=2))
+
+def prettyPrint2(key, data):
+    print(key, ujson.dumps(data, indent=2))
+
 def printAllDetails():
     try:
         redisConn = redis.StrictRedis(
@@ -19,15 +25,17 @@ def printAllDetails():
         print('realTimeRideRequest: ')
         requests = [ ujson.loads(r)  for r in rideRequest ]
         for r in requests:
-            print(ujson.dumps(r, indent=4))
+            prettyPrint(r)
         
         print("\ndriverLocation: ")
         for (driverId, locationJson) in driverLocationDict.items():
-            print(driverId, ':', ujson.dumps(ujson.loads( locationJson ), indent=4))
+            location = ujson.loads( locationJson )
+            prettyPrint2(driverId, location)
 
         print("\ndriverOngoingRide: ")
         for (driverId, ongoingRideListJson) in ongoingRideListDict.items():
-            print(driverId, ':', ujson.dumps(ujson.loads( ongoingRideListJson ), indent=4))
+            onGoingRideList = ujson.loads( ongoingRideListJson )
+            prettyPrint2(driverId, onGoingRideList)
 
     except Exception as ex:
         print('Error:', ex)
