@@ -1,7 +1,7 @@
 from itertools import permutations
 
 import googleMapApiAdapter as gMapApi
-import univLoc
+import loc
 from utils import haversineDistance
 
 class GreedyMatcher:
@@ -68,7 +68,8 @@ class GreedyMatcher:
                 "longitude": number
             },
             "ongoingRide": [ requests ],
-            "capacity": number           }]
+            "capacity": number,
+            "timestamp": number           }]
         
         output
         (M, R) format:
@@ -173,15 +174,15 @@ def greedyMatcherTest():
         {
             "id": '1',
             "userId": 'Eric',
-            "startLocation": univLoc.hku,
-            "endLocation": univLoc.cu,
+            "startLocation": loc.hku,
+            "endLocation": loc.cu,
             "timestamp": 1553701200965
         },
         {
             "id": '2',
             "userId": 'Tony',
-            "startLocation": univLoc.cu,
-            "endLocation": univLoc.hku,
+            "startLocation": loc.cu,
+            "endLocation": loc.hku,
             "timestamp": 1553701760965
         }
     ]
@@ -189,8 +190,8 @@ def greedyMatcherTest():
     onGoingReq1 = {
         "id": '3',
         "userId": 'David',
-        "startLocation": univLoc.cu,
-        "endLocation": univLoc.hku,
+        "startLocation": loc.cu,
+        "endLocation": loc.hku,
         "timestamp": 1553701060965,
         "isOnCar": False
     }
@@ -198,13 +199,13 @@ def greedyMatcherTest():
     drivers = [
         {
             "userId": 'Antony',
-            "location":  univLoc.cu,
+            "location":  loc.cu,
             "ongoingRide": [onGoingReq1],
             "capacity": 4
         },
         {
             "userId": 'Elven',
-            "location":  univLoc.polyu,
+            "location":  loc.polyu,
             "ongoingRide": [],
             "capacity": 4
         }

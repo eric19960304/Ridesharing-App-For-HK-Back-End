@@ -100,9 +100,12 @@ const saveRideLogsToDB = (req, res, next) => {
     const driverReq = req.body.driver;
 
     const newRideLogs = new RideLogs({
-        _id: riderReq.id,
+        _id: ObjectId(),
+        rideId: riderReq.id,
         driverId: driverReq.userId,
+        driverEmail: req.driver.email,
         riderId: riderReq.userId,
+        riderEmail: req.rider.email,
         startLocation: {
             latitude: riderReq.startLocation.latitude,
             longitude: riderReq.startLocation.longitude
@@ -115,6 +118,7 @@ const saveRideLogsToDB = (req, res, next) => {
         requestedDate: new Date(riderReq.timestamp),
         matchedDate: new Date(),
         algoVersion: req.body.algoVersion,
+        tag: 'caseStudy1'
     });
 
     // store ride logs to DB
@@ -162,7 +166,9 @@ const sendNotificationAndMessageToUsers = (req, res) => {
             return tokensForThisUser.indexOf(elem) === pos;
         });
 
-        notificationClient.notify(tokensForThisUser, 'New Message:\n' + text);
+        if(tokensForThisUser.length>0){
+            notificationClient.notify(tokensForThisUser, 'New Message:\n' + text);
+        }
 
         console.log(text);
 

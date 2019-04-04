@@ -4,9 +4,13 @@ const ObjectId = Schema.Types.ObjectId;
 
 const rideLogs = new Schema({
     _id: ObjectId,
+    rideId: { type: String },
     driverId: { type: ObjectId, required: true, ref: 'User' },
+    driverEmail: { type: String},
     riderId: { type: ObjectId, required: true, ref: 'User' },
+    riderEmail: { type: String },
     algoVersion: { type: String, required: true },
+    tag: { type: String },
     startLocation: {
         type: {
             latitude: { type: Number },
@@ -35,7 +39,7 @@ const rideLogs = new Schema({
             distance: { type: Number},
             duration: { type: Number }
         }
-    }
+    },
 });
 
 module.exports = mongoose.model('RideLogs', rideLogs);

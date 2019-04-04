@@ -1,7 +1,7 @@
 import googlemaps
 import os
 import ujson
-import univLoc
+import loc
 
 gmaps = googlemaps.Client(key=os.environ['GOOGLE_MAP_API_KEY'])
 
@@ -52,11 +52,11 @@ def getDistanceMatrix(origins, destinations, getDuration=False):
     return matrix
 
 def getDistanceTest():
-    print(getDistance(univLoc.hku, univLoc.hku))
+    print(getDistance(loc.hku, loc.hku))
 
 def getDistanceMatrixTest():
-    origins = [univLoc.hku, univLoc.cu, univLoc.ust]
-    # destinations = [ univLoc.ust, univLoc.polyu, univLoc.cityu ]
+    origins = [loc.hku, loc.cu, loc.ust]
+    # destinations = [ loc.ust, loc.polyu, loc.cityu ]
     destinations = origins
     matrix = getDistanceMatrix(origins, destinations)
     print(matrix)

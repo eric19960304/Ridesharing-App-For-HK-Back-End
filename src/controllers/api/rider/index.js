@@ -5,7 +5,7 @@ const redisClient = require('../../../db/redisClient');
 const { REDIS_KEYS } = require('../../../helpers/constants');
 
 const router = express.Router();
-const ObjectId = mongoose.Types.ObjectId;
+const uuidv4 = require('uuid/v4');
 
 /* 
 /api/rider/real-time-ride-request
@@ -29,7 +29,7 @@ const storeRideRequest = (req, res) => {
 
     let completeRequest = Object.assign({}, req.body);
     completeRequest.userId = userId;
-    completeRequest.id = new ObjectId();
+    completeRequest.id = uuidv4();
 
     redisClient.rpush(
         REDIS_KEYS.RIDE_REQUEST, 

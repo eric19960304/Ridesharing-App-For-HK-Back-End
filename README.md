@@ -73,13 +73,13 @@ prerequisite:
 
 
 
-To install all the packages (under /matchingEngine directory):
+To install all the packages (under root directory):
 
-`pip3 install -r requirements.txt`
+`pip install -r requirements.txt`
 
-To run the server "engine_v1":
+To run the server "engine_v1" (under /matchingEngine directory):
 
-`python3 engine_v1.py`
+`python engine_v1.py`
 
 
 

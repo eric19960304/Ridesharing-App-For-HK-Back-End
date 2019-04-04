@@ -30,7 +30,7 @@ def startEngine():
         sleep(5)
 
         queueLen = redisConn.llen(RIDE_REQUEST)
-        onlineDriverCount =   redisConn.hlen(DRIVER_LOCATION)
+        onlineDriverCount = redisConn.hlen(DRIVER_LOCATION)
 
         if queueLen==0 or onlineDriverCount==0:
             continue
