@@ -36,10 +36,10 @@ class RVGraph:
                     continue
                 #create location List contain two requests' start and end point
                 locationList = []
-                locationList.append( riderLocationJson[startLocation] )
-                locationList.append( riderLocationJson2[startLocation] )
-                locationList.append( riderLocationJson[endLocation] )
-                locationList.append( riderLocationJson2[endLocation] )
+                locationList.append( riderLocationJson["startLocation"] )
+                locationList.append( riderLocationJson2["startLocation"] )
+                locationList.append( riderLocationJson["endLocation"] )
+                locationList.append( riderLocationJson2["endLocation"] )
                 #calculate the matrix with those four points
                 distanceMatrix = getDistanceMatrix(locationList, locationList)
                 spearatedRideDistance = distanceMatrix[0][3] + distanceMatrix[1][4]
@@ -74,14 +74,24 @@ class RVGraph:
     '''TSP Link:https://pypi.org/project/tsp/'''
 
     def RVGraphPairwiseDriverRequest(self, rideRequests, driverLocationsList):
+        # connect to redis
+        try:
+            redisConn = redis.StrictRedis(host='localhost', port=6379, decode_responses=True)
+            print('Connected to redis')
+        except Exception as ex:
+            print('Error:', ex)
+            exit('Failed to connect, terminating.')
+
         driverOnGoing = redisConn.hgetall(DRIVER_ON_GOING_RIDE)
+
         for (driverId, driverLocationJson) in driverLocationsList:
             edgeList = []
 
+            #need to test
             if driverId not in driverOnGoing:
                 
                 for (riderId, riderLocationJson) in rideRequests:
-                    riderDriverDistance, riderDriverTime = getDistance(driverLocationJson, riderLocationJson)
+                    riderDriverDistance = getDistance(driverLocationJson, riderLocationJson)
                     edgeList.append( (riderId, riderDriverDistance) )
             else:
                 driverPassagerList = driverOnGoing[driverId]
@@ -90,20 +100,20 @@ class RVGraph:
 
                 #create a driver location directory
                 driverLocation = {}
-                driverLocation[latitude] = driverLocationJson[location][latitude]
-                driverLocation[longitude] = driverLocationJson[location][longitude]
+                driverLocation["latitude"] = driverLocationJson["location"]["latitude"]
+                driverLocation["longitude"] = driverLocationJson["location"]["longitude"]
 
                 if len(driverPassagerList) < 2:
                     #TWO RIDERS ONLY
                     passagerLocationList = []
                     #request is not on ride
-                    if not driverPassagerList[0][isOnRide]:
-                        passagerLocationList.append(driverPassagerList[0][startLocation])
-                    passagerLocationList.append(driverPassagerList[0][endLocation])
+                    if not driverPassagerList[0]["isOnRide"]:
+                        passagerLocationList.append(driverPassagerList[0]["startLocation"])
+                    passagerLocationList.append(driverPassagerList[0]["endLocation"])
                     for (riderId, riderLocationJson) in rideRequests:
                         locationList = []
-                        locationList.append(riderLocationJson[startLocation])
-                        locationList.append(riderLocationJson[endLocation])
+                        locationList.append(riderLocationJson["startLocation"])
+                        locationList.append(riderLocationJson["endLocation"])
                         locationList.append(driverLocation)
                         locationList += passagerLocationList
 
@@ -111,8 +121,9 @@ class RVGraph:
                         distanceMatrix = getDistanceMatrix(locationList, locationList)
 
                         delayDistance = 100000
-                        if not riverPassagerList[isOnRide]:
-                            min([distanceMatrix[2][0] + distanceMatrix[0][3] + distanceMatrix[3][4] + distanceMatrix[4][1],
+
+                        if not driverPassagerList[0]["isOnRide"]:
+                            minimumShareDistance = min([distanceMatrix[2][0] + distanceMatrix[0][3] + distanceMatrix[3][4] + distanceMatrix[4][1],
                             distanceMatrix[2][0] + distanceMatrix[0][3] + distanceMatrix[3][1] + distanceMatrix[1][4],
                             distanceMatrix[2][3] + distanceMatrix[3][0] + distanceMatrix[0][4] + distanceMatrix[4][1],
                             distanceMatrix[2][3] + distanceMatrix[3][0] + distanceMatrix[0][1] + distanceMatrix[1][4]])
