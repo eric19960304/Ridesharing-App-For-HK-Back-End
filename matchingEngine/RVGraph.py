@@ -72,7 +72,7 @@ class RVGraph:
 
                 if shareRideDistance < spearatedRideDistance:
                     self.requestsGraph[(riderLocationJson["userId"], riderLocationJson2["userId"])] = shareRideDistance
-        #print(self.requestsGraph)
+        print(self.requestsGraph)
                                 
 
 
@@ -121,8 +121,9 @@ class RVGraph:
             if len(driverJson["ongoingRide"]) == 0:
                 
                 for riderLocationJson in rideRequests:
-                    riderDriverDistance = getDistance(driverJson["location"], riderLocationJson)
-                    edgeList.append( (riderLocationJson["userId"], riderDriverDistance) )
+                    riderDriverDistance = getDistance(driverJson["location"], riderLocationJson["startLocation"])
+                    if riderDriverDistance < 5000:
+                        edgeList.append( (riderLocationJson["userId"], riderDriverDistance) )
             else:
                 driverPassagerList = driverJson["ongoingRide"]
 
@@ -141,25 +142,24 @@ class RVGraph:
                         locationList.append(riderLocationJson["endLocation"])
                         locationList.append(driverJson['location'])
                         locationList += passagerLocationList
-
                         
-                        #distanceMatrix = getDistanceMatrix(locationList, locationList)
+                        distanceMatrix = getDistanceMatrix(locationList, locationList)
 
-                        # delayDistance = 100000
+                        delayDistance = 100000
 
-                        # if not driverPassagerList[0]["isOnCar"]:
-                        #     minimumShareDistance = min([distanceMatrix[2][0] + distanceMatrix[0][3] + distanceMatrix[3][4] + distanceMatrix[4][1],
-                        #     distanceMatrix[2][0] + distanceMatrix[0][3] + distanceMatrix[3][1] + distanceMatrix[1][4],
-                        #     distanceMatrix[2][3] + distanceMatrix[3][0] + distanceMatrix[0][4] + distanceMatrix[4][1],
-                        #     distanceMatrix[2][3] + distanceMatrix[3][0] + distanceMatrix[0][1] + distanceMatrix[1][4]])
+                        if not driverPassagerList[0]["isOnCar"]:
+                            minimumShareDistance = min([distanceMatrix[2][0] + distanceMatrix[0][3] + distanceMatrix[3][4] + distanceMatrix[4][1],
+                            distanceMatrix[2][0] + distanceMatrix[0][3] + distanceMatrix[3][1] + distanceMatrix[1][4],
+                            distanceMatrix[2][3] + distanceMatrix[3][0] + distanceMatrix[0][4] + distanceMatrix[4][1],
+                            distanceMatrix[2][3] + distanceMatrix[3][0] + distanceMatrix[0][1] + distanceMatrix[1][4]])
 
-                        #     delayDistance = minimumShareDistance - distanceMatrix[2][3] + distanceMatrix[3][4] 
-                        # else:
-                        #     delayDistance = distanceMatrix[2][0] + distanceMatrix[0][1] + distanceMatrix[2][3] - distanceMatrix[2][3]
+                            delayDistance = minimumShareDistance - distanceMatrix[2][3] + distanceMatrix[3][4] 
+                        else:
+                            delayDistance = distanceMatrix[2][0] + distanceMatrix[0][1] + distanceMatrix[2][3] - distanceMatrix[2][3]
 
-                        # #delay
-                        # if delayDistance < 5000:
-                        #     edgeList.append( (riderId, delayDistance) )
+                        #delay
+                        if delayDistance < 5000:
+                            edgeList.append( (riderLocationJson["userId"], delayDistance) )
 
                     # passagerLocationList = []
                     # for passagerJson in driverPassagerList:
@@ -222,12 +222,9 @@ def startEngine():
     redisConn.ltrim(RIDE_REQUEST, numOfReq, -1)
     requests = [ ujson.loads(r) for r in rideRequest ]
 
-    # rvGraph = RVGraph()
+    rvGraph = RVGraph()
     # rvGraph.RVGraphPairwiseRequests(requests)
-
-    print(drivers)
-    #print(driverLocationDict)
-    #RVGraphPairwiseDriverRequest(requests, driverLocationDict, driverOnGoing):
+    rvGraph.RVGraphPairwiseDriverRequest(requests, drivers)
 
 def isDriverOnline(driverLocation):
     # print("[{}] : ".format( getTimeStr() ), ' location time: ', driverLocation['timestamp'])
