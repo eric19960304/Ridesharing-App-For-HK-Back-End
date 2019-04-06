@@ -1,7 +1,7 @@
 from itertools import permutations
 
 import googleMapApiAdapter as gMapApi
-import loc
+from loc import loc
 from utils import haversineDistance
 
 class GreedyMatcher:
@@ -60,7 +60,9 @@ class GreedyMatcher:
                 "latitude": number,
                 "longitude": number
             }
-            "timestamp": number]
+            "timestamp": number,
+            "isOnCar": False,
+        ]
         drivers format:
         [{  "userId": string,
             "location":  {
@@ -132,99 +134,183 @@ class GreedyMatcher:
 
         if len(driver['ongoingRide']) > 0:
             # at least one ongoign ride is sharable with current request
-            for onGoingRide in driver['ongoingRide']:
-                if self._isShareable(driver['location'], request, onGoingRide):
-                    return True
-            return False
+            return self._isShareable(driver['location'], request, driver['ongoingRide'])
         
         # not violating any constraint
         return True
     
-    def _isShareable(self, driverLoc, requestToMatch, onGoingRide):
-        print('requestToMatch', requestToMatch)
+    def _isShareable(self, driverLoc, requestToMatch, onGoingRides):
+        '''
+        origins = [ onGoingRides start and end , requestToMatch start and end , driverLoc ]
+        destinations = [ onGoingRides start and end , requestToMatch start and end ]
+        '''
+        origins = []
+        destinations = []
+        for onGoingRide in onGoingRides:
+            if onGoingRide['isOnCar']:
+                start = onGoingRide['startLocation']
+                end = onGoingRide['endLocation']
+                origins.append(start)
+                destinations.append(end)
+            else:
+                start = onGoingRide['startLocation']
+                end = onGoingRide['endLocation']
+                origins.append(start)
+                origins.append(end)
+                destinations.append(start)
+                destinations.append(end)
         s1 = requestToMatch['startLocation']
         t1 = requestToMatch['endLocation']
-        s2 = onGoingRide['startLocation']
-        t2 = onGoingRide['endLocation']
-        if onGoingRide['isOnCar']:
-            origins = [s1, t1, t2, driverLoc]
-            destinations = [s1, t1, t2]
-            n = 3
-        else:
-            origins = [s1, t1, s2, t2, driverLoc]
-            destinations = [s1, t1, s2, t2]
-            n = 4
+        origins.append(s1)
+        origins.append(t1)
+        destinations.append(s1)
+        destinations.append(t1)
+        numOfReqLocations = len(destinations)
+        origins.append(driverLoc)
         
         distMatrix = self._getDistanceMatrix(origins, destinations)
-        print('distMatrix', distMatrix)
         
         # calculate the cost fo all possible routes
-        allCostPathTuples = []
-        for path in permutations(list(range(n))):
-            cost = distMatrix[n][path[0]]
-            for i in range(n-1):
+        possible_cost_bestRoutes = []
+        pathLen = numOfReqLocations
+        for path in permutations(list(range(pathLen))):
+            cost = distMatrix[numOfReqLocations][path[0]]
+            for i in range(pathLen-1):
                 cost += distMatrix[ path[i] ][ path[i+1] ]
-            allCostPathTuples.append( (cost, path) )
+            possible_cost_bestRoutes.append( (cost, path) )
         
-        print('allCostPathTuples', allCostPathTuples)
+        # print('possible_cost_bestRoutes', possible_cost_bestRoutes)
     
-        (bestRouteCost, bestRoutePath) = min(allCostPathTuples)
+        (bestRouteCost, bestRoutePath) = min(possible_cost_bestRoutes)
         
-        if onGoingRide['isOnCar']:
-            sumOfSingleRouteCost = distMatrix[0][1] + distMatrix[3][2]
-        else:
-            sumOfSingleRouteCost = distMatrix[0][1] + distMatrix[1][2] + distMatrix[2][3] + distMatrix[3][bestRoutePath[0]]
 
-        print(bestRouteCost, sumOfSingleRouteCost)
-        return bestRouteCost <= sumOfSingleRouteCost
-
+        # calculate best route of onGoingRides
+        possible_cost_bestOnGoingRoutes = []
+        pathLen = numOfReqLocations-2
+        for path in permutations(list(range(pathLen))):
+            cost = distMatrix[numOfReqLocations][path[0]]
+            for i in range(pathLen-1):
+                cost += distMatrix[ path[i] ][ path[i+1] ]
+            possible_cost_bestOnGoingRoutes.append( (cost, path) )
         
+        # print('possible_cost_bestOnGoingRoutes', possible_cost_bestOnGoingRoutes)
     
+        (bestOnGoingRouteCost, bestOnGoingRoutePath) = min(possible_cost_bestOnGoingRoutes)
 
-def greedyMatcherTest():
+        # distance(requestToMatch) + distance(bestOnGoingRoute)
+        sumOfSeperateCost = bestOnGoingRouteCost + distMatrix[numOfReqLocations-2][numOfReqLocations-1]
 
+        print(bestRouteCost, sumOfSeperateCost)
+        return bestRouteCost <= sumOfSeperateCost
+
+        
+def greedyMatcherTest1():
     requests = [
         {
             "id": '1',
-            "userId": 'Eric',
-            "startLocation": loc.hku,
-            "endLocation": loc.cu,
-            "timestamp": 1553701200965
-        },
-        {
-            "id": '2',
-            "userId": 'Tony',
-            "startLocation": loc.cu,
-            "endLocation": loc.hku,
-            "timestamp": 1553701760965
+            "userId": 'R1',
+            "startLocation": loc['cityu'],
+            "endLocation": loc['mk_station'],
+            "timestamp": 1553701760965,
+            "isOnCar": False
         }
     ]
 
-    onGoingReq1 = {
-        "id": '3',
-        "userId": 'David',
-        "startLocation": loc.cu,
-        "endLocation": loc.hku,
-        "timestamp": 1553701060965,
-        "isOnCar": False
-    }
-
     drivers = [
         {
-            "userId": 'Antony',
-            "location":  loc.cu,
-            "ongoingRide": [onGoingReq1],
+            "userId": 'D1',
+            "location":  loc['kowloon_tong_station'],
+            "ongoingRide": [],
             "capacity": 4
         },
         {
-            "userId": 'Elven',
-            "location":  loc.polyu,
+            "userId": 'D2',
+            "location":  loc['mk_station'],
             "ongoingRide": [],
             "capacity": 4
         }
     ]
 
-    gMatcher = GreedyMatcher({ 'maxMatchDistance': 1 })
+    gMatcher = GreedyMatcher({ 'maxMatchDistance': 5000 })
+    M, R = gMatcher.match(requests, drivers)
+    print('mapping (passenger->driver): ')
+    for q, d in M:
+        print("  %s -> %s" %(q['userId'], d['userId']))
+    print('remaining requests: ', len(R))
+
+
+def greedyMatcherTest2():
+
+    requests = [
+        {
+            "id": '1',
+            "userId": 'R1',
+            "startLocation": loc['cu'],
+            "endLocation": loc['sai_ying_pun_station'],
+            "timestamp": 1553701760965,
+            "isOnCar": False
+        },
+        {
+            "id": '2',
+            "userId": 'R2',
+            "startLocation": loc['city_one'],
+            "endLocation": loc['ust'],
+            "timestamp": 1553701760965,
+            "isOnCar": False
+        },
+        {
+            "id": '3',
+            "userId": 'R3',
+            "startLocation": loc['city_one'],
+            "endLocation": loc['sha_tin'],
+            "timestamp": 1553701760965,
+            "isOnCar": False
+        },
+        {
+            "id": '4',
+            "userId": 'R4',
+            "startLocation": loc['mk_station'],
+            "endLocation": loc['ust'],
+            "timestamp": 1553701760965,
+            "isOnCar": False
+        }
+    ]
+
+    onGoingReq1 = {
+        "id": '4',
+        "userId": 'OR1',
+        "startLocation": loc['science_park'],
+        "endLocation": loc['hku'],
+        "timestamp": 1553701060965,
+        "isOnCar": True
+    }
+
+    onGoingReq2 ={
+        "id": '5',
+        "userId": 'OR2',
+        "startLocation": loc['science_park'],
+        "endLocation": loc['cu'],
+        "timestamp": 1553701200965,
+        "isOnCar": False
+    }
+
+
+    drivers = [
+        {
+            "userId": 'D1',
+            "location":  loc['racecourse_station'],
+            "ongoingRide": [onGoingReq1, onGoingReq2],
+            "capacity": 4
+        },
+        {
+            "userId": 'D2',
+            "location":  loc['polyu'],
+            "ongoingRide": [],
+            "capacity": 4
+        }
+    ]
+
+    gMatcher = GreedyMatcher({ 'maxMatchDistance': 5000 })
     M, R = gMatcher.match(requests, drivers)
     print('mapping (passenger->driver): ')
     for q, d in M:
@@ -232,4 +318,5 @@ def greedyMatcherTest():
     print('remaining requests: ', len(R))
 
 if __name__ == "__main__":
-    greedyMatcherTest()
+    # greedyMatcherTest1()
+    greedyMatcherTest2()

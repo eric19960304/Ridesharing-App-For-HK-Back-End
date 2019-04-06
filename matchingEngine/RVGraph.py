@@ -14,9 +14,24 @@ DRIVER_LOCATION = 'driverLocation'
 DRIVER_ON_GOING_RIDE = 'driverOngoingRide'
 
 class RVGraph:
-    def __init__(self):
+    def __init__(self, useGridWorld=False):
         self.rvGraph = {}
-        self.requestsGraph = {}                       
+        self.requestsGraph = {}    
+        self.useGridWorld = useGridWorld              
+
+    def _getDistanceMatrix(self, origins, destinations):
+        if self.useGridWorld:
+            # TODO
+            return None
+        else:
+            return getDistanceMatrix(origins, destinations)
+    
+    def _getDistance(self, origin, destination):
+        if self.useGridWorld:
+            # TODO
+            return None
+        else:
+            return getDistance(origin, destination)               
 
     '''
     Input
@@ -161,7 +176,7 @@ class RVGraph:
 
                         #delay
                         if delayDistance < 5000:
-                            edgeList.append( (riderId, delayDistance) )
+                            edgeList.append( (riderLocationJson['riderId'], delayDistance) )
 
                     # passagerLocationList = []
                     # for passagerJson in driverPassagerList:

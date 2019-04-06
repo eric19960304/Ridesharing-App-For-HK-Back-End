@@ -1,5 +1,5 @@
 from math import radians, cos, sin, asin, sqrt
-import loc
+from loc import loc
 
 def haversineDistance(location1, location2):
     """
@@ -23,4 +23,4 @@ def haversineDistance(location1, location2):
 
 if __name__ == "__main__":
     print('test')
-    print(haversineDistance(loc.hku, loc.cu))
+    print(haversineDistance(loc['hku'], loc['cu']))

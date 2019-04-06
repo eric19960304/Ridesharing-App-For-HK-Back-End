@@ -30,6 +30,7 @@ const storeRideRequest = (req, res) => {
     let completeRequest = Object.assign({}, req.body);
     completeRequest.userId = userId;
     completeRequest.id = uuidv4();
+    completeRequest.isOnCar = false;
 
     redisClient.rpush(
         REDIS_KEYS.RIDE_REQUEST, 
