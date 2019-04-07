@@ -21,6 +21,24 @@ def haversineDistance(location1, location2):
     r = 6371 # Radius of earth in kilometers. Use 3956 for miles
     return c * r * 1000
 
+def gridWorldDistance(location1, location2):
+    '''
+    location: ( int, int)
+    '''
+    return abs(location1[0]-location2[0]) + abs(location1[1]-location2[1])
+
+def gridWorldDistanceMatrix(origins, destinations):
+    matrix = []
+    for o in origins:
+        row = []
+        for d in destinations:
+            row.append( gridWorldDistance(o, d) )
+        matrix.append( row )
+    return matrix
+
 if __name__ == "__main__":
     print('test')
-    print(haversineDistance(loc['hku'], loc['cu']))
+    # print(haversineDistance(loc['hku'], loc['cu']))
+    distMatrix = gridWorldDistanceMatrix( [(3,5), (10, 11), (6, 6), (8, 5)], [(91, 5), (50, 50), (31, 42)] )
+    print( len(distMatrix), len(distMatrix[0]) )
+    print(distMatrix)

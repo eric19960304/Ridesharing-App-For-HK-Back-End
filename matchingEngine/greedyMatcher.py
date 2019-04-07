@@ -2,7 +2,7 @@ from itertools import permutations
 
 import googleMapApiAdapter as gMapApi
 from loc import loc
-from utils import haversineDistance
+from utils import haversineDistance, gridWorldDistanceMatrix
 
 class GreedyMatcher:
     '''
@@ -41,8 +41,7 @@ class GreedyMatcher:
 
     def _getDistanceMatrix(self, origins, destinations):
         if self.useGridWorld:
-            # TODO
-            return None
+            return gridWorldDistanceMatrix(origins, destinations)
         else:
             return gMapApi.getDistanceMatrix(origins, destinations)
 
@@ -69,20 +68,7 @@ class GreedyMatcher:
                 "latitude": number,
                 "longitude": number
             },
-            "ongoingRide": [ {
-                "id": string,
-                "userId": string,
-                "startLocation": {
-                    "latitude": number,
-                    "longitude": number
-                },
-                "endLocation": {
-                    "latitude": number,
-                    "longitude": number
-                }
-                "timestamp": number,
-                "isOnCar": boolean,         <---- if passenger on the car
-            } ],
+            "ongoingRide": [ requests ],
             "capacity": number,
             "timestamp": number           }]
         
@@ -182,6 +168,7 @@ class GreedyMatcher:
         # print('possible_cost_bestRoutes', possible_cost_bestRoutes)
     
         (bestRouteCost, bestRoutePath) = min(possible_cost_bestRoutes)
+        print(bestRoutePath)
         
 
         # calculate best route of onGoingRides
@@ -196,6 +183,7 @@ class GreedyMatcher:
         # print('possible_cost_bestOnGoingRoutes', possible_cost_bestOnGoingRoutes)
     
         (bestOnGoingRouteCost, bestOnGoingRoutePath) = min(possible_cost_bestOnGoingRoutes)
+        print(bestOnGoingRoutePath)
 
         # distance(requestToMatch) + distance(bestOnGoingRoute)
         sumOfSeperateCost = bestOnGoingRouteCost + distMatrix[numOfReqLocations-2][numOfReqLocations-1]

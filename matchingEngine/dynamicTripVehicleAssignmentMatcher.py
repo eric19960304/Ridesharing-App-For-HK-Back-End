@@ -2,7 +2,7 @@ import googleMapApiAdapter as gMapApi
 from loc import loc
 from RVGraph import RVGraph
 
-class DynamicTripVehicleAssignmentMatcher():
+class DynamicTripVehicleAssignmentMatcher:
     def __init__(self, constraints_param, useGridWorld=False):
         '''
         constraints_param:

@@ -7,7 +7,7 @@ import sys
 
 API_URL = 'http://localhost/'
 
-class TestUser():
+class TestUser:
     def __init__(self, testUserId):
         self.testUserId = testUserId
 
