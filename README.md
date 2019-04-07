@@ -108,9 +108,9 @@ Steps to run integration test:
 
 The result should be like this:
 
-<img src="https://raw.githubusercontent.com/eric19960304/Ridesharing-App-For-HK-Back-End/master/images/testing/case1_greedy.jpg" width="800">
+<img src="https://raw.githubusercontent.com/eric19960304/Ridesharing-App-For-HK-Back-End/master/images/testing/case1_greedy.jpg" width="900">
 
-<img src="https://raw.githubusercontent.com/eric19960304/Ridesharing-App-For-HK-Back-End/master/images/testing/case2_greedy.jpg" width="800">
+<img src="https://raw.githubusercontent.com/eric19960304/Ridesharing-App-For-HK-Back-End/master/images/testing/case2_greedy.jpg" width="900">
 
 
 
