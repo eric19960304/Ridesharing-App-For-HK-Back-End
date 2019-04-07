@@ -56,11 +56,13 @@ class DynamicTripVehicleAssignmentMatcher():
             "capacity": number,
             "timestamp": number           }]
         '''
-        g = RVGraph()
+        
+        constraints_param = {"maxMatchDistance": 100}
+        g = RVGraph(constraints_param)
         g.RVGraphPairwiseRequests(requests)
-        print(g.requestsGraph)
+        print("rrGraph: ", g.requestsGraph)
         g.RVGraphPairwiseDriverRequest(requests, drivers)
-        print(g.rvGraph)
+        print("rvGraph: ",g.rvGraph)
         return ([], requests)
 
 def Test():
@@ -97,7 +99,7 @@ def Test():
         {
             "userId": 'Antony',
             "location":  loc['cu'],
-            "ongoingRide": [onGoingReq1],
+            "ongoingRide": [],
             "capacity": 4
         },
         {
