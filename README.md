@@ -86,7 +86,7 @@ To run the matching engine:
 # Integration Test
 
 
-<img src="https://raw.githubusercontent.com/eric19960304/Ridesharing-App-For-HK-Back-End/master/images/testing/case1.png" width="600">
+<img src="https://raw.githubusercontent.com/eric19960304/Ridesharing-App-For-HK-Back-End/master/images/testing/case1.png" width="900">
 
 <img src="https://raw.githubusercontent.com/eric19960304/Ridesharing-App-For-HK-Back-End/master/images/testing/case2.png" width="900">
 
