@@ -87,7 +87,7 @@ class RVGraph:
 
                 if shareRideDistance < spearatedRideDistance:
                     self.requestsGraph[(riderLocationJson["userId"], riderLocationJson2["userId"])] = shareRideDistance
-        #print(self.requestsGraph)
+        print(self.requestsGraph)
                                 
 
 
@@ -176,7 +176,7 @@ class RVGraph:
 
                         #delay
                         if delayDistance < 5000:
-                            edgeList.append( (riderLocationJson['riderId'], delayDistance) )
+                            edgeList.append( (riderLocationJson["userId"], delayDistance) )
 
                     # passagerLocationList = []
                     # for passagerJson in driverPassagerList:
@@ -242,8 +242,6 @@ def startEngine():
 
     rvGraph = RVGraph()
     # rvGraph.RVGraphPairwiseRequests(requests)
-
-    #print(driverLocationDict)
     rvGraph.RVGraphPairwiseDriverRequest(requests, drivers)
 
 def isDriverOnline(driverLocation):
