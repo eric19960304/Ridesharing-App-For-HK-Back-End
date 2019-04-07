@@ -38,21 +38,21 @@ To run the server in production mode (all env variables should be set):
 
 All Restful API endpoints:
 ```
-/auth/login \[POST]
-/auth/signup \[POST]
-/auth/signup/activate/:token \[GET]
-/auth/reset-password/request \[POST]
-/auth/reset-password/:token \[GET]   // serve the reset password form
-/auth/reset-password/:token \[POST]  // handle reset password form
-/api/secret/google-map-api-key \[POST]
-/api/driver/update \[POST]
-/api/driver/get-all-drivers-location \[POST]
-/api/rider/real-time-ride-request \[POST]
-/api/user/edit-profile \[POST]
-/api/user/edit-profile-with-password \[POST]
-/api/user/push-token \[POST]
-/api/user/unread-messages-count \[POST]
-/notify-match-result/real-time-ride \[POST]  // for internal use only
+/auth/login [POST]
+/auth/signup [POST]
+/auth/signup/activate/:token [GET]
+/auth/reset-password/request [POST]
+/auth/reset-password/:token [GET]   // serve the reset password form
+/auth/reset-password/:token [POST]  // handle reset password form
+/api/secret/google-map-api-key [POST]
+/api/driver/update [POST]
+/api/driver/get-all-drivers-location [POST]
+/api/rider/real-time-ride-request [POST]
+/api/user/edit-profile [POST]
+/api/user/edit-profile-with-password [POST]
+/api/user/push-token [POST]
+/api/user/unread-messages-count [POST]
+/notify-match-result/real-time-ride [POST]  // for internal use only
 ```
 
 Note: demo server's domain name is https://demo.coder.faith
