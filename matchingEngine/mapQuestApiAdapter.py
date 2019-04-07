@@ -1,6 +1,6 @@
 import os
 import ujson
-import loc
+from loc import loc
 import requests
 import utils
 
@@ -53,9 +53,9 @@ def getDistanceMatrix(locations, getDuration=False):
         return responseJson['time']
 
 def getDistanceMatrixTest():
-    locations = [ loc.hku, loc.cu, loc.ust ]
+    locations = [ loc['hku'], loc['cu'], loc['ust'] ]
     matrix = getDistanceMatrix(locations)
-    print(utils.haversineDistance(loc.hku, loc.cu))
+    print(utils.haversineDistance(loc['hku'], loc['cu']))
     print(matrix)
 
 if __name__ == "__main__":

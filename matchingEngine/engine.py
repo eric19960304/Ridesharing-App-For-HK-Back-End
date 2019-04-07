@@ -3,13 +3,15 @@ from time import sleep, gmtime, strftime, time
 import ujson
 import requests as requestsClient
 from greedyMatcher import GreedyMatcher
+from DynamicTripVehicleAssignmentMatcher import DynamicTripVehicleAssignmentMatcher
+import sys
 
 # redis key name, refer to README for the data struture
 RIDE_REQUEST = 'realTimeRideRequest'
 DRIVER_LOCATION = 'driverLocation'
 DRIVER_ON_GOING_RIDE = 'driverOngoingRide'
 SERVER_ENDPOINT = 'http://localhost/notify-match-result/real-time-ride'
-ALGO_VERSION = 'v1'
+ALGO_VERSION = 'v2'
 
 def getTimeStr():
     return strftime("%Y-%m-%d %H:%M:%S", gmtime())
@@ -23,7 +25,12 @@ def startEngine():
         print('Error:', ex)
         exit('Failed to connect, terminating.')
 
-    matcher = GreedyMatcher({ 'maxMatchDistance': 1500 })
+    if sys.argv[0]=='greedy':
+        print('using GreedyMatcher')
+        matcher = GreedyMatcher({ 'maxMatchDistance': 1500 })
+    else:
+        print('using DynamicTripVehicleAssignmentMatcher')
+        matcher = DynamicTripVehicleAssignmentMatcher({ 'maxMatchDistance': 1500 })
 
     while True:
 

@@ -3,6 +3,7 @@ from uuid import uuid4
 import requests
 import pymongo
 from loc import loc
+import sys
 
 API_URL = 'http://localhost/'
 
@@ -76,8 +77,16 @@ def createTestUsersIfNotExists():
 if __name__ == "__main__":
     createTestUsersIfNotExists()
 
-    t1 = TestUser(1)
-    t1.updateDriverLocation(loc['cu'])
+    if sys.argv[0]=='1':
 
-    t2 = TestUser(2)
-    t2.sendRideRequest(loc['cu'], loc['cityu'])
+        tusers = []
+        for i in range(4):
+            tusers.append( TestUser(i) )
+        tusers[0].updateDriverLocation(loc['kowloon_tong_station'])
+        tusers[1].updateDriverLocation(loc['mk_station'])
+        tusers[2].sendRideRequest(loc['cityu'], loc['mk_station'])
+    
+    
+
+
+
