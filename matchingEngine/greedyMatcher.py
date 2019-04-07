@@ -133,6 +133,10 @@ class GreedyMatcher:
         origins = []
         destinations = []
         for onGoingRide in onGoingRides:
+
+            if 'isOnCar' not in onGoingRide:
+                onGoingRide['isOnCar'] = False
+
             if onGoingRide['isOnCar']:
                 start = onGoingRide['startLocation']
                 end = onGoingRide['endLocation']
@@ -168,7 +172,7 @@ class GreedyMatcher:
         # print('possible_cost_bestRoutes', possible_cost_bestRoutes)
     
         (bestRouteCost, bestRoutePath) = min(possible_cost_bestRoutes)
-        print(bestRoutePath)
+        # print(bestRoutePath)
         
 
         # calculate best route of onGoingRides
@@ -183,12 +187,11 @@ class GreedyMatcher:
         # print('possible_cost_bestOnGoingRoutes', possible_cost_bestOnGoingRoutes)
     
         (bestOnGoingRouteCost, bestOnGoingRoutePath) = min(possible_cost_bestOnGoingRoutes)
-        print(bestOnGoingRoutePath)
 
         # distance(requestToMatch) + distance(bestOnGoingRoute)
         sumOfSeperateCost = bestOnGoingRouteCost + distMatrix[numOfReqLocations-2][numOfReqLocations-1]
 
-        print(bestRouteCost, sumOfSeperateCost)
+        # print(bestRouteCost, sumOfSeperateCost)
         return bestRouteCost <= sumOfSeperateCost
 
         

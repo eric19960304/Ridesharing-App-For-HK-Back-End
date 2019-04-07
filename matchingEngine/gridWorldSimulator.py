@@ -2,7 +2,7 @@ from random import randint
 from greedyMatcher import GreedyMatcher
 from utils import gridWorldDistance
 from itertools import combinations
-
+from collections import deque
 class GridWorldSimulator:
     '''
     requests format:
@@ -42,17 +42,17 @@ class GridWorldSimulator:
 
     def _generateRandomRequests(self):
         '''
-        return list of points, size is randomized between [1, maxNumOfRequestsGenPerRound]
+        return list of points, size is randomized between [1, maxNumOfRequestsGenPerRound-1]
         '''
         startPoints = set()
         endPoints = set()
         numOfRequests = randint(1, self.maxNumOfRequestsGenPerRound)
         for i in range(numOfRequests):
             while True:
-                startX = randint(0, self.gridWorldSize)
-                startY = randint(0, self.gridWorldSize)
-                endX = randint(0, self.gridWorldSize)
-                endY = randint(0, self.gridWorldSize)
+                startX = randint(0, self.gridWorldSize-1)
+                startY = randint(0, self.gridWorldSize-1)
+                endX = randint(0, self.gridWorldSize-1)
+                endY = randint(0, self.gridWorldSize-1)
                 if (startX, startY) != (endX, endY) and \
                     (startX, startY) not in startPoints and \
                     (endX, endY) not in endPoints:
@@ -98,10 +98,11 @@ class GridWorldSimulator:
         drivers = []
 
         for i in range(self.numOfDrivers):
-            x = randint(0, self.gridWorldSize)
-            y = randint(0, self.gridWorldSize)
+            x = randint(0, self.gridWorldSize-1)
+            y = randint(0, self.gridWorldSize-1)
             initLoc = (x,y)
-            drivers.append( Driver(self.finishedRequests, i, initLoc, self.capacity) )
+            drivers.append( Driver(finishedRequestsRef=self.finishedRequests, \
+                userId=i, initialLocation=initLoc, capacity=self.capacity, gridWorldSize=self.gridWorldSize) )
 
         for currentTime in range(1, self.testingDuration):
 
@@ -120,7 +121,7 @@ class GridWorldSimulator:
                 print( "[%d] match rate =  %.3f"%(currentTime, matchRate) )
 
 class Driver:
-    def __init__(self, finishedRequestsRef, userId, initialLocation, capacity):
+    def __init__(self, finishedRequestsRef, userId, initialLocation, capacity, gridWorldSize):
         self.finishedRequestsRef = finishedRequestsRef
         self.driver = {
             "userId": str(userId),
@@ -129,14 +130,27 @@ class Driver:
             "capacity": capacity,
             "timestamp": 0
         }
-        self.route = []
+        self.route = deque()
+        self.gridWorldSize = gridWorldSize
     
     def getDriver(self, currentTime):
         self.driver['timestamp'] = currentTime
         return self.driver
     
     def move(self):
-        pass
+        if len(self.driver['ongoingRide'])==0:
+            # move random direction
+            (x, y) = self.driver['location']
+            possibleMoves = [ (x+1, y), (x-1, y), (x, y+1), (x, y-1) ]
+            possibleMoves = [ move for move in possibleMoves 
+                if move[0]>=0 and move[0]<self.gridWorldSize and move[1]>=0 and move[1]<self.gridWorldSize
+            ]
+            newLoc = possibleMoves[randint(0, len(possibleMoves))]
+
+
+        for ride in self.driver['ongoingRide']:
+            if self.driver['location']:
+                pass
 
     def updateRoute(self):
         pass

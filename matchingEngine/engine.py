@@ -3,7 +3,7 @@ from time import sleep, gmtime, strftime, time
 import ujson
 import requests as requestsClient
 from greedyMatcher import GreedyMatcher
-from DynamicTripVehicleAssignmentMatcher import DynamicTripVehicleAssignmentMatcher
+from dynamicTripVehicleAssignmentMatcher import DynamicTripVehicleAssignmentMatcher
 import sys
 
 # redis key name, refer to README for the data struture
@@ -25,12 +25,15 @@ def startEngine():
         print('Error:', ex)
         exit('Failed to connect, terminating.')
 
-    if sys.argv[0]=='greedy':
+    if sys.argv[1]=='greedy':
         print('using GreedyMatcher')
-        matcher = GreedyMatcher({ 'maxMatchDistance': 1500 })
-    else:
+        matcher = GreedyMatcher({ 'maxMatchDistance': 2000 })
+    elif sys.argv[1]=='dynamic':
         print('using DynamicTripVehicleAssignmentMatcher')
         matcher = DynamicTripVehicleAssignmentMatcher({ 'maxMatchDistance': 1500 })
+    else:
+        print('Usage: python engine.py [greedy|dynamic]')
+        exit()
 
     while True:
 
@@ -65,12 +68,17 @@ def startEngine():
                     ongoingRideList = []
                 # print(len(ongoingRideList))
 
-                drivers.append({
+                driver = {
                     "userId": driverId,
                     "location": location['location'],
-                    "capacity": 4,
+                    "capacity": 2,
                     "ongoingRide": ongoingRideList
-                })
+                }
+
+                if 'nickname' in location:
+                    driver['nickname'] = location['nickname']
+
+                drivers.append(driver)
             # end of if
         # end of for
         
@@ -81,7 +89,10 @@ def startEngine():
 
                 print("[{}] : ".format( getTimeStr() ), 'mapping (passenger->driver): ')
                 for q, d in mappings:
-                    print("  %s -> %s" %(q['userId'], d['userId']))
+                    if 'nickname' in q and 'nickname' in d:
+                        print("  %s -> %s" %(q['nickname'], d['nickname']))
+                    else:
+                        print("  %s -> %s" %(q['userId'], d['userId']))
                 print('remaining requests: ', len(remainingRequests))
 
                 for mapping in mappings:
@@ -120,4 +131,8 @@ def isDriverOnline(driverLocation):
 
 
 if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print('Usage: python engine.py [greedy or dynamic]')
+        exit()
+    
     startEngine()
