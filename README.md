@@ -73,18 +73,48 @@ prerequisite:
 
 
 
-To install all the packages (under root directory):
+To install all the packages:
 
-`pip install -r requirements.txt`
+`pip install -r requirements.txt` (under root directory)
 
-To run the server "engine_v1" (under /matchingEngine directory):
+To run the matching engine:
 
-`python engine_v1.py`
-
-
+`python engine_v1.py` (under /matchingEngine directory)
 
 
-List of used Redis keys
+
+# Integration Test
+
+
+<img src="https://raw.githubusercontent.com/eric19960304/Ridesharing-App-For-HK-Back-End/master/images/testing/case1.png" width="600">
+
+<img src="https://raw.githubusercontent.com/eric19960304/Ridesharing-App-For-HK-Back-End/master/images/testing/case2.png" width="900">
+
+<img src="https://raw.githubusercontent.com/eric19960304/Ridesharing-App-For-HK-Back-End/master/images/testing/case2_ios_requests.png" width="400"> <img src="https://raw.githubusercontent.com/eric19960304/Ridesharing-App-For-HK-Back-End/master/images/testing/case2_ios_drivers.png" width="400">
+
+
+Steps to run integration test:
+
+1. Redis, MongoDB, and the back-end server running
+
+2. run the test script "caseStudy.py" (under /testing directory)
+
+`python caseStudy.py 1` for case 1 or `python caseStudy.py 2` for case 2
+
+3. [optional] you can now run the front end Expo client to observe the requests path and drivers icon
+
+4. run the matching engine "engine_v1.py" (under /matchingEngine directory) to see the result
+
+
+The result should be like this:
+
+<img src="https://raw.githubusercontent.com/eric19960304/Ridesharing-App-For-HK-Back-End/master/images/testing/case1_greedy.jpg" width="800">
+
+<img src="https://raw.githubusercontent.com/eric19960304/Ridesharing-App-For-HK-Back-End/master/images/testing/case2_greedy.jpg" width="800">
+
+
+
+# List of used Redis keys
 
 1. realTimeRideRequest
 
