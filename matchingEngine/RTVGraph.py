@@ -84,7 +84,7 @@ class RTVGraph:
                    
                    
     
-        self.rtvGraph.extend(rvGraph.rvGraph)
+        #self.rtvGraph.extend(rvGraph.rvGraph)
 
             
         

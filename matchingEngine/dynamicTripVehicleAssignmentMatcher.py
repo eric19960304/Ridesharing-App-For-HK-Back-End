@@ -1,6 +1,8 @@
 import googleMapApiAdapter as gMapApi
 from loc import loc
 from RVGraph import RVGraph
+from RTVGraph import RTVGraph
+from AssignTrips import AssignTrips
 
 class DynamicTripVehicleAssignmentMatcher:
     def __init__(self, constraints_param, useGridWorld=False):
@@ -58,11 +60,21 @@ class DynamicTripVehicleAssignmentMatcher:
         '''
         
         constraints_param = {"maxMatchDistance": 100}
-        g = RVGraph(constraints_param)
+        '''g = RVGraph(constraints_param)
         g.RVGraphPairwiseRequests(requests)
         print("rrGraph: ", g.requestsGraph)
         g.RVGraphPairwiseDriverRequest(requests, drivers)
         print("rvGraph: ",g.rvGraph)
+        g2 = RTVGraph(constraints_param)
+        g2.RTVGraphFindFeasibleTrips(g, drivers)
+        print("rtvGraph: ",g2.rtvGraph)'''
+        rtvGraph=[({'userId': 'Antony', 'location': {'latitude': 22.4134546, 'longitude': 114.2105288}, 'ongoingRide': [], 'capacity': 4}, {'id': '2', 'userId': 'Tony', 'startLocation': {'latitude': 22.4134546, 'longitude': 114.2105288}, 'endLocation': {'latitude': 22.283551, 'longitude': 114.134292}, 'timestamp': 1553701760965, 'isOnCar': False}, {'id': '4', 'userId': 'Alex', 'startLocation': {'latitude': 22.4134546, 'longitude': 114.2105288}, 'endLocation': {'latitude': 22.2882899, 'longitude': 114.1416011}, 'timestamp': 1553701760965, 'isOnCar': False}, 23), ({'userId': 'Antony1', 'location': {'latitude': 22.4134546, 'longitude': 114.2105288}, 'ongoingRide': [], 'capacity': 4}, {'id': '2', 'userId': 'Tony', 'startLocation': {'latitude': 22.4134546, 'longitude': 114.2105288}, 'endLocation': {'latitude': 22.283551, 'longitude': 114.134292}, 'timestamp': 1553701760965, 'isOnCar': False}, {'id': '4', 'userId': 'Alex', 'startLocation': {'latitude': 22.4134546, 'longitude': 114.2105288}, 'endLocation': {'latitude': 22.2882899, 'longitude': 114.1416011}, 'timestamp': 1553701760965, 'isOnCar': False}, 23)]
+        g3=AssignTrips()
+        g3.Assignment(rtvGraph)
+        
+        print("assignment: ",g3.assignList)
+        print("assigned V: ",g3. assignedV)
+        print("assigned R: ",g3. assignedR)
         return ([], requests)
 
 def Test():
@@ -82,7 +94,16 @@ def Test():
             "endLocation": loc['hku'],
             "timestamp": 1553701760965,
             "isOnCar": False
-        }
+        },
+        {
+            "id": '4',
+            "userId": 'alex',
+            "startLocation": loc['cu'],
+            "endLocation": loc['sai_ying_pun_station'],
+            "timestamp": 1553701760965,
+            "isOnCar": False
+        },
+      
     ]
 
     onGoingReq1 = {
@@ -98,6 +119,12 @@ def Test():
     drivers = [
         {
             "userId": 'Antony',
+            "location":  loc['cu'],
+            "ongoingRide": [],
+            "capacity": 4
+        },
+        {
+            "userId": 'Antony1',
             "location":  loc['cu'],
             "ongoingRide": [],
             "capacity": 4
