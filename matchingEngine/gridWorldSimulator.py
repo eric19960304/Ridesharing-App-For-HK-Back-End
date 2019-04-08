@@ -101,6 +101,7 @@ class GridWorldSimulator:
                 matchRate = numOfMatchedReq / numOfRequest
                 self.matchingRates.append(matchRate)
                 print( "match rate=%.3f, matched/unmatched requests: %d/%d"%(matchRate, len(mappings), len(remainingRequests)) )
+                print( "finished/total requests: %d/%d"%(len(self.finishedRequests), self.totalRequestCount) )
             
             # move all drivers
             for d in self.drivers:
@@ -108,7 +109,7 @@ class GridWorldSimulator:
             
             # increment time
             self.currentTime += 1
-        
+        print('[time=%d]'%(self.currentTime))
         print('num of finished/unmatched/total requests: %d/%d/%d' % (len(self.finishedRequests), len(self.requests), self.totalRequestCount))
 
     def _generateRandomRequests(self):
