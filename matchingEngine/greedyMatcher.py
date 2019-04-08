@@ -2,7 +2,7 @@ from itertools import permutations
 
 import googleMapApiAdapter as gMapApi
 from loc import loc
-from utils import haversineDistance, gridWorldDistanceMatrix
+from utils import haversineDistance, gridWorldDistance ,gridWorldDistanceMatrix
 
 class GreedyMatcher:
     '''
@@ -37,6 +37,10 @@ class GreedyMatcher:
         }
         '''
         self.maxMatchDistance = constraints_param['maxMatchDistance']
+        if 'maxWaitingTime' in constraints_param:
+            self.maxWaitingTime = constraints_param['maxWaitingTime']
+        else:
+            self.maxWaitingTime = None
         self.useGridWorld = useGridWorld
 
     def _getDistanceMatrix(self, origins, destinations):
@@ -44,8 +48,14 @@ class GreedyMatcher:
             return gridWorldDistanceMatrix(origins, destinations)
         else:
             return gMapApi.getDistanceMatrix(origins, destinations)
+    
+    def _getStrictLineDistance(self, origin, destination):
+        if self.useGridWorld:
+            return gridWorldDistance(origin, destination)
+        else:
+            return haversineDistance(origin, destination)
 
-    def match(self, requests, drivers):
+    def match(self, requests, drivers, currentTime=None):
         '''
         Input
         requests format:
@@ -95,7 +105,7 @@ class GreedyMatcher:
         matchedRquestIDs = set()
 
         for cost, r, d in possibleMappings:
-            if r['id'] in matchedRquestIDs or (not self._isSatisfyConstraints(r,d)):
+            if r['id'] in matchedRquestIDs or (not self._isSatisfyConstraints(r, d, currentTime)):
                 continue
             
             r['estimatedWaitingCost'] = cost
@@ -106,7 +116,7 @@ class GreedyMatcher:
         remainingRequests = [ r for r in requests if r['id'] not in matchedRquestIDs ]
         return (mappings, remainingRequests)
 
-    def _isSatisfyConstraints(self, request, driver):
+    def _isSatisfyConstraints(self, request, driver, currentTime=None):
         '''
         1. driver.capacity > 0
         2. dist(driver.currentLocation, request.startLocation) <= maxMatchDistance
@@ -115,8 +125,11 @@ class GreedyMatcher:
         if driver['capacity'] <= len(driver['ongoingRide']):
             return False
         
-        if haversineDistance(request['startLocation'], driver['location']) > self.maxMatchDistance:
-            return False
+        if self._getStrictLineDistance(request['startLocation'], driver['location']) > self.maxMatchDistance:
+            if currentTime!=None and self.maxWaitingTime!=None and currentTime - request['requestedDate'] > self.maxWaitingTime:
+                return True
+            else:
+                return False
 
         if len(driver['ongoingRide']) > 0:
             # at least one ongoign ride is sharable with current request
@@ -138,9 +151,9 @@ class GreedyMatcher:
                 onGoingRide['isOnCar'] = False
 
             if onGoingRide['isOnCar']:
-                start = onGoingRide['startLocation']
+                # only consider endLocation
                 end = onGoingRide['endLocation']
-                origins.append(start)
+                origins.append(end)
                 destinations.append(end)
             else:
                 start = onGoingRide['startLocation']
@@ -164,7 +177,7 @@ class GreedyMatcher:
         possible_cost_bestRoutes = []
         pathLen = numOfReqLocations
         for path in permutations(list(range(pathLen))):
-            cost = distMatrix[numOfReqLocations][path[0]]
+            cost = distMatrix[-1][path[0]]
             for i in range(pathLen-1):
                 cost += distMatrix[ path[i] ][ path[i+1] ]
             possible_cost_bestRoutes.append( (cost, path) )
@@ -179,7 +192,7 @@ class GreedyMatcher:
         possible_cost_bestOnGoingRoutes = []
         pathLen = numOfReqLocations-2
         for path in permutations(list(range(pathLen))):
-            cost = distMatrix[numOfReqLocations][path[0]]
+            cost = distMatrix[-1][path[0]]
             for i in range(pathLen-1):
                 cost += distMatrix[ path[i] ][ path[i+1] ]
             possible_cost_bestOnGoingRoutes.append( (cost, path) )
@@ -282,7 +295,7 @@ def greedyMatcherTest2():
         "startLocation": loc['science_park'],
         "endLocation": loc['cu'],
         "timestamp": 1553701200965,
-        "isOnCar": False
+        "isOnCar": True
     }
 
 
