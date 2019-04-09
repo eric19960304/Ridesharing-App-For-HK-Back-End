@@ -40,6 +40,14 @@ class RVGraph:
         else:
             return getDistance(origin, destination)               
 
+    def satifiedAllConstraints(self, minShareDistance, separatedDistance, waitingDistance):
+        if minShareDistance > separatedDistance:
+            return True
+        #waitingTime: self.maxMatchDistance
+        if waitingDistance < self.maxMatchDistance:
+            return True
+        return False
+
     '''
     Input
         requests format:
@@ -165,24 +173,27 @@ class RVGraph:
                         distanceMatrix = self._getDistanceMatrix(locationList, locationList)
 
                         delayDistance = float('inf')
+                        waitingDistance = float('inf')
+                        minShareDistance = float('-inf')
 
                         if not driverPassagerList[0]["isOnCar"]:
                             #0: request startLocation, 1: request endLocation, 2: driver Location, 3: passager startLocation, 4: passager endLocation
-                            minimumShareDistance = min([distanceMatrix[2][0] + distanceMatrix[0][3] + distanceMatrix[3][4] + distanceMatrix[4][1],
+                            minShareDistance = min([distanceMatrix[2][0] + distanceMatrix[0][3] + distanceMatrix[3][4] + distanceMatrix[4][1],
                             distanceMatrix[2][0] + distanceMatrix[0][3] + distanceMatrix[3][1] + distanceMatrix[1][4],
                             distanceMatrix[2][3] + distanceMatrix[3][0] + distanceMatrix[0][4] + distanceMatrix[4][1],
                             distanceMatrix[2][3] + distanceMatrix[3][0] + distanceMatrix[0][1] + distanceMatrix[1][4]])
 
-                            delayDistance = minimumShareDistance - distanceMatrix[2][3] + distanceMatrix[3][4] 
+                            delayDistance = minShareDistance - distanceMatrix[2][3] - distanceMatrix[3][4] 
+                            waitingDistance = min(distanceMatrix[2][0], distanceMatrix[2][3])
                         else:
                             #0: request startLocation, 1: request endLocation, 2: driver Location, 3: passager endLocation
-                            minimumShareDistance = min(distanceMatrix[2][0] + distanceMatrix[0][1] + distanceMatrix[1][3],
+                            minShareDistance = min(distanceMatrix[2][0] + distanceMatrix[0][1] + distanceMatrix[1][3],
                             distanceMatrix[2][0] + distanceMatrix[0][3] + distanceMatrix[3][1])
 
-                            delayDistance = minimumShareDistance - distanceMatrix[2][3] - distanceMatrix[0][1]
+                            delayDistance = minShareDistance - distanceMatrix[2][3] - distanceMatrix[0][1]
+                            waitingDistance = min(distanceMatrix[2][0], distanceMatrix[2][3])
 
-                        #delay: self.maxMatchDistance
-                        if delayDistance < self.maxMatchDistance:
+                        if self.satifiedAllConstraints(minShareDistance, separatedDistance, waitingDistance):
                             edgeList.append( (driver, request, delayDistance) )
 
                     # passagerLocationList = []
