@@ -41,11 +41,19 @@ class Rebalancing:
     def rebalance(self, requests, drivers, assignedR, assignedV):
         Vidle = [item for item in requests if item not in assignedR]
         Rko = [item for item in drivers if item not in assignedV]
-        rvList = []
+        oneTripList = []
         for request in Vidle:
             for driver in Rko:
                 distance = self._getDistance(driver["location"], request["startLocation"])
-                rvList.append( (request, driver, distance) )
-        rvList.sort(key=lambda tup: tup[2])
+                oneTripList.append( (request, driver, distance) )
+        oneTripList.sort(key=lambda tup: tup[2])
         minVidleRko = min(len(Vidle), len(Rko))
-        self.assignList = rvList[0..(minVidleRko-1)]
+        i = 0
+        for trip in oneTripList:
+            if i == minVidleRko:
+                break
+            if (trip[0] in assignedR) == False and (trip[1] in assignedV) == False: 
+                assignedR.append(trip[0])
+                assignedV.append(trip[1])
+                self.assignList.append(trip)
+                i += 1
