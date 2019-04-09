@@ -25,13 +25,25 @@ class Rebalancing:
         self.assignList = [] 
         self.useGridWorld = useGridWorld             
 
+    def _getDistanceMatrix(self, origins, destinations):
+        if self.useGridWorld:
+            return gridWorldDistanceMatrix(origins, destinations)
+        else:
+            return getDistanceMatrix(origins, destinations)
+
+    def _getDistance(self, origin, destination):
+        if self.useGridWorld:
+            return gridWorldDistance(origin, destination)
+        else:
+            return getDistance(origin, destination)  
+
     def rebalance(self, requests, drivers, assignedR, assignedV):
         Vidle = [item for item in requests if item not in assignedR]
         Rko = [item for item in drivers if item not in assignedV]
         rvList = []
         for request in Vidle:
             for driver in Rko:
-                distance = getDistance(driver["location"], request["startLocation"])
+                distance = self._getDistance(driver["location"], request["startLocation"])
                 rvList.append( (request, driver, distance) )
         rvList.sort(key=lambda tup: tup[2])
         minVidleRko = min(len(Vidle), len(Rko))
