@@ -2,7 +2,7 @@ import googleMapApiAdapter as gMapApi
 from loc import loc
 from RVGraph import RVGraph
 from RTVGraph import RTVGraph
-from AssignTrips import AssignTrips
+from assignTrips import AssignTrips
 
 class DynamicTripVehicleAssignmentMatcher:
     def __init__(self, constraints_param, useGridWorld=False):
@@ -19,7 +19,7 @@ class DynamicTripVehicleAssignmentMatcher:
         self.constraints_param = constraints_param
         self.useGridWorld = useGridWorld
 
-    def match(self, requests, drivers):
+    def match(self, requests, drivers, showDetails=False):
         '''
         Input
         requests format:
@@ -62,18 +62,22 @@ class DynamicTripVehicleAssignmentMatcher:
         
         g = RVGraph(self.constraints_param)
         g.RVGraphPairwiseRequests(requests)
-        print("rrGraph: ", g.requestsGraph)
+        if showDetails:
+            print("rrGraph: ", g.requestsGraph)
         g.RVGraphPairwiseDriverRequest(requests, drivers)
-        print("rvGraph: ",g.rvGraph)
+        if showDetails:
+            print("rvGraph: ",g.rvGraph)
         g2 = RTVGraph(self.constraints_param)
         g2.RTVGraphFindFeasibleTrips(g, drivers)
-        print("rtvGraph: ",g2.rtvGraph)
+        if showDetails:
+            print("rtvGraph: ",g2.rtvGraph)
         g3=AssignTrips(self.constraints_param["maxCost"])
-        g3.Assignment(g2.rtvGraph)
+        g3.assignment(g2.rtvGraph)
         
-        print("assignment: ",g3.assignList)
-        print("assigned V: ",g3. assignedV)
-        print("assigned R: ",g3. assignedR)
+        if showDetails:
+            print("assignment: ",g3.assignList)
+            print("assigned V: ",g3. assignedV)
+            print("assigned R: ",g3. assignedR)
         unAssignedR=[]
         for r,d in g3.assignList:
             d["ongoingRide"].append(r)
@@ -142,8 +146,11 @@ def Test():
         }
     ]
 
-    dMatcher = DynamicTripVehicleAssignmentMatcher({ 'maxMatchDistance': 1 })
+    dMatcher = DynamicTripVehicleAssignmentMatcher({ 'maxMatchDistance': 5000, 'maxCost': 5000 })
     M, R = dMatcher.match(requests, drivers)
+    for r, d in M:
+        print(r["userId"], '->', d["userId"])
+    print(len(R))
 
 if __name__ == "__main__":
     Test()

@@ -52,7 +52,7 @@ class Rebalancing:
         for trip in oneTripList:
             if i == minVidleRko:
                 break
-            if (trip[0] in assignedR) == False and (trip[1] in assignedV) == False: 
+            if (trip[0] not in assignedR)  and (trip[1] not in assignedV) : 
                 assignedR.append(trip[0])
                 assignedV.append(trip[1])
                 self.assignList.append(trip)
