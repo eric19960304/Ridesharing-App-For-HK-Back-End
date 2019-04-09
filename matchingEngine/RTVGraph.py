@@ -96,7 +96,10 @@ class RTVGraph:
     {
     'driver1',('request1'),('request2'),delayMin,
     'driver1',('request2'),('request3'),delayMin
-              
+      (driver,request,request2,delayMin)    
+      (driver,request,delayMin)  
+
+      (driver(no r),request,delayMin)     
     }
     '''
 
