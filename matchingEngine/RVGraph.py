@@ -41,7 +41,7 @@ class RVGraph:
             return getDistance(origin, destination)               
 
     def satifiedAllConstraints(self, minShareDistance, separatedDistance, waitingDistance):
-        if minShareDistance > separatedDistance:
+        if minShareDistance < separatedDistance:
             return True
         #waitingTime: self.maxMatchDistance
         if waitingDistance < self.maxMatchDistance:
@@ -172,10 +172,10 @@ class RVGraph:
                         
                         distanceMatrix = self._getDistanceMatrix(locationList, locationList)
 
-                        delayDistance = float('inf')
-                        waitingDistance = float('inf')
-                        minShareDistance = float('-inf')
-                        separatedDistance = float('inf')
+                        delayDistance = None
+                        waitingDistance = None
+                        minShareDistance = None
+                        separatedDistance = None
 
                         if not driverPassagerList[0]["isOnCar"]:
                             #0: request startLocation, 1: request endLocation, 2: driver Location, 3: passager startLocation, 4: passager endLocation
