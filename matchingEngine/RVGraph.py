@@ -164,9 +164,10 @@ class RVGraph:
                         
                         distanceMatrix = self._getDistanceMatrix(locationList, locationList)
 
-                        delayDistance = 100000
+                        delayDistance = float('inf')
 
                         if not driverPassagerList[0]["isOnCar"]:
+                            #0: request startLocation, 1: request endLocation, 2: driver Location, 3: passager startLocation, 4: passager endLocation
                             minimumShareDistance = min([distanceMatrix[2][0] + distanceMatrix[0][3] + distanceMatrix[3][4] + distanceMatrix[4][1],
                             distanceMatrix[2][0] + distanceMatrix[0][3] + distanceMatrix[3][1] + distanceMatrix[1][4],
                             distanceMatrix[2][3] + distanceMatrix[3][0] + distanceMatrix[0][4] + distanceMatrix[4][1],
@@ -174,8 +175,11 @@ class RVGraph:
 
                             delayDistance = minimumShareDistance - distanceMatrix[2][3] + distanceMatrix[3][4] 
                         else:
-                            delayDistance = min(distanceMatrix[2][0] + distanceMatrix[0][1] + distanceMatrix[1][3] - distanceMatrix[2][3],
-                            distanceMatrix[2][0] + distanceMatrix[0][3] + distanceMatrix[3][1] - distanceMatrix[2][3])
+                            #0: request startLocation, 1: request endLocation, 2: driver Location, 3: passager endLocation
+                            minimumShareDistance = min(distanceMatrix[2][0] + distanceMatrix[0][1] + distanceMatrix[1][3],
+                            distanceMatrix[2][0] + distanceMatrix[0][3] + distanceMatrix[3][1])
+
+                            delayDistance = minimumShareDistance - distanceMatrix[2][3] - distanceMatrix[0][1]
 
                         #delay: self.maxMatchDistance
                         if delayDistance < self.maxMatchDistance:
