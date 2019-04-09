@@ -13,6 +13,7 @@ or
 paper: assign min(Vidle, Rko) no matter how far away
 '''
 from googleMapApiAdapter import getDistance, getDistanceMatrix
+from utils import gridWorldDistance, gridWorldDistanceMatrix
 
 class Rebalancing:
     def __init__(self, constraints_param, useGridWorld=False):
