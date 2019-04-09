@@ -84,7 +84,7 @@ class GreedyMatcher:
         
         output
         (M, R) format:
-        ( [{request, driver}], [request] )
+        ( [(request, driver)], [request] )
 
         '''
         if(len(requests)==0 or len(drivers)==0):

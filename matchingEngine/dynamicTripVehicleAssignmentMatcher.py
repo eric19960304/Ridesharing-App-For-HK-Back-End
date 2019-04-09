@@ -60,7 +60,6 @@ class DynamicTripVehicleAssignmentMatcher:
             "timestamp": number           }]
         '''
         
-        #constraints_param = {"maxMatchDistance": 5000}
         g = RVGraph(self.constraints_param)
         g.RVGraphPairwiseRequests(requests)
         print("rrGraph: ", g.requestsGraph)
@@ -69,7 +68,6 @@ class DynamicTripVehicleAssignmentMatcher:
         g2 = RTVGraph(self.constraints_param)
         g2.RTVGraphFindFeasibleTrips(g, drivers)
         print("rtvGraph: ",g2.rtvGraph)
-        #rtvGraph=[({'userId': 'Antony', 'location': {'latitude': 22.4134546, 'longitude': 114.2105288}, 'ongoingRide': [], 'capacity': 4}, {'id': '2', 'userId': 'Tony', 'startLocation': {'latitude': 22.4134546, 'longitude': 114.2105288}, 'endLocation': {'latitude': 22.283551, 'longitude': 114.134292}, 'timestamp': 1553701760965, 'isOnCar': False}, {'id': '4', 'userId': 'Alex', 'startLocation': {'latitude': 22.4134546, 'longitude': 114.2105288}, 'endLocation': {'latitude': 22.2882899, 'longitude': 114.1416011}, 'timestamp': 1553701760965, 'isOnCar': False}, 23), ({'userId': 'Antony1', 'location': {'latitude': 22.4134546, 'longitude': 114.2105288}, 'ongoingRide': [], 'capacity': 4}, {'id': '2', 'userId': 'Tony', 'startLocation': {'latitude': 22.4134546, 'longitude': 114.2105288}, 'endLocation': {'latitude': 22.283551, 'longitude': 114.134292}, 'timestamp': 1553701760965, 'isOnCar': False}, {'id': '4', 'userId': 'Alex', 'startLocation': {'latitude': 22.4134546, 'longitude': 114.2105288}, 'endLocation': {'latitude': 22.2882899, 'longitude': 114.1416011}, 'timestamp': 1553701760965, 'isOnCar': False}, 23)]
         g3=AssignTrips(self.constraints_param["maxCost"])
         g3.Assignment(g2.rtvGraph)
         

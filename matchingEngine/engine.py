@@ -30,14 +30,12 @@ def startEngine():
         matcher = GreedyMatcher({ 'maxMatchDistance': 2000 })
     elif sys.argv[1]=='dynamic':
         print('using DynamicTripVehicleAssignmentMatcher')
-        matcher = DynamicTripVehicleAssignmentMatcher({ 'maxMatchDistance': 5000,'maxCost':5000 })
+        matcher = DynamicTripVehicleAssignmentMatcher({ 'maxMatchDistance': 5000, 'maxCost':5000 })
     else:
         print('Usage: python engine.py [greedy|dynamic]')
         exit()
 
     while True:
-
-        sleep(5)
 
         queueLen = redisConn.llen(RIDE_REQUEST)
         onlineDriverCount = redisConn.hlen(DRIVER_LOCATION)
@@ -121,10 +119,9 @@ def startEngine():
             if len(remainingRequests)>0:
                 remainingRequestJsons = [ ujson.dumps(r) for r in remainingRequests ]
                 redisConn.rpush(RIDE_REQUEST, *remainingRequestJsons)
-            # end of if
+           
+        sleep(5)
             
-        # end of if
-    # end of while
 
 
 def isDriverOnline(driverLocation):

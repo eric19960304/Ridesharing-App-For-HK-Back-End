@@ -28,14 +28,15 @@ class GridWorldSimulator:
     Note: ? means the field will appear if some conditions are satisfied
     '''
 
-    def __init__(self, gridWorldSize, constraints_param, requetSeq, numOfDrivers, 
+    def __init__(self, gridWorldH, gridWorldW, constraints_param, requetSeq, numOfDrivers, 
         capacity, matchEngineTriggerInterval, algo, showDetails=False):
         '''
         For each time unit t, the simulator will bring all the requets in requetSeq[t] to the simulation
         requetSeq format: 
         [ [request] ]
         '''
-        self.gridWorldSize = gridWorldSize
+        self.gridWorldH = gridWorldH
+        self.gridWorldW = gridWorldW
         self.constraints_param = constraints_param
         self.requetSeq = requetSeq
         self.numOfDrivers = numOfDrivers
@@ -66,11 +67,12 @@ class GridWorldSimulator:
         self.drivers = []
 
         for i in range(self.numOfDrivers):
-            x = randint(0, self.gridWorldSize-1)
-            y = randint(0, self.gridWorldSize-1)
+            x = randint(0, self.gridWorldW-1)
+            y = randint(0, self.gridWorldH-1)
             initLoc = (x,y)
             self.drivers.append( Driver(finishedRequestsRef=self.finishedRequests, \
-                userId=i, initialLocation=initLoc, capacity=self.capacity, gridWorldSize=self.gridWorldSize) )
+                userId=i, initialLocation=initLoc, capacity=self.capacity, \
+                gridWorldH=self.gridWorldH, gridWorldW=self.gridWorldW) )
 
         drivers = [ d.getDriver() for d in self.drivers ]
         
@@ -121,7 +123,7 @@ class GridWorldSimulator:
         print('[t=%d] Finished all rides'%(self.currentTime))
         print('Num of finished/unmatched/total requests: %d/%d/%d' % (len(self.finishedRequests), len(self.requests), self.totalRequestCount))
 class Driver:
-    def __init__(self, finishedRequestsRef, userId, initialLocation, capacity, gridWorldSize):
+    def __init__(self, finishedRequestsRef, userId, initialLocation, capacity, gridWorldW, gridWorldH):
         self.finishedRequestsRef = finishedRequestsRef
         self.driver = {
             "userId": str(userId),
@@ -130,7 +132,8 @@ class Driver:
             "capacity": capacity,
         }
         self.route = []
-        self.gridWorldSize = gridWorldSize
+        self.gridWorldW = gridWorldW
+        self.gridWorldH = gridWorldH
 
     def getDriver(self):
         return self.driver
@@ -164,7 +167,7 @@ class Driver:
             (x, y) = self.driver['location']
             possibleMoves = [ (x+1, y), (x-1, y), (x, y+1), (x, y-1) ]
             possibleMoves = [ move for move in possibleMoves 
-                if move[0]>=0 and move[0]<self.gridWorldSize and move[1]>=0 and move[1]<self.gridWorldSize
+                if move[0]>=0 and move[0]<self.gridWorldW and move[1]>=0 and move[1]<self.gridWorldH
             ]
             newLoc = possibleMoves[randint(0, len(possibleMoves)-1)]
             self.driver['location'] = newLoc
@@ -239,7 +242,7 @@ class Driver:
         self.route = newRoute
 
 
-def generateRequetSeq(gridWorldSize, numOfSeq, maxNumOfRequestsPerSeq):
+def generateRequetSeq(gridWorldW, gridWorldH, numOfSeq, maxNumOfRequestsPerSeq):
     requestSeq = []
     totalRequestCount = 0
     reqId = 0
@@ -253,10 +256,10 @@ def generateRequetSeq(gridWorldSize, numOfSeq, maxNumOfRequestsPerSeq):
 
         for _ in range(numOfRequests):
             while True:
-                startX = randint(0, gridWorldSize-1)
-                startY = randint(0, gridWorldSize-1)
-                endX = randint(0, gridWorldSize-1)
-                endY = randint(0, gridWorldSize-1)
+                startX = randint(0, gridWorldW-1)
+                startY = randint(0, gridWorldH-1)
+                endX = randint(0, gridWorldW-1)
+                endY = randint(0, gridWorldH-1)
                 if (startX, startY) != (endX, endY) and \
                     (startX, startY) not in startPoints and \
                     (endX, endY) not in endPoints:
@@ -290,22 +293,24 @@ if __name__ == '__main__':
     total travel delay = T_drop - T*_arrive
         where T*_arrive the earliest possible time at which the destination could be reached
     '''
-    gridWorldSize = 100
+    gridWorldH = 30
+    gridWorldW = 90
     numOfRoundToGenerateReq = 100
     maxNumOfReqGeneratePerRound = 3
 
     # generate requets for all rounds
-    requetSeq = generateRequetSeq(gridWorldSize, numOfRoundToGenerateReq, maxNumOfReqGeneratePerRound)
+    requetSeq = generateRequetSeq(gridWorldH, gridWorldW, numOfRoundToGenerateReq, maxNumOfReqGeneratePerRound)
 
     gridWorld = GridWorldSimulator(
-        gridWorldSize=100, 
+        gridWorldH=30,
+        gridWorldW=90,
         constraints_param={ 
             'maxMatchDistance': 25,
             'maxWaitingTime': 25,
         }, 
         requetSeq=requetSeq,
         numOfDrivers=30,
-        capacity=2,
+        capacity=3,
         matchEngineTriggerInterval=10,
         algo='greedy',
         showDetails=False
