@@ -132,7 +132,6 @@ class GreedyMatcher:
                 return False
 
         if len(driver['ongoingRide']) > 0:
-            # at least one ongoign ride is sharable with current request
             return self._isShareable(driver['location'], request, driver['ongoingRide'])
         
         # not violating any constraint

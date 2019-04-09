@@ -25,7 +25,7 @@ class AssignTrips:
         self.assignedV = []
         self.assignedR = []
         self.delayMax=delayMax 
-          
+
 
     def assignment(self,rtvGraph, showDetails=False):
         oneRequestTrip = []

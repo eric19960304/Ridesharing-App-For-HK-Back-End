@@ -78,6 +78,7 @@ class DynamicTripVehicleAssignmentMatcher:
             print("assignment: ",g3.assignList)
             print("assigned V: ",g3. assignedV)
             print("assigned R: ",g3. assignedR)
+        
         unAssignedR=[]
         for r,d in g3.assignList:
             d["ongoingRide"].append(r)
