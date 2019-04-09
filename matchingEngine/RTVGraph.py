@@ -6,6 +6,7 @@ RVGraph
 from time import sleep, gmtime, strftime, time
 import requests
 from googleMapApiAdapter import getDistance, getDistanceMatrix
+from utils import gridWorldDistance, gridWorldDistanceMatrix
 
 # redis key name, refer to README for the data struture
 RIDE_REQUEST = 'realTimeRideRequest'
@@ -27,8 +28,7 @@ class RTVGraph:
 
     def _getDistanceMatrix(self, origins, destinations):
         if self.useGridWorld:
-            # TODO
-            return None
+            return gridWorldDistanceMatrix(origins, destinations)
         else:
             return getDistanceMatrix(origins, destinations)                
 
@@ -84,7 +84,7 @@ class RTVGraph:
                    
                    
     
-        #self.rtvGraph.extend(rvGraph.rvGraph)
+        self.rtvGraph.extend(rvGraph.rvGraph)
 
             
         

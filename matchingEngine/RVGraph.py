@@ -3,9 +3,9 @@ RVGraph
 (1) which requests can be pairwise combined: if share > single route then don't pairwise else pair wise
 (2) which vehicles can serve which requests individually, given their current passengers
 '''
-import redis
+
 from time import sleep, gmtime, strftime, time
-import ujson
+
 from googleMapApiAdapter import getDistance, getDistanceMatrix
 from utils import gridWorldDistance, gridWorldDistanceMatrix
 

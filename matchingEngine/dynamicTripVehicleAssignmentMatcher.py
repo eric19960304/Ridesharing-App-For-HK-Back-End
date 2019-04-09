@@ -15,7 +15,8 @@ class DynamicTripVehicleAssignmentMatcher:
         useGridWorld:
             True or False, indicate whether use grid world to do testing
         '''
-        self.maxMatchDistance = constraints_param['maxMatchDistance']
+        #self.maxMatchDistance = constraints_param['maxMatchDistance']
+        self.constraints_param = constraints_param
         self.useGridWorld = useGridWorld
 
     def match(self, requests, drivers):
@@ -59,23 +60,29 @@ class DynamicTripVehicleAssignmentMatcher:
             "timestamp": number           }]
         '''
         
-        constraints_param = {"maxMatchDistance": 100}
-        '''g = RVGraph(constraints_param)
+        #constraints_param = {"maxMatchDistance": 5000}
+        g = RVGraph(self.constraints_param)
         g.RVGraphPairwiseRequests(requests)
-        print("rrGraph: ", g.requestsGraph)
+        #print("rrGraph: ", g.requestsGraph)
         g.RVGraphPairwiseDriverRequest(requests, drivers)
-        print("rvGraph: ",g.rvGraph)
-        g2 = RTVGraph(constraints_param)
+        #print("rvGraph: ",g.rvGraph)
+        g2 = RTVGraph(self.constraints_param)
         g2.RTVGraphFindFeasibleTrips(g, drivers)
-        print("rtvGraph: ",g2.rtvGraph)'''
-        rtvGraph=[({'userId': 'Antony', 'location': {'latitude': 22.4134546, 'longitude': 114.2105288}, 'ongoingRide': [], 'capacity': 4}, {'id': '2', 'userId': 'Tony', 'startLocation': {'latitude': 22.4134546, 'longitude': 114.2105288}, 'endLocation': {'latitude': 22.283551, 'longitude': 114.134292}, 'timestamp': 1553701760965, 'isOnCar': False}, {'id': '4', 'userId': 'Alex', 'startLocation': {'latitude': 22.4134546, 'longitude': 114.2105288}, 'endLocation': {'latitude': 22.2882899, 'longitude': 114.1416011}, 'timestamp': 1553701760965, 'isOnCar': False}, 23), ({'userId': 'Antony1', 'location': {'latitude': 22.4134546, 'longitude': 114.2105288}, 'ongoingRide': [], 'capacity': 4}, {'id': '2', 'userId': 'Tony', 'startLocation': {'latitude': 22.4134546, 'longitude': 114.2105288}, 'endLocation': {'latitude': 22.283551, 'longitude': 114.134292}, 'timestamp': 1553701760965, 'isOnCar': False}, {'id': '4', 'userId': 'Alex', 'startLocation': {'latitude': 22.4134546, 'longitude': 114.2105288}, 'endLocation': {'latitude': 22.2882899, 'longitude': 114.1416011}, 'timestamp': 1553701760965, 'isOnCar': False}, 23)]
-        g3=AssignTrips()
-        g3.Assignment(rtvGraph)
+        #print("rtvGraph: ",g2.rtvGraph)
+        #rtvGraph=[({'userId': 'Antony', 'location': {'latitude': 22.4134546, 'longitude': 114.2105288}, 'ongoingRide': [], 'capacity': 4}, {'id': '2', 'userId': 'Tony', 'startLocation': {'latitude': 22.4134546, 'longitude': 114.2105288}, 'endLocation': {'latitude': 22.283551, 'longitude': 114.134292}, 'timestamp': 1553701760965, 'isOnCar': False}, {'id': '4', 'userId': 'Alex', 'startLocation': {'latitude': 22.4134546, 'longitude': 114.2105288}, 'endLocation': {'latitude': 22.2882899, 'longitude': 114.1416011}, 'timestamp': 1553701760965, 'isOnCar': False}, 23), ({'userId': 'Antony1', 'location': {'latitude': 22.4134546, 'longitude': 114.2105288}, 'ongoingRide': [], 'capacity': 4}, {'id': '2', 'userId': 'Tony', 'startLocation': {'latitude': 22.4134546, 'longitude': 114.2105288}, 'endLocation': {'latitude': 22.283551, 'longitude': 114.134292}, 'timestamp': 1553701760965, 'isOnCar': False}, {'id': '4', 'userId': 'Alex', 'startLocation': {'latitude': 22.4134546, 'longitude': 114.2105288}, 'endLocation': {'latitude': 22.2882899, 'longitude': 114.1416011}, 'timestamp': 1553701760965, 'isOnCar': False}, 23)]
+        g3=AssignTrips(self.constraints_param["maxCost"])
+        g3.Assignment(g2.rtvGraph)
         
-        print("assignment: ",g3.assignList)
-        print("assigned V: ",g3. assignedV)
-        print("assigned R: ",g3. assignedR)
-        return ([], requests)
+        # print("assignment: ",g3.assignList)
+        #print("assigned V: ",g3. assignedV)
+        #print("assigned R: ",g3. assignedR)
+        unAssignedR=[]
+        for r,d in g3.assignList:
+            d["ongoingRide"].append(r)
+        for r in requests:
+            if r not in g3.assignedR:
+                unAssignedR.append(r)
+        return (g3.assignList, unAssignedR)
 
 def Test():
     requests = [
