@@ -42,8 +42,8 @@ class Rebalancing:
         Rko = [item for item in requests if item not in assignedR]
         Vidle = [item for item in drivers if item not in assignedV and len(item["ongoingRide"])==0]
         oneTripList = []
-        for request in Vidle:
-            for driver in Rko:
+        for request in Rko:
+            for driver in Vidle:
                 distance = self._getDistance(driver["location"], request["startLocation"])
                 oneTripList.append( (request, driver, distance) )
         oneTripList.sort(key=lambda tup: tup[2])
