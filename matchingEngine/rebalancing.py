@@ -39,8 +39,8 @@ class Rebalancing:
             return getDistance(origin, destination)  
 
     def rebalance(self, requests, drivers, assignedR, assignedV):
-        Vidle = [item for item in requests if item not in assignedR]
-        Rko = [item for item in drivers if item not in assignedV]
+        Rko = [item for item in requests if item not in assignedR]
+        Vidle = [item for item in drivers if item not in assignedV and len(item["ongoingRide"])==0]
         oneTripList = []
         for request in Vidle:
             for driver in Rko:
