@@ -174,7 +174,8 @@ class RVGraph:
 
                             delayDistance = minimumShareDistance - distanceMatrix[2][3] + distanceMatrix[3][4] 
                         else:
-                            delayDistance = distanceMatrix[2][0] + distanceMatrix[0][1] + distanceMatrix[2][3] - distanceMatrix[2][3]
+                            delayDistance = min(distanceMatrix[2][0] + distanceMatrix[0][1] + distanceMatrix[1][3] - distanceMatrix[2][3],
+                            distanceMatrix[2][0] + distanceMatrix[0][3] + distanceMatrix[3][1] - distanceMatrix[2][3])
 
                         #delay: self.maxMatchDistance
                         if delayDistance < self.maxMatchDistance:
