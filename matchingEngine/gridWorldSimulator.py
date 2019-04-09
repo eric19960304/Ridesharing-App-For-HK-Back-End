@@ -14,6 +14,7 @@ class GridWorldSimulator:
             "isOnCar": False,
             "requestedDate" ? : int,
             "matchedDate" ? : int,
+            "startedRideDate" ? : int,
             "finishedDate" ? : int
         }]
     drivers format:
@@ -27,30 +28,38 @@ class GridWorldSimulator:
     Note: ? means the field will appear if some conditions are satisfied
     '''
 
-    def __init__(
-        self, gridWorldSize, constraints_param, 
-        requestGenDuration, maxNumOfRequestsGenPerRound, 
-        numOfDrivers, capacity, matchEngineTriggerInterval, algo
-        ):
+    def __init__(self, gridWorldSize, constraints_param, requetSeq, numOfDrivers, 
+        capacity, matchEngineTriggerInterval, algo, showDetails=False):
+        '''
+        For each time unit t, the simulator will bring all the requets in requetSeq[t] to the simulation
+        requetSeq format: 
+        [ [request] ]
+        '''
         self.gridWorldSize = gridWorldSize
         self.constraints_param = constraints_param
-        self.requestGenDuration = requestGenDuration
-        self.maxNumOfRequestsGenPerRound = maxNumOfRequestsGenPerRound
-        self.reqId = 0
-        self.driverId = 0
-        self.requests = []
-        self.drivers = []
-        self.currentTime = 0
-        self.matchingRates = []
+        self.requetSeq = requetSeq
         self.numOfDrivers = numOfDrivers
-        self.finishedRequests = []
         self.capacity = capacity
-        self.totalRequestCount = 0
         self.matchEngineTriggerInterval = matchEngineTriggerInterval
+        self.showDetails = showDetails
+        
+        # non param instance variables
+
         if algo=='greedy':
             self.matcher = GreedyMatcher(self.constraints_param, useGridWorld=True)
         else:
             self.matcher = DynamicTripVehicleAssignmentMatcher(self.constraints_param, useGridWorld=True)
+        
+        self.requests = []
+        self.drivers = []
+        self.finishedRequests = []
+        self.matchingRates = []
+        self.shareRates = []
+
+        self.currentTime = 0
+        self.totalRequestCount = 0
+        self.driverId = 0
+        
 
     def startSimulator(self):
 
@@ -73,19 +82,18 @@ class GridWorldSimulator:
         for (s1, s2) in driverInitLocationPairs:
             locationAvgDistance += gridWorldDistance(s1, s2)
         locationAvgDistance /= len(driverInitLocationPairs)
-        print('avg distance of pairwise drivers\' locations:', locationAvgDistance)
+        print('Average distance of pairwise drivers\' locations:', locationAvgDistance)
 
         while True:
             # detect if all requets matched
-            if self.currentTime >= self.requestGenDuration and len(self.requests)==0 and len(self.finishedRequests)==self.totalRequestCount:
+            if self.currentTime >= len(self.requetSeq)  and len(self.requests)==0 and len(self.finishedRequests)==self.totalRequestCount:
                 break
 
-            if self.currentTime < self.requestGenDuration:
-                self._generateRandomRequests()
+            if self.currentTime < len(self.requetSeq):
+                self.totalRequestCount += len(self.requetSeq[self.currentTime])
+                self.requests.extend( self.requetSeq[self.currentTime] )
             
             if self.currentTime%self.matchEngineTriggerInterval==0 and len(self.requests)>0:
-
-                print('[time=%d]'%(self.currentTime))
                 numOfRequest = len(self.requests)
 
                 mappings, remainingRequests = self.matcher.match(self.requests, drivers, self.currentTime)
@@ -100,73 +108,18 @@ class GridWorldSimulator:
                 numOfMatchedReq = numOfRequest-len(remainingRequests)
                 matchRate = numOfMatchedReq / numOfRequest
                 self.matchingRates.append(matchRate)
-                print( "match rate=%.3f, matched/unmatched requests: %d/%d"%(matchRate, len(mappings), len(remainingRequests)) )
-                print( "finished/total requests: %d/%d"%(len(self.finishedRequests), self.totalRequestCount) )
+                print("[t=%d] match rate=%.3f, matched/unmatched/finished/total requests: %d/%d/%d/%d" % \
+                    (self.currentTime, matchRate, len(mappings), len(remainingRequests), \
+                    len(self.finishedRequests), self.totalRequestCount) )
             
             # move all drivers
             for d in self.drivers:
-                d.move(self.currentTime)
+                d.move(self.currentTime, self.showDetails)
             
             # increment time
             self.currentTime += 1
-        print('[time=%d]'%(self.currentTime))
-        print('num of finished/unmatched/total requests: %d/%d/%d' % (len(self.finishedRequests), len(self.requests), self.totalRequestCount))
-
-    def _generateRandomRequests(self):
-        '''
-        return list of points, size is randomized between [1, maxNumOfRequestsGenPerRound-1]
-        '''
-        startPoints = set()
-        endPoints = set()
-        numOfRequests = randint(0, self.maxNumOfRequestsGenPerRound)
-        self.totalRequestCount += numOfRequests
-
-        # print('generating %d requests'%(numOfRequests))
-        for _ in range(numOfRequests):
-            while True:
-                startX = randint(0, self.gridWorldSize-1)
-                startY = randint(0, self.gridWorldSize-1)
-                endX = randint(0, self.gridWorldSize-1)
-                endY = randint(0, self.gridWorldSize-1)
-                if (startX, startY) != (endX, endY) and \
-                    (startX, startY) not in startPoints and \
-                    (endX, endY) not in endPoints:
-                    startPoints.add( (startX, startY) )
-                    endPoints.add( (endX, endY) )
-                    break
-        startPoints = list(startPoints)
-        endPoints = list(endPoints)
-        startEndPoints = zip(startPoints, endPoints)
-        avgDistance = 0
-        for (startPoint, endPoint) in startEndPoints:
-            self.requests.append({
-                "id": str(self.reqId),
-                "userId": str(self.reqId),
-                "startLocation": startPoint,
-                "endLocation": endPoint,
-                "requestedDate": self.currentTime,
-                "isOnCar": False,
-            })
-            self.reqId += 1
-            avgDistance += gridWorldDistance(startPoint, endPoint)
-        
-        # print('avg travel distance: ', avgDistance/len(startPoints))
-
-        # startPointsPairs = list(combinations(startPoints, 2))
-        # startPointAvgDistance = 0
-        # for (s1, s2) in startPointsPairs:
-        #     startPointAvgDistance += gridWorldDistance(s1, s2)
-        # startPointAvgDistance /= len(startPointsPairs)
-        # print('avg distance between startPoints', startPointAvgDistance)
-
-        # endPointsPairs = list(combinations(endPoints, 2))
-        # endPointAvgDistance = 0
-        # for (e1, e2) in endPointsPairs:
-        #     endPointAvgDistance += gridWorldDistance(e1, e2)
-        # endPointAvgDistance /= len(endPointsPairs)
-        # print('avg distance between endPoints', endPointAvgDistance)
-
-
+        print('[t=%d] Finished all rides'%(self.currentTime))
+        print('Num of finished/unmatched/total requests: %d/%d/%d' % (len(self.finishedRequests), len(self.requests), self.totalRequestCount))
 class Driver:
     def __init__(self, finishedRequestsRef, userId, initialLocation, capacity, gridWorldSize):
         self.finishedRequestsRef = finishedRequestsRef
@@ -182,7 +135,7 @@ class Driver:
     def getDriver(self):
         return self.driver
     
-    def move(self, currentTime):
+    def move(self, currentTime, showDetails=False):
         # check if arrived next route point
         if len(self.route) > 0 and self.driver['location']==self.route[0]:
             self.route.pop(0)
@@ -190,15 +143,19 @@ class Driver:
         # detect start and end ride
         for ride in self.driver['ongoingRide']:
             if self.driver['location']==ride['startLocation'] and (not ride['isOnCar']):
-                # print(self.driver['userId'], 'start ride')
+                if showDetails:
+                    print('[t=%d] R%s is now on car (D%s)'%(currentTime, ride['userId'], self.driver['userId']))
+                
                 ride['isOnCar'] = True
+                ride['startedRideDate'] = currentTime
 
             if self.driver['location']==ride['endLocation'] and ride['isOnCar']:
-                # print(self.driver['userId'], 'end ride')
+                if showDetails:
+                    print('[t=%d] R%s arrived dest (D%s)'%(currentTime, ride['userId'], self.driver['userId']))
                 ride['finishedDate'] = currentTime
+                
                 self.finishedRequestsRef.append(ride)
                 self.driver['ongoingRide'].remove(ride)
-                # print('ongoing after end: ', self.driver['ongoingRide'])
                 self.updateRoute()
 
         # move
@@ -273,7 +230,7 @@ class Driver:
         
         # print('possible_cost_bestRoutes', possible_cost_bestRoutes)
     
-        (bestRouteCost, bestRoutePath) = min(possible_cost_bestRoutes)
+        (_, bestRoutePath) = min(possible_cost_bestRoutes)
         # print(bestRoutePath)
         
         newRoute = []
@@ -282,7 +239,63 @@ class Driver:
         self.route = newRoute
 
 
+def generateRequetSeq(gridWorldSize, numOfSeq, maxNumOfRequestsPerSeq):
+    requestSeq = []
+    totalRequestCount = 0
+    reqId = 0
+
+    for i in range(numOfSeq):
+        requests = []
+        startPoints = set()
+        endPoints = set()
+        numOfRequests = randint(0, maxNumOfRequestsPerSeq)
+        totalRequestCount += numOfRequests
+
+        for _ in range(numOfRequests):
+            while True:
+                startX = randint(0, gridWorldSize-1)
+                startY = randint(0, gridWorldSize-1)
+                endX = randint(0, gridWorldSize-1)
+                endY = randint(0, gridWorldSize-1)
+                if (startX, startY) != (endX, endY) and \
+                    (startX, startY) not in startPoints and \
+                    (endX, endY) not in endPoints:
+                    startPoints.add( (startX, startY) )
+                    endPoints.add( (endX, endY) )
+                    break
+        startPoints = list(startPoints)
+        endPoints = list(endPoints)
+        startEndPoints = zip(startPoints, endPoints)
+        avgDistance = 0
+        for (startPoint, endPoint) in startEndPoints:
+            requests.append({
+                "id": str(reqId),
+                "userId": str(reqId),
+                "startLocation": startPoint,
+                "endLocation": endPoint,
+                "requestedDate": i,
+                "isOnCar": False,
+            })
+            reqId += 1
+            avgDistance += gridWorldDistance(startPoint, endPoint)
+        requestSeq.append(requests)
+    
+    return requestSeq
+
+
+
 if __name__ == '__main__':
+    '''
+    Waiting time= T_pickup - T_request
+    total travel delay = T_drop - T*_arrive
+        where T*_arrive the earliest possible time at which the destination could be reached
+    '''
+    gridWorldSize = 100
+    numOfRoundToGenerateReq = 100
+    maxNumOfReqGeneratePerRound = 3
+
+    # generate requets for all rounds
+    requetSeq = generateRequetSeq(gridWorldSize, numOfRoundToGenerateReq, maxNumOfReqGeneratePerRound)
 
     gridWorld = GridWorldSimulator(
         gridWorldSize=100, 
@@ -290,11 +303,11 @@ if __name__ == '__main__':
             'maxMatchDistance': 25,
             'maxWaitingTime': 25,
         }, 
-        requestGenDuration=50, 
-        maxNumOfRequestsGenPerRound=10, 
+        requetSeq=requetSeq,
         numOfDrivers=30,
         capacity=2,
         matchEngineTriggerInterval=10,
-        algo='greedy'
+        algo='greedy',
+        showDetails=False
     )
     gridWorld.startSimulator()
