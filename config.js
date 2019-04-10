@@ -15,7 +15,7 @@ const config = {
     },
     domainName,
     google_map_api_key: process.env.GOOGLE_MAP_API_KEY || 'apikeyNotFound',
-    default_driver_seat_number: 4
+    default_driver_seat_number: 2
 };
 
 module.exports = config;
