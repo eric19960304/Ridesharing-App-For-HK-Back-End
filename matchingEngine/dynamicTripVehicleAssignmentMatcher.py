@@ -19,7 +19,7 @@ class DynamicTripVehicleAssignmentMatcher:
         self.constraints_param = constraints_param
         self.useGridWorld = useGridWorld
 
-    def match(self, requests, drivers, showDetails=False):
+    def match(self, requests, drivers, currentTime=None, showDetails=False):
         '''
         Input
         requests format:
@@ -60,19 +60,19 @@ class DynamicTripVehicleAssignmentMatcher:
             "timestamp": number           }]
         '''
         
-        g = RVGraph(self.constraints_param)
+        g = RVGraph(self.constraints_param, self.useGridWorld)
         g.RVGraphPairwiseRequests(requests)
         if showDetails:
             print("rrGraph: ", g.requestsGraph)
         g.RVGraphPairwiseDriverRequest(requests, drivers)
         if showDetails:
             print("rvGraph: ",g.rvGraph)
-        g2 = RTVGraph(self.constraints_param)
+        g2 = RTVGraph(self.constraints_param, self.useGridWorld)
         g2.RTVGraphFindFeasibleTrips(g, drivers)
         if showDetails:
             print("rtvGraph: ",g2.rtvGraph)
-        g3=AssignTrips(self.constraints_param["maxCost"])
-        g3.assignment(g2.rtvGraph)
+        g3=AssignTrips(self.constraints_param["maxCost"], self.useGridWorld)
+        g3.assignment(g2.rtvGraph, showDetails=showDetails)
         
         if showDetails:
             print("assignment: ",g3.assignList)

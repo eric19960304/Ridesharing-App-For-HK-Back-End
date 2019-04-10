@@ -20,11 +20,12 @@ DRIVER_ON_GOING_RIDE = 'driverOngoingRide'
 '''
 
 class AssignTrips:
-    def __init__(self,delayMax=5000):
+    def __init__(self,delayMax=5000, useGridWorld=False):
         self.assignList = []    
         self.assignedV = []
         self.assignedR = []
         self.delayMax=delayMax 
+        self.useGridWorld = useGridWorld
           
 
     def assignment(self,rtvGraph, showDetails=False):

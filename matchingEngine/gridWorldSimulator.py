@@ -99,6 +99,15 @@ class GridWorldSimulator:
 
                 self.requests = remainingRequests
 
+                numOfOnogingReq = 0
+                for d in self.drivers:
+                    if d.matchedRide >= 2 and len(d.driver['ongoingRide'])==0:
+                        # driver not used anymore
+                        continue
+                    
+                    numOfOnogingReq += len(driver['ongoingRide'])
+                    
+
                 for (req, driver) in mappings:
                     req['matchedDate'] = self.currentTime
                     driverIdx = int(driver['userId'])
@@ -112,13 +121,13 @@ class GridWorldSimulator:
 
                 # print stat
                 if len(mappings)>0:
-                    print("[t=%d] match rate=%.3f, matched/unmatched/finished/total requests: %d/%d/%d/%d" % \
-                        (self.currentTime, matchRate, len(mappings), len(remainingRequests), len(self.finishedRequests), self.totalRequestCount))
+                    print("[t=%d] match rate=%.3f, matched/unmatched/ongoing/finished/total requests: %d/%d/%d/%d" % \
+                        (self.currentTime, matchRate, len(mappings), len(remainingRequests), numOfOnogingReq,len(self.finishedRequests), self.totalRequestCount))
                     
                 else:
                     print("[t=%d] No match found. "%(self.currentTime))
-                    print("\tmatch rate=%.3f, matched/unmatched/finished/total requests: %d/%d/%d/%d" % \
-                        (matchRate, len(mappings), len(remainingRequests), len(self.finishedRequests), self.totalRequestCount))
+                    print("\tmatch rate=%.3f, matched/unmatched/ongoing/finished/total requests: %d/%d/%d/%d" % \
+                        (matchRate, len(mappings), len(remainingRequests), numOfOnogingReq, len(self.finishedRequests), self.totalRequestCount))
 
             # calc stat
             numOfOccupiedSeat = 0
@@ -384,7 +393,7 @@ if __name__ == '__main__':
     '''
     gridWorldH = 1000  # 1km
     gridWorldW = 5000  # 5km
-    unitOfTimeToGenerate = 300   # 600 ~ generate request for first 1 hour
+    unitOfTimeToGenerate = 100   # 600 ~ generate request for first 1 hour
     maxNumOfReqGeneratePerUnitTime = 10      # generate how many requests every 6 seconds
     maxNumOfDriverGeneratePerUnitTime = 3  # generate how many requests every 6 seconds
 
@@ -406,8 +415,9 @@ if __name__ == '__main__':
         gridWorldW=gridWorldW,
         gridWorldH=gridWorldH,
         constraints_param={ 
-            'maxMatchDistance': 500,
+            'maxMatchDistance': 2500,
             'maxWaitingTime': 20,
+            'maxCost': 2000
         }, 
         requetSeq=requetSeq,
         driverLocSeq=driverLocSeq,
