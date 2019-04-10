@@ -59,5 +59,69 @@ loc = {
     'science_park': {
         "latitude":22.425799, 
         "longitude": 114.210726
-    }
+    },
+    'case1_D1': {
+        "latitude": 22.33595, 
+        "longitude": 114.17545
+    },
+    'case1_D2': {
+        "latitude": 22.33054,
+        "longitude": 114.16065
+    },
+    'case1_R1_start': {
+        "latitude": 22.33713, 
+        "longitude": 114.17267 
+    },
+    'case1_R1_end': {
+        "latitude": 22.33521, 
+        "longitude": 114.15641
+    },
+    'case1_R2_start': {
+        "latitude": 22.33041, 
+        "longitude": 114.16282
+    },
+    'case1_R2_end': {
+        "latitude": 22.32516, 
+        "longitude": 114.1682
+    },
+    'case2_D1': {
+        "latitude": 22.28625, 
+        "longitude": 114.15146
+    },
+    'case2_D2': {
+        "latitude": 22.28234, 
+        "longitude": 114.15505
+    },
+    'case2_R1_start': {
+        "latitude": 22.28633, 
+        "longitude": 114.14901
+    },
+    'case2_R1_end': {
+        "latitude": 22.28352, 
+        "longitude": 114.13275
+    },
+    'case2_R2_start': {
+        "latitude": 22.28099, 
+        "longitude": 114.1561
+    },
+    'case2_R2_end': {
+        "latitude": 22.2833, 
+        "longitude": 114.13678
+    },
+    'case2_R3_start': {
+        "latitude": 22.28233, 
+        "longitude": 114.15328
+    },
+    'case2_R3_end': {
+        "latitude": 22.28075, 
+        "longitude": 114.16929
+    },
+    'case2_R4_start': {
+        "latitude": 22.27722, 
+        "longitude": 114.13685
+    },
+    'case2_R4_end': {
+        "latitude": 22.27805, 
+        "longitude": 114.14683
+    },
 }

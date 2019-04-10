@@ -84,7 +84,7 @@ def startEngine():
             try:
                 # match
                 mappings, remainingRequests = matcher.match(requests, drivers)
-
+                
                 print("[{}] : ".format( getTimeStr() ), 'mapping (passenger->driver): ')
                 for q, d in mappings:
                     if 'nickname' in q and 'nickname' in d:

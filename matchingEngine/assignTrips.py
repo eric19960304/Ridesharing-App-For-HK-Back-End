@@ -52,7 +52,8 @@ class AssignTrips:
             # print(trip[0] in self.assignedV)
             # print(trip[1] in self.assignedR)
             # print(trip[2] in self.assignedR)
-            print(trip[-1] in self.assignedR)
+            if showDetails:
+                print(trip[-1] in self.assignedR)
             if trip[-1]<self.delayMax and (trip[0] not in self.assignedV) and (trip[1] not in self.assignedR): 
                #print("hi ",trip[2])
                 if len(trip)==4:
@@ -63,7 +64,8 @@ class AssignTrips:
                         self.assignedR.append(trip[1])
                         self.assignedR.append(trip[2])
                 else:
-                    print ('loop',' trip1:',trip[1],' trip0:',trip[0] )
+                    if showDetails:
+                        print ('loop',' trip1:',trip[1],' trip0:',trip[0] )
                     self.assignList.append((trip[1],trip[0]))
                     self.assignedR.append(trip[1])
                     self.assignedV.append(trip[0])

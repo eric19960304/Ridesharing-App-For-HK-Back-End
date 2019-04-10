@@ -79,13 +79,11 @@ class DynamicTripVehicleAssignmentMatcher:
             print("assigned V: ",g3. assignedV)
             print("assigned R: ",g3. assignedR)
         
-        unAssignedR=[]
         for r,d in g3.assignList:
             d["ongoingRide"].append(r)
-        for r in requests:
-            if r not in g3.assignedR:
-                unAssignedR.append(r)
-        return (g3.assignList, unAssignedR)
+        
+        remainingReq = [ r for r in requests if r not in g3.assignedR ]
+        return (g3.assignList, remainingReq)
 
 def Test():
     requests = [

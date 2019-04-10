@@ -1,5 +1,6 @@
 from random import randint
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 import numpy as np
 
 from greedyMatcher import GreedyMatcher
@@ -48,6 +49,8 @@ class GridWorldSimulator:
         self.capacity = capacity
         self.matchEngineTriggerInterval = matchEngineTriggerInterval
         self.showDetails = showDetails
+        self.avgWaitingTime = 0
+        self.avgtotalDelay = 0
         
         # non param instance variables
 
@@ -174,13 +177,16 @@ class GridWorldSimulator:
             totalWaitingTime += req['startedRideDate'] - req['requestedDate']
 
             optimalTravelTime = gridWorldDistance(req['startLocation'], req['endLocation']) / self.driverSpeed
-            actualTravelTime = req['finishedDate'] - req['startedRideDate']
-            totalDelay += actualTravelTime - optimalTravelTime
+            actualTravelTime = req['finishedDate'] - req['requestedDate']
+            if actualTravelTime - optimalTravelTime > 0:
+                totalDelay += actualTravelTime - optimalTravelTime
         reqLen = len(self.finishedRequests)
         # print('Total waiting time   = %d'%(totalWaitingTime))
         # print('Total delay          = %d'%(totalDelay))
-        print('Average waiting time = %.3f'%(totalWaitingTime/reqLen))
-        print('Average delay after start ride = %.3f'%(totalDelay/reqLen))
+        self.avgWaitingTime = totalWaitingTime/reqLen
+        self.avgtotalDelay = totalDelay/reqLen
+        print('Average waiting time = %.3f'%(self.avgWaitingTime))
+        print('Average delay after start ride = %.3f'%(self.avgtotalDelay))
 
 class Driver:
     def __init__(self, finishedRequestsRef, userId, initialLocation, capacity, gridWorldW, gridWorldH):
@@ -386,7 +392,7 @@ if __name__ == '__main__':
     '''
     gridWorldH = 1000  # 1km
     gridWorldW = 5000  # 5km
-    unitOfTimeToGenerate = 100   # 600 ~ generate request for first 1 hour
+    unitOfTimeToGenerate = 50   # 600 ~ generate request for first 1 hour
     maxNumOfReqGeneratePerUnitTime = 4      # generate how many requests every 6 seconds
     maxNumOfDriverGeneratePerUnitTime = 2  # generate how many requests every 6 seconds
 
@@ -404,7 +410,7 @@ if __name__ == '__main__':
             driversLoc.append( (x,y) )
         driverLocSeq.append( driversLoc )
 
-    gridWorld = GridWorldSimulator(
+    gridWorld_greedy = GridWorldSimulator(
         gridWorldW=gridWorldW,
         gridWorldH=gridWorldH,
         constraints_param={ 
@@ -420,8 +426,25 @@ if __name__ == '__main__':
         algo='greedy',
         showDetails=False
     )
-    gridWorld.startSimulator()
+    gridWorld_greedy.startSimulator()
 
+    gridWorld_dynamic = GridWorldSimulator(
+        gridWorldW=gridWorldW,
+        gridWorldH=gridWorldH,
+        constraints_param={ 
+            'maxMatchDistance': 2000,
+            'maxWaitingTime': 20,
+            'maxCost': 2000
+        }, 
+        requetSeq=requetSeq,
+        driverLocSeq=driverLocSeq,
+        driverSpeed=41,    # ~25 km/h
+        capacity=2,
+        matchEngineTriggerInterval=10,
+        algo='dynamic',
+        showDetails=False
+    )
+    gridWorld_dynamic.startSimulator()
 
     # print stats
 
@@ -432,7 +455,6 @@ if __name__ == '__main__':
     totalDriver = 0
     for seq in driverLocSeq:
         totalDriver += len(seq)
-
 
     print()
     print('num of requsts =', totalRequest)
@@ -459,28 +481,53 @@ if __name__ == '__main__':
     # show driver location distribution
     xs = [ loc[0] for loc in driversLocations ]
     ys = [ loc[1] for loc in driversLocations ]
-    fig, (ax2) = plt.subplots(1, 1)
+    
+    gs = gridspec.GridSpec(2, 2)
 
-    # ax1.set_title('Driver spawn location distribution')
-    # ax1.set_xlabel('x', fontsize=12)
-    # ax1.set_ylabel('y', fontsize=12)
-    # ax1.plot(xs, ys, 'o')
-    # ax1.set_aspect(aspect=1)
-    
-    ax2.set_title('Algorithm Performance')
-    ax2.set_xlabel('time', fontsize=12)
-    ax2.set_ylabel('%', fontsize=12)
-    x = [ x for (x, _) in gridWorld.shareRates ]
-    y = [ y for (_, y) in gridWorld.shareRates ]
-    ax2.plot(x, y, linestyle='-', label='share rate')
-    
-    x = [ x for (x, _) in gridWorld.matchingRates ]
-    y = [ y for (_, y) in gridWorld.matchingRates ]
-    ax2.plot(x, y, linestyle='--', label='match rate')
-    
-    x = [ x for (x, _) in gridWorld.seatUtilization ]
-    y = [ y for (_, y) in gridWorld.seatUtilization ]
-    ax2.plot(x, y, linestyle='-.', label='seat utilization')
+    ax = plt.subplot(gs[0, 0])
+    ax.set_title('Matching Details of greedy')
+    ax.set_xlabel('time', fontsize=12)
+    ax.set_ylabel('%', fontsize=12)
+    x = [ x for (x, _) in gridWorld_greedy.shareRates ]
+    y = [ y for (_, y) in gridWorld_greedy.shareRates ]
+    ax.plot(x, y, linestyle='-', label='share rate')
+    x = [ x for (x, _) in gridWorld_greedy.matchingRates ]
+    y = [ y for (_, y) in gridWorld_greedy.matchingRates ]
+    ax.plot(x, y, linestyle='--', label='match rate')
+    x = [ x for (x, _) in gridWorld_greedy.seatUtilization ]
+    y = [ y for (_, y) in gridWorld_greedy.seatUtilization ]
+    ax.plot(x, y, linestyle='-.', label='seat utilization')
+    ax.legend()
 
-    plt.legend(loc='best')
+    ax = plt.subplot(gs[0, 1])
+    ax.set_title('Matching Details of dynamic')
+    ax.set_xlabel('time', fontsize=12)
+    ax.set_ylabel('%', fontsize=12)
+    x = [ x for (x, _) in gridWorld_dynamic.shareRates ]
+    y = [ y for (_, y) in gridWorld_dynamic.shareRates ]
+    ax.plot(x, y, linestyle='-', label='share rate')
+    x = [ x for (x, _) in gridWorld_dynamic.matchingRates ]
+    y = [ y for (_, y) in gridWorld_dynamic.matchingRates ]
+    ax.plot(x, y, linestyle='--', label='match rate')
+    x = [ x for (x, _) in gridWorld_dynamic.seatUtilization ]
+    y = [ y for (_, y) in gridWorld_dynamic.seatUtilization ]
+    ax.plot(x, y, linestyle='-.', label='seat utilization')
+    ax.legend()
+
+    ax = plt.subplot(gs[1, 0])
+    numOfBarGroup = 2
+    idex = np.arange(numOfBarGroup)
+    bar_width = 0.35
+    opacity = 0.8
+    greedy_data = (gridWorld_greedy.avgWaitingTime, gridWorld_greedy.avgtotalDelay)
+    dynamic_data = (gridWorld_dynamic.avgWaitingTime, gridWorld_dynamic.avgtotalDelay)
+    rects1 = ax.bar(idex, greedy_data, bar_width, alpha=opacity, color='b', label='Greedy')
+    rects2 = ax.bar(idex + bar_width, dynamic_data, bar_width, alpha=opacity, color='r', label='Dynamic')
+    ax.set_ylabel('Time Unit')
+    ax.set_title('Delay')
+    ax.set_xticks(idex + bar_width)
+    ax.set_xticklabels( ('Avg Waiting Time', 'Avg Total Delay') )
+    ax.legend()
+
+    plt.tight_layout()
     plt.show()
