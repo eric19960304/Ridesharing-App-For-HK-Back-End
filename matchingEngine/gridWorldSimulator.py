@@ -72,14 +72,12 @@ class GridWorldSimulator:
     def startSimulator(self):
 
         while True:
-            # detect if all requets matched
-            if self.currentTime >= len(self.requetSeq)  and len(self.requests)==0 and len(self.finishedRequests)==self.totalRequestCount:
-                break
-
+            # extract request from sequence
             if self.currentTime < len(self.requetSeq):
                 self.totalRequestCount += len(self.requetSeq[self.currentTime])
                 self.requests.extend( self.requetSeq[self.currentTime] )
             
+            # extract driver from sequence
             if self.currentTime < len(self.driverLocSeq):
                 self.totalDriverCount += len(self.driverLocSeq[self.currentTime])
                 for loc in self.driverLocSeq[self.currentTime]:
@@ -99,70 +97,56 @@ class GridWorldSimulator:
 
                 self.requests = remainingRequests
 
-                numOfOnogingReq = 0
-                for d in self.drivers:
-                    if d.matchedRide >= 2 and len(d.driver['ongoingRide'])==0:
-                        # driver not used anymore
-                        continue
-                    
-                    numOfOnogingReq += len(driver['ongoingRide'])
-                    
-
                 for (req, driver) in mappings:
                     req['matchedDate'] = self.currentTime
                     driverIdx = int(driver['userId'])
                     self.drivers[driverIdx].updateRoute()
                     self.drivers[driverIdx].matchedRide += 1
+
+                # calc stat
+                numOfOccupiedSeat = 0
+                numOfCurrentTotalSeats = 0
+                numOfSharedOngoingRide = 0
+                numOfNonSharedOngoingRide = 0
+
+                for driver in self.drivers:
+                    ongoingRideLen = len(driver.driver['ongoingRide'])
+                    if ongoingRideLen == 2:
+                        numOfSharedOngoingRide += ongoingRideLen
+                    if ongoingRideLen == 1:
+                        numOfNonSharedOngoingRide += ongoingRideLen
+
+                    if driver.matchedRide >= 2 and len(driver.driver['ongoingRide'])==0:
+                        # driver not used anymore
+                        continue
+                    numOfOccupiedSeat += len(driver.driver['ongoingRide'])
+                    numOfCurrentTotalSeats += self.capacity
+                
+                numOfEmptySeats = numOfCurrentTotalSeats - numOfOccupiedSeat
+                if numOfCurrentTotalSeats > 0 and self.currentTime >= self.matchEngineTriggerInterval:
+                    u = numOfOccupiedSeat / numOfCurrentTotalSeats
+                    self.seatUtilization.append( (self.currentTime, u) )
+                
+                totalOngoingRide = numOfSharedOngoingRide + numOfNonSharedOngoingRide
+                if totalOngoingRide > 0 and self.currentTime >= self.matchEngineTriggerInterval:
+                    sharedRate = numOfSharedOngoingRide / totalOngoingRide
+                    self.shareRates.append( (self.currentTime, sharedRate) )
+
                 
                 numOfMatchedReq = numOfRequest-len(remainingRequests)
                 matchRate = numOfMatchedReq / numOfRequest
                 if self.currentTime >= self.matchEngineTriggerInterval and numOfRequest>0:
                     self.matchingRates.append( (self.currentTime, matchRate) )
 
-                # print stat
                 if len(mappings)>0:
-                    print("[t=%d] match rate=%.3f, matched/unmatched/ongoing/finished/total requests: %d/%d/%d/%d" % \
-                        (self.currentTime, matchRate, len(mappings), len(remainingRequests), numOfOnogingReq,len(self.finishedRequests), self.totalRequestCount))
+                    print("[t=%d] match rate=%.3f, matched/unmatched/finished/total requests: %d/%d/%d/%d" % \
+                        (self.currentTime, matchRate, len(mappings), len(remainingRequests),len(self.finishedRequests), self.totalRequestCount))
                     
                 else:
                     print("[t=%d] No match found. "%(self.currentTime))
                     print("\tmatch rate=%.3f, matched/unmatched/ongoing/finished/total requests: %d/%d/%d/%d" % \
-                        (matchRate, len(mappings), len(remainingRequests), numOfOnogingReq, len(self.finishedRequests), self.totalRequestCount))
+                        (matchRate, len(mappings), len(remainingRequests), len(self.finishedRequests), self.totalRequestCount))
 
-            # calc stat
-            numOfOccupiedSeat = 0
-            numOfCurrentTotalSeats = 0
-            numOfSharedOngoingRide = 0
-            numOfNonSharedOngoingRide = 0
-
-            if not drivers:
-                drivers = [ d.getDriver() for d in self.drivers if d.matchedRide < 2 ]
-
-            for driver in drivers:
-                driverIdx = int(driver['userId'])
-                if self.drivers[driverIdx].matchedRide >= 2 and len(driver['ongoingRide'])==0:
-                    # driver not used anymore
-                    continue
-                
-                numOfOccupiedSeat += len(driver['ongoingRide'])
-                numOfCurrentTotalSeats += self.capacity
-            numOfEmptySeats = numOfCurrentTotalSeats - numOfOccupiedSeat
-            if numOfCurrentTotalSeats > 0 and self.currentTime >= self.matchEngineTriggerInterval:
-                u = numOfOccupiedSeat / numOfCurrentTotalSeats
-                self.seatUtilization.append( (self.currentTime, u) )
-
-            
-            for driver in self.drivers:
-                ongoingRideLen = len(driver.driver['ongoingRide'])
-                if ongoingRideLen == 2:
-                    numOfSharedOngoingRide += ongoingRideLen
-                if ongoingRideLen == 1:
-                    numOfNonSharedOngoingRide += ongoingRideLen
-            totalOngoingRide = numOfSharedOngoingRide + numOfNonSharedOngoingRide
-            sharedRate = 0
-            if totalOngoingRide > 0 and self.currentTime >= self.matchEngineTriggerInterval:
-                sharedRate = numOfSharedOngoingRide / totalOngoingRide
-                self.shareRates.append( (self.currentTime, sharedRate) )
 
             # move all drivers
             for d in self.drivers:
@@ -170,6 +154,15 @@ class GridWorldSimulator:
             
             # increment time
             self.currentTime += 1
+
+            # detect if all ongoing ride ended
+            if self.currentTime >= len(self.requetSeq):
+                hasOngoingRideInProgress = False
+                for driver in self.drivers:
+                    if len(driver.driver['ongoingRide']) > 0:
+                        hasOngoingRideInProgress = True
+                if not hasOngoingRideInProgress:
+                    break
         
         print('[t=%d] Finished all rides'%(self.currentTime))
         print('Num of finished/unmatched/total requests: %d/%d/%d' % (len(self.finishedRequests), len(self.requests), self.totalRequestCount))
@@ -394,8 +387,8 @@ if __name__ == '__main__':
     gridWorldH = 1000  # 1km
     gridWorldW = 5000  # 5km
     unitOfTimeToGenerate = 100   # 600 ~ generate request for first 1 hour
-    maxNumOfReqGeneratePerUnitTime = 10      # generate how many requests every 6 seconds
-    maxNumOfDriverGeneratePerUnitTime = 3  # generate how many requests every 6 seconds
+    maxNumOfReqGeneratePerUnitTime = 4      # generate how many requests every 6 seconds
+    maxNumOfDriverGeneratePerUnitTime = 2  # generate how many requests every 6 seconds
 
     # generate requets for all rounds
     requetSeq = generateRequetSeq(gridWorldW, gridWorldH, unitOfTimeToGenerate, maxNumOfReqGeneratePerUnitTime)
@@ -415,7 +408,7 @@ if __name__ == '__main__':
         gridWorldW=gridWorldW,
         gridWorldH=gridWorldH,
         constraints_param={ 
-            'maxMatchDistance': 2500,
+            'maxMatchDistance': 500,
             'maxWaitingTime': 20,
             'maxCost': 2000
         }, 
