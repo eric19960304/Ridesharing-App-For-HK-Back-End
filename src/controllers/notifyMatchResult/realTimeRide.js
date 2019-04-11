@@ -72,7 +72,7 @@ const storeRideDetailsToRedis = (req, res, next) => {
         }
     });
 
-    if(req.users[0]._id.toString()===req.users[1]._id.toString()){
+    if(req.users.length < 2){
         req.rider = req.users[0];
     }
 
