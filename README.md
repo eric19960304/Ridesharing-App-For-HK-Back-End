@@ -80,7 +80,9 @@ To install all the packages:
 
 To run the matching engine:
 
-`python engine_v1.py` (under /matchingEngine directory)
+`python engine.py greedy` or `python engine.py dynamic` (under /matchingEngine directory)
+
+where greedy means to use greedy algorihms and means to use "On-demand high-capacity ride-sharing via dynamic trip-vehicle assignment".
 
 
 # Grid World Simulator
