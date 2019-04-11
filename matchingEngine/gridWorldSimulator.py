@@ -552,5 +552,5 @@ if __name__ == '__main__':
 
         fig = plt.gcf()
         fig.set_size_inches(15, 12)
-        fig.suptitle('%d fix drivers / %d total passengers'%(numOfDrivers, totalRequest), fontsize=24)
+        fig.suptitle('%d fix drivers / %d total ride requests'%(numOfDrivers, totalRequest), fontsize=24)
         fig.savefig('simulationResult/%d_%d.png'%(numOfDrivers, totalRequest))

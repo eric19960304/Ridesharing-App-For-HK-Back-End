@@ -67,8 +67,10 @@ class DynamicTripVehicleAssignmentMatcher:
         g.RVGraphPairwiseDriverRequest(requests, drivers)
         if showDetails:
             print("rvGraph: ",g.rvGraph)
+        
+        driversInRV = [ d for d,_,_ in g.rvGraph ]
         g2 = RTVGraph(self.constraints_param, self.useGridWorld)
-        g2.RTVGraphFindFeasibleTrips(g, drivers)
+        g2.RTVGraphFindFeasibleTrips(g, driversInRV)
         if showDetails:
             print("rtvGraph: ",g2.rtvGraph)
         g3=AssignTrips(self.constraints_param["maxCost"], self.useGridWorld)
