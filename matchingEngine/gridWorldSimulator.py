@@ -398,7 +398,7 @@ if __name__ == '__main__':
     '''
     gridWorldH = 1000  # 1km
     gridWorldW = 5000  # 5km
-    numOfReqToGenAtFirst = 10      # generate how many requests every 6 seconds
+    numOfReqToGenAtFirst = 100      # generate how many requests every 6 seconds
     # maxNumOfDriverGeneratePerUnitTime = 2  # generate how many requests every 6 seconds
     totalRequests = numOfReqToGenAtFirst
     numOfDriversChoices = [
@@ -507,14 +507,14 @@ if __name__ == '__main__':
     idex = np.arange(numOfBarGroup)
     bar_width = 0.35
     opacity = 0.8
-    data_1 = tuple([ sim.shareRates[0] for sim in greedySimulators])
-    data_2 = tuple([ sim.shareRates[0] for sim in greedySimulators])
-    rects1 = ax.bar(idex, data_1, bar_width, alpha=opacity, color='r', label='Greedy')
-    rects2 = ax.bar(idex + bar_width, data_2, bar_width, alpha=opacity, color='b', label='Dynamic')
+    data_1 = tuple([ sim.shareRates[0][1] for sim in greedySimulators])
+    data_2 = tuple([ sim.shareRates[0][1] for sim in dynamicSimulators])
+    rects1 = ax.bar(idex, data_1, bar_width, alpha=opacity, color='c', label='Greedy')
+    rects2 = ax.bar(idex + bar_width, data_2, bar_width, alpha=opacity, color='y', label='Dynamic')
     ax.set_ylabel('rate', fontsize=12)
     ax.set_title('Match rate', fontsize=16)
     ax.set_xticks(idex + bar_width/2)
-    ax.set_xticklabels( ('2:1', '1:1', '1:2') )
+    ax.set_xticklabels( ('2:1', '1:1\n\n(driver:request)', '1:2') )
     ax.legend()
 
     ax = plt.subplot(gs[0, 1])
@@ -523,16 +523,16 @@ if __name__ == '__main__':
     bar_width = 0.35
     opacity = 0.8
     data_1 = tuple([ sim.avgtotalDelay for sim in greedySimulators])
-    data_2 = tuple([ sim.avgtotalDelay for sim in greedySimulators])
+    data_2 = tuple([ sim.avgtotalDelay for sim in dynamicSimulators])
     rects1 = ax.bar(idex, data_1, bar_width, alpha=opacity, color='r', label='Greedy')
     rects2 = ax.bar(idex + bar_width, data_2, bar_width, alpha=opacity, color='b', label='Dynamic')
     ax.set_ylabel('time unit', fontsize=12)
     ax.set_title('Total Delay (for finished rides)', fontsize=16)
     ax.set_xticks(idex + bar_width/2)
-    ax.set_xticklabels( ('2:1', '1:1', '1:2') )
+    ax.set_xticklabels( ('2:1', '1:1\n\n(driver:request)', '1:2') )
     ax.legend()
 
     fig = plt.gcf()
     fig.set_size_inches(15, 12)
-    fig.suptitle('%d fix drivers / %d total ride requests'%(numOfDrivers, totalRequest), fontsize=24)
-    fig.savefig('simulationResult/%d_%d.png'%(numOfDrivers, totalRequest))
+    fig.suptitle('%d total ride requests'%(totalRequest), fontsize=24)
+    fig.savefig('simulationResult/%drequest.png'%(totalRequest))

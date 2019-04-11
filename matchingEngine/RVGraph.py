@@ -72,7 +72,7 @@ class RVGraph:
     '''
 
     def RVGraphPairwiseRequests(self, rideRequests):
-        for (request, request2) in list(itertools.combinations(rideRequests, 2)):
+        for request, request2 in itertools.combinations(rideRequests, 2):
             #create location List contain two requests' start and end point
             locationList = []
             locationList.append( request["startLocation"] )
