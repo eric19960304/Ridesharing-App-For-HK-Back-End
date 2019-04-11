@@ -126,20 +126,20 @@ class GridWorldSimulator:
                     numOfCurrentTotalSeats += self.capacity
                 
                 # numOfEmptySeats = numOfCurrentTotalSeats - numOfOccupiedSeat
-                if numOfCurrentTotalSeats > 0 and self.currentTime >= self.matchEngineTriggerInterval:
+                if numOfCurrentTotalSeats > 0:
                     u = numOfOccupiedSeat / numOfCurrentTotalSeats
                     self.seatUtilization.append( (self.currentTime, u) )
                 
                 self.numOfRemainingRequests.append( (self.currentTime, len(remainingRequests)) )
 
                 totalOngoingRide = numOfSharedOngoingRide + numOfNonSharedOngoingRide
-                if totalOngoingRide > 0 and self.currentTime >= self.matchEngineTriggerInterval:
+                if totalOngoingRide > 0:
                     sharedRate = numOfSharedOngoingRide / totalOngoingRide
                     self.shareRates.append( (self.currentTime, sharedRate) )
 
                 numOfMatchedReq = numOfRequest-len(remainingRequests)
                 matchRate = numOfMatchedReq / numOfRequest
-                if self.currentTime >= self.matchEngineTriggerInterval and numOfRequest>0:
+                if numOfRequest>0:
                     self.matchingRates.append( (self.currentTime, matchRate) )
 
                 if len(mappings)>0:
@@ -398,7 +398,7 @@ if __name__ == '__main__':
     '''
     gridWorldH = 1000  # 1km
     gridWorldW = 5000  # 5km
-    numOfReqToGenAtFirst = 100      # generate how many requests every 6 seconds
+    numOfReqToGenAtFirst = 10      # generate how many requests every 6 seconds
     # maxNumOfDriverGeneratePerUnitTime = 2  # generate how many requests every 6 seconds
     totalRequests = numOfReqToGenAtFirst
     numOfDriversChoices = [
@@ -502,7 +502,7 @@ if __name__ == '__main__':
     # plot figure
     gs = gridspec.GridSpec(1, 2)
 
-    ax = plt.subplot(gs[0, 1])
+    ax = plt.subplot(gs[0, 0])
     numOfBarGroup = 3
     idex = np.arange(numOfBarGroup)
     bar_width = 0.35
