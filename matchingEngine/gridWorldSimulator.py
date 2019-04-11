@@ -78,6 +78,8 @@ class GridWorldSimulator:
             # extract request from sequence
             if self.currentTime < len(self.requetSeq):
                 self.totalRequestCount += len(self.requetSeq[self.currentTime])
+                for r in self.requetSeq[self.currentTime]:
+                    r['isOnCar']=False
                 self.requests.extend( self.requetSeq[self.currentTime] )
             
             # extract driver from sequence
@@ -178,8 +180,7 @@ class GridWorldSimulator:
 
             optimalTravelTime = gridWorldDistance(req['startLocation'], req['endLocation']) / self.driverSpeed
             actualTravelTime = req['finishedDate'] - req['requestedDate']
-            if actualTravelTime - optimalTravelTime > 0:
-                totalDelay += actualTravelTime - optimalTravelTime
+            totalDelay += actualTravelTime - optimalTravelTime
         reqLen = len(self.finishedRequests)
         # print('Total waiting time   = %d'%(totalWaitingTime))
         # print('Total delay          = %d'%(totalDelay))
