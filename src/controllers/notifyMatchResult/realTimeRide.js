@@ -72,7 +72,7 @@ const storeRideDetailsToRedis = (req, res, next) => {
         }
     });
 
-    if(req.users.length < 2){
+    if(!req.rider){
         req.rider = req.users[0];
     }
 
