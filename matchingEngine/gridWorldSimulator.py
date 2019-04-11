@@ -179,12 +179,6 @@ class GridWorldSimulator:
             optimalTravelTime = gridWorldDistance(req['startLocation'], req['endLocation']) / self.driverSpeed
             actualTravelTime = req['finishedDate'] - req['requestedDate']
             totalDelay += actualTravelTime - optimalTravelTime
-            
-            if req['finishedDate'] < req['startedRideDate']:
-                print('Error!!!', req)
-                raise Exception('finishedDate < startedRideDate')
-        # for req in self.requests:
-        #     totalWaitingTime += self.currentTime - req['requestedDate']
         reqLen = len(self.finishedRequests)
         # print('Total waiting time   = %d'%(totalWaitingTime))
         # print('Total delay          = %d'%(totalDelay))

@@ -1,5 +1,6 @@
 # HKUCS FYP Back End Server for Ridesharing App
 
+This repository implemented a Nodejs webserver for our ride-sharing app with two matching algorithms, an originated greedy algorithm and an advanced algorithm from the academic paper "On-demand high-capacity ride-sharing via dynamic trip-vehicle assignment" (https://www.pnas.org/content/114/3/462). Two algorithms are evaluated using both real-world test cases and a grid world simulator.
 
 Also see the App repository: https://github.com/eric19960304/Ridesharing-App-For-HK
 
@@ -79,8 +80,26 @@ To install all the packages:
 
 To run the matching engine:
 
-`python engine_v1.py` (under /matchingEngine directory)
+`python engine.py greedy` or `python engine.py dynamic` (under /matchingEngine directory)
 
+where greedy means to use greedy algorihms and means to use "On-demand high-capacity ride-sharing via dynamic trip-vehicle assignment".
+
+
+# Grid World Simulator
+
+
+<img src="https://raw.githubusercontent.com/eric19960304/Ridesharing-App-For-HK-Back-End/master/images/testing/60_900.png" width="800">
+
+
+The grid world simulator will generate fixed number of drivers at the beginning at random locations and generate a sequences of random requests. Then, the grid world will pass the generated drivers and sequences of requests to both greedy and the "On-demand high-capacity ride-sharing via dynamic trip-vehicle assignment" (dynamic for short) for simulation. Every 10 time units, matching will be conducted, and matched drivers will start move toward their best routes to serve all the ongoing rides assigned to them. After the requests sequences is consumed, matching will not be conducted anymore, and the drivers will finish their remaining rides, then the simulation will end and statistics will be generated using matplotlib.
+
+
+To run the simulator:
+
+`python simulator.py` (under /matchingEngine directory)
+
+
+you can adjust the parameters at the (almost) bottom of the simulator.py file.
 
 
 # Integration Test

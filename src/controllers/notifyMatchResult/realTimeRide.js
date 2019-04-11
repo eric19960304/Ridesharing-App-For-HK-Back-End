@@ -72,6 +72,10 @@ const storeRideDetailsToRedis = (req, res, next) => {
         }
     });
 
+    if(!req.rider){
+        req.rider = req.users[0];
+    }
+
     let driverOngoingRideList;
     redisClient.HGET(REDIS_KEYS.DRIVER_ON_GOING_RIDE, driverId, (err, data)=>{
         if(data===null){

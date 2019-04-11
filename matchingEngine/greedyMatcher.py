@@ -16,7 +16,7 @@ class GreedyMatcher:
         M: a set of mapping
     
     Steps:
-    Q <- all requests, D <- all drivers, R <- {}, M <- {}
+    Q <- all requests, D <- all drivers, M <- {}
     C <- { (q, d ) | q ∈ Q ∧ d ∈ D }
     sort C in ascending order by distance(q.start_location, s.current_location)
     S <- {}
@@ -188,21 +188,30 @@ class GreedyMatcher:
         # print(bestRoutePath)
         
 
-        # calculate best route of onGoingRides
-        possible_cost_bestOnGoingRoutes = []
-        pathLen = numOfReqLocations-2
-        for path in permutations(list(range(pathLen))):
-            cost = distMatrix[-1][path[0]]
-            for i in range(pathLen-1):
-                cost += distMatrix[ path[i] ][ path[i+1] ]
-            possible_cost_bestOnGoingRoutes.append( (cost, path) )
+        # # calculate best route of onGoingRides
+        # possible_cost_bestOnGoingRoutes = []
+        # pathLen = numOfReqLocations-2
+        # for path in permutations(list(range(pathLen))):
+        #     cost = distMatrix[-1][path[0]]
+        #     for i in range(pathLen-1):
+        #         cost += distMatrix[ path[i] ][ path[i+1] ]
+        #     possible_cost_bestOnGoingRoutes.append( (cost, path) )
         
-        # print('possible_cost_bestOnGoingRoutes', possible_cost_bestOnGoingRoutes)
+        # # print('possible_cost_bestOnGoingRoutes', possible_cost_bestOnGoingRoutes)
     
-        (bestOnGoingRouteCost, bestOnGoingRoutePath) = min(possible_cost_bestOnGoingRoutes)
+        # (bestOnGoingRouteCost, bestOnGoingRoutePath) = min(possible_cost_bestOnGoingRoutes)
 
-        # distance(requestToMatch) + distance(bestOnGoingRoute)
-        sumOfSeperateCost = bestOnGoingRouteCost + distMatrix[numOfReqLocations-2][numOfReqLocations-1]
+        # # distance(requestToMatch) + distance(bestOnGoingRoute)
+        # sumOfSeperateCost = bestOnGoingRouteCost + distMatrix[numOfReqLocations-2][numOfReqLocations-1]
+        sumOfSeperateCost = 0
+        i = 0
+        for ongoing in onGoingRides:
+            if ongoing['isOnCar']:
+                sumOfSeperateCost += distMatrix[-1][i+1]
+            else:
+                sumOfSeperateCost += distMatrix[i][i+1]
+            i+=2
+        sumOfSeperateCost += distMatrix[-3][-2]
 
         # print(bestRouteCost, sumOfSeperateCost)
         return bestRouteCost <= sumOfSeperateCost
