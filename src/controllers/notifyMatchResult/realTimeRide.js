@@ -103,9 +103,7 @@ const saveRideLogsToDB = (req, res, next) => {
         _id: ObjectId(),
         rideId: riderReq.id,
         driverId: driverReq.userId,
-        driverEmail: req.driver.email,
         riderId: riderReq.userId,
-        riderEmail: req.rider.email,
         startLocation: {
             latitude: riderReq.startLocation.latitude,
             longitude: riderReq.startLocation.longitude
