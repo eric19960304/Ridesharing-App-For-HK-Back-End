@@ -126,10 +126,11 @@ class GreedyMatcher:
             return False
         
         if self._getStrictLineDistance(request['startLocation'], driver['location']) > self.maxMatchDistance:
-            if currentTime!=None and self.maxWaitingTime!=None and currentTime - request['requestedDate'] > self.maxWaitingTime:
-                return True
-            else:
-                return False
+            # if currentTime!=None and self.maxWaitingTime!=None and currentTime - request['requestedDate'] > self.maxWaitingTime:
+            #     return True
+            # else:
+            #     return False
+            return False
 
         if len(driver['ongoingRide']) > 0:
             return self._isShareable(driver['location'], request, driver['ongoingRide'])
