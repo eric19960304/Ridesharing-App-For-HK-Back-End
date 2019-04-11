@@ -72,6 +72,10 @@ const storeRideDetailsToRedis = (req, res, next) => {
         }
     });
 
+    if(req.users[0]._id.toString()===req.users[1]._id.toString()){
+        req.rider = req.users[0];
+    }
+
     let driverOngoingRideList;
     redisClient.HGET(REDIS_KEYS.DRIVER_ON_GOING_RIDE, driverId, (err, data)=>{
         if(data===null){
@@ -103,7 +107,9 @@ const saveRideLogsToDB = (req, res, next) => {
         _id: ObjectId(),
         rideId: riderReq.id,
         driverId: driverReq.userId,
+        driverEmail: req.driver.email,
         riderId: riderReq.userId,
+        riderEmail: req.rider.email,
         startLocation: {
             latitude: riderReq.startLocation.latitude,
             longitude: riderReq.startLocation.longitude
