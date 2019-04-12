@@ -512,7 +512,11 @@ if __name__ == '__main__':
     ax.set_ylabel('rate', fontsize=12)
     ax.set_title('Match rate', fontsize=16)
     ax.set_xticks(idex + bar_width/2)
-    ax.set_xticklabels( ('2:1', '1:1\n\n(driver:request)', '1:2') )
+    ax.set_xticklabels( (
+        '2:1\n(%d:%d)'%(totalRequests*2,totalRequests), 
+        '1:1\n(%d:%d)'%(totalRequests, totalRequests), 
+        '1:2\n(%d:%d)'%(totalRequests//2, totalRequests))
+    )
     ax.legend()
 
     ax = plt.subplot(gs[0, 1])
@@ -527,10 +531,14 @@ if __name__ == '__main__':
     ax.set_ylabel('time unit', fontsize=12)
     ax.set_title('Total Delay', fontsize=16)
     ax.set_xticks(idex + bar_width/2)
-    ax.set_xticklabels( ('2:1', '1:1\n\n(driver:request)', '1:2') )
+    ax.set_xticklabels( (
+        '2:1\n(%d:%d)'%(totalRequests*2,totalRequests), 
+        '1:1\n(%d:%d)'%(totalRequests, totalRequests), 
+        '1:2\n(%d:%d)'%(totalRequests//2, totalRequests))
+    )
     ax.legend()
 
     fig = plt.gcf()
     fig.set_size_inches(24, 12)
-    fig.suptitle('%d total ride requests'%(totalRequests), fontsize=24)
+    fig.suptitle('Performance of different driver-request ratio', fontsize=24)
     fig.savefig('simulationResult/%drequest.png'%(totalRequests))
