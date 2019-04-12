@@ -184,7 +184,7 @@ class GreedyMatcher:
         
         # print('possible_cost_bestRoutes', possible_cost_bestRoutes)
     
-        (bestRouteCost, bestRoutePath) = min(possible_cost_bestRoutes)
+        (bestRouteCost, _) = min(possible_cost_bestRoutes)
         # print(bestRoutePath)
         
 
@@ -199,7 +199,7 @@ class GreedyMatcher:
         
         # print('possible_cost_bestOnGoingRoutes', possible_cost_bestOnGoingRoutes)
     
-        (bestOnGoingRouteCost, bestOnGoingRoutePath) = min(possible_cost_bestOnGoingRoutes)
+        (bestOnGoingRouteCost, _) = min(possible_cost_bestOnGoingRoutes)
 
         # distance(requestToMatch) + distance(bestOnGoingRoute)
         sumOfSeperateCost = bestOnGoingRouteCost + distMatrix[numOfReqLocations-2][numOfReqLocations-1]

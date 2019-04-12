@@ -398,7 +398,7 @@ if __name__ == '__main__':
     '''
     gridWorldH = 1000  # 1km
     gridWorldW = 5000  # 5km
-    numOfReqToGenAtFirst = 11      # generate how many requests every 6 seconds
+    numOfReqToGenAtFirst = 50      # generate how many requests every 6 seconds
     # maxNumOfDriverGeneratePerUnitTime = 2  # generate how many requests every 6 seconds
     totalRequests = numOfReqToGenAtFirst
     numOfDriversChoices = [
@@ -533,6 +533,6 @@ if __name__ == '__main__':
     ax.legend()
 
     fig = plt.gcf()
-    fig.set_size_inches(15, 12)
+    fig.set_size_inches(24, 12)
     fig.suptitle('%d total ride requests'%(totalRequests), fontsize=24)
     fig.savefig('simulationResult/%drequest.png'%(totalRequests))
