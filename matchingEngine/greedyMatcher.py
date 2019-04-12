@@ -214,7 +214,6 @@ class GreedyMatcher:
             i+=2
         sumOfSeperateCost += distMatrix[-3][-2]
 
-        print(bestRouteCost, sumOfSeperateCost)
         return bestRouteCost <= sumOfSeperateCost
 
         

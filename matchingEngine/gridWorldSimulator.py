@@ -181,8 +181,8 @@ class GridWorldSimulator:
             totalDelay += actualTravelTime - optimalTravelTime
         
         for req in self.requests:
-            totalWaitingTime += req['startedRideDate'] - req['requestedDate']
-            totalDelay += req['startedRideDate'] - req['requestedDate']
+            totalWaitingTime += self.currentTime - req['requestedDate']
+            totalDelay += self.currentTime - req['requestedDate']
 
         # print('Total waiting time   = %d'%(totalWaitingTime))
         # print('Total delay          = %d'%(totalDelay))
