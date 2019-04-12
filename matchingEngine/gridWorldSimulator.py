@@ -444,8 +444,6 @@ if __name__ == '__main__':
             gridWorldH=gridWorldH,
             constraints_param={ 
                 'maxMatchDistance': 1000,
-                'maxWaitingTime': 20,
-                'maxCost': 1000
             }, 
             requetSeq=requetSeq,
             driverLocSeq=driverLocSeq,
@@ -464,7 +462,6 @@ if __name__ == '__main__':
             gridWorldH=gridWorldH,
             constraints_param={ 
                 'maxMatchDistance': 1000,
-                'maxWaitingTime': 20,
                 'maxCost': 1000
             }, 
             requetSeq=requetSeq,
