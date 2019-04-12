@@ -179,9 +179,14 @@ class GridWorldSimulator:
             optimalTravelTime = gridWorldDistance(req['startLocation'], req['endLocation']) / self.driverSpeed
             actualTravelTime = req['finishedDate'] - req['requestedDate']
             totalDelay += actualTravelTime - optimalTravelTime
-        reqLen = len(self.finishedRequests)
+        
+        for req in self.requests:
+            totalWaitingTime += req['startedRideDate'] - req['requestedDate']
+            totalDelay += req['startedRideDate'] - req['requestedDate']
+
         # print('Total waiting time   = %d'%(totalWaitingTime))
         # print('Total delay          = %d'%(totalDelay))
+        reqLen = len(self.finishedRequests) + len(self.requests)
         self.avgWaitingTime = totalWaitingTime/reqLen
         self.avgtotalDelay = totalDelay/reqLen
         print('Average waiting time = %.3f'%(self.avgWaitingTime))
@@ -392,9 +397,8 @@ if __name__ == '__main__':
     '''
     gridWorldH = 1000  # 1km
     gridWorldW = 5000  # 5km
-    unitOfTimeToGenerate = 100
+    unitOfTimeToGenerate = 50
     maxNumOfReqGeneratePerUnitTime = 3      # generate how many requests every 6 seconds
-    # maxNumOfDriverGeneratePerUnitTime = 2  # generate how many requests every 6 seconds
     totalRequests = unitOfTimeToGenerate*maxNumOfReqGeneratePerUnitTime
     numOfDriversChoices = [
         (maxNumOfReqGeneratePerUnitTime*10)*2,   # when first match driver:request = 2:1
@@ -443,7 +447,7 @@ if __name__ == '__main__':
             }, 
             requetSeq=requetSeq,
             driverLocSeq=driverLocSeq,
-            driverSpeed=41,    # ~25 km/h
+            driverSpeed=82,    # ~25 km/h
             capacity=2,
             matchEngineTriggerInterval=10,
             algo='greedy',
