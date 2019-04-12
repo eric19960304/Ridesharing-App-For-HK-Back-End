@@ -122,7 +122,9 @@ Steps to run integration test:
 
 3. [optional] you can now run the front end Expo client to observe the requests path and drivers icon
 
-4. run the matching engine "engine_v1.py" (under /matchingEngine directory) to see the result
+4. run the matching engine "engine.py" (under /matchingEngine directory) to see the result
+
+`python engine.py greedy` and `python engine.py dynamic`
 
 
 The result should be like this:
