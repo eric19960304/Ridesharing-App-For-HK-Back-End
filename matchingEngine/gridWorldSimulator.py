@@ -183,9 +183,10 @@ class GridWorldSimulator:
             if req['finishedDate'] < req['startedRideDate']:
                 print('Error!!!', req)
                 raise Exception('finishedDate < startedRideDate')
-        # for req in self.requests:
-        #     totalWaitingTime += self.currentTime - req['requestedDate']
-        reqLen = len(self.finishedRequests)
+        for req in self.requests:
+            totalWaitingTime += self.currentTime - req['requestedDate']
+            totalDelay += self.currentTime - req['requestedDate']
+        reqLen = len(self.finishedRequests) + len(self.requests)
         # print('Total waiting time   = %d'%(totalWaitingTime))
         # print('Total delay          = %d'%(totalDelay))
         self.avgWaitingTime = totalWaitingTime/reqLen
@@ -442,9 +443,9 @@ if __name__ == '__main__':
             gridWorldW=gridWorldW,
             gridWorldH=gridWorldH,
             constraints_param={ 
-                'maxMatchDistance': 2000,
+                'maxMatchDistance': 1000,
                 'maxWaitingTime': 20,
-                'maxCost': 2000
+                'maxCost': 1000
             }, 
             requetSeq=requetSeq,
             driverLocSeq=driverLocSeq,
@@ -462,9 +463,9 @@ if __name__ == '__main__':
             gridWorldW=gridWorldW,
             gridWorldH=gridWorldH,
             constraints_param={ 
-                'maxMatchDistance': 2000,
+                'maxMatchDistance': 1000,
                 'maxWaitingTime': 20,
-                'maxCost': 2000
+                'maxCost': 1000
             }, 
             requetSeq=requetSeq,
             driverLocSeq=driverLocSeq,
@@ -527,7 +528,7 @@ if __name__ == '__main__':
     rects1 = ax.bar(idex, data_1, bar_width, alpha=opacity, color='r', label='Greedy')
     rects2 = ax.bar(idex + bar_width, data_2, bar_width, alpha=opacity, color='b', label='Dynamic')
     ax.set_ylabel('time unit', fontsize=12)
-    ax.set_title('Total Delay (for finished rides)', fontsize=16)
+    ax.set_title('Total Delay', fontsize=16)
     ax.set_xticks(idex + bar_width/2)
     ax.set_xticklabels( ('2:1', '1:1\n\n(driver:request)', '1:2') )
     ax.legend()
