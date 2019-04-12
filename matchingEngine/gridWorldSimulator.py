@@ -186,7 +186,7 @@ class GridWorldSimulator:
 
         # print('Total waiting time   = %d'%(totalWaitingTime))
         # print('Total delay          = %d'%(totalDelay))
-        reqLen = len(self.finishedRequests)
+        reqLen = len(self.finishedRequests) + len(self.requests)
         self.avgWaitingTime = totalWaitingTime/reqLen
         self.avgtotalDelay = totalDelay/reqLen
         print('Average waiting time = %.3f'%(self.avgWaitingTime))
