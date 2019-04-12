@@ -448,7 +448,7 @@ if __name__ == '__main__':
             }, 
             requetSeq=requetSeq,
             driverLocSeq=driverLocSeq,
-            driverSpeed=41,    # ~25 km/h
+            driverSpeed=82,    # ~25 km/h
             capacity=2,
             matchEngineTriggerInterval=10,
             algo='greedy',
