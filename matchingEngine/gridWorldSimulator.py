@@ -186,7 +186,7 @@ class GridWorldSimulator:
 
         # print('Total waiting time   = %d'%(totalWaitingTime))
         # print('Total delay          = %d'%(totalDelay))
-        reqLen = len(self.finishedRequests) + len(self.requests)
+        reqLen = len(self.finishedRequests)
         self.avgWaitingTime = totalWaitingTime/reqLen
         self.avgtotalDelay = totalDelay/reqLen
         print('Average waiting time = %.3f'%(self.avgWaitingTime))
@@ -397,7 +397,7 @@ if __name__ == '__main__':
     '''
     gridWorldH = 1000  # 1km
     gridWorldW = 5000  # 5km
-    unitOfTimeToGenerate = 50
+    unitOfTimeToGenerate = 100
     maxNumOfReqGeneratePerUnitTime = 3      # generate how many requests every 6 seconds
     totalRequests = unitOfTimeToGenerate*maxNumOfReqGeneratePerUnitTime
     numOfDriversChoices = [
@@ -436,46 +436,6 @@ if __name__ == '__main__':
         print('num of drivers =', numOfDrivers)
 
         print()
-        print('Start Greedy simulation')
-        gridWorld_greedy = GridWorldSimulator(
-            gridWorldW=gridWorldW,
-            gridWorldH=gridWorldH,
-            constraints_param={ 
-                'maxMatchDistance': 2000,
-                'maxWaitingTime': 20,
-                'maxCost': 2000
-            }, 
-            requetSeq=requetSeq,
-            driverLocSeq=driverLocSeq,
-            driverSpeed=82,    # ~25 km/h
-            capacity=2,
-            matchEngineTriggerInterval=10,
-            algo='greedy',
-            showDetails=False
-        )
-        gridWorld_greedy.startSimulator()
-
-        print()
-        print('Start Dynamic simulation')
-        gridWorld_dynamic = GridWorldSimulator(
-            gridWorldW=gridWorldW,
-            gridWorldH=gridWorldH,
-            constraints_param={ 
-                'maxMatchDistance': 2000,
-                'maxWaitingTime': 20,
-                'maxCost': 2000
-            }, 
-            requetSeq=requetSeq,
-            driverLocSeq=driverLocSeq,
-            driverSpeed=82,    # ~50 km/h
-            capacity=2,
-            matchEngineTriggerInterval=10,
-            algo='dynamic',
-            showDetails=False
-        )
-        gridWorld_dynamic.startSimulator()
-
-        print()
         # calculate avg travel distance of requests
         startLocations = [ req['startLocation'] for seq in requetSeq for req in seq ]
         endLocations = [ req['endLocation'] for seq in requetSeq for req in seq ]
@@ -493,6 +453,46 @@ if __name__ == '__main__':
             locationAvgDistance += gridWorldDistance(s1, s2)
         locationAvgDistance /= len(driverInitLocationPairs)
         print('Average distance of pairwise drivers\' locations:', locationAvgDistance)
+
+        print()
+        print('Start Greedy simulation')
+        gridWorld_greedy = GridWorldSimulator(
+            gridWorldW=gridWorldW,
+            gridWorldH=gridWorldH,
+            constraints_param={ 
+                'maxMatchDistance': 1000,
+                'maxWaitingTime': 20,
+                'maxCost': 1000
+            }, 
+            requetSeq=requetSeq,
+            driverLocSeq=driverLocSeq,
+            driverSpeed=82,    # ~25 km/h
+            capacity=2,
+            matchEngineTriggerInterval=10,
+            algo='greedy',
+            showDetails=False
+        )
+        gridWorld_greedy.startSimulator()
+
+        print()
+        print('Start Dynamic simulation')
+        gridWorld_dynamic = GridWorldSimulator(
+            gridWorldW=gridWorldW,
+            gridWorldH=gridWorldH,
+            constraints_param={ 
+                'maxMatchDistance': 1000,
+                'maxWaitingTime': 20,
+                'maxCost': 1000
+            }, 
+            requetSeq=requetSeq,
+            driverLocSeq=driverLocSeq,
+            driverSpeed=82,    # ~50 km/h
+            capacity=2,
+            matchEngineTriggerInterval=10,
+            algo='dynamic',
+            showDetails=False
+        )
+        gridWorld_dynamic.startSimulator()
 
         # plot figure
         gs = gridspec.GridSpec(2, 2)
@@ -543,7 +543,7 @@ if __name__ == '__main__':
         rects1 = ax.bar(idex, greedy_data, bar_width, alpha=opacity, color='r', label='Greedy')
         rects2 = ax.bar(idex + bar_width, dynamic_data, bar_width, alpha=opacity, color='b', label='Dynamic')
         ax.set_ylabel('time unit', fontsize=12)
-        ax.set_title('Delay (for finished rides)', fontsize=16)
+        ax.set_title('Delay', fontsize=16)
         ax.set_xticks(idex + bar_width/2)
         ax.set_xticklabels( ('avg waiting time', 'avg total delay') )
         ax.legend()
