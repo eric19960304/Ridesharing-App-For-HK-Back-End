@@ -397,13 +397,13 @@ if __name__ == '__main__':
     '''
     gridWorldH = 1000  # 1km
     gridWorldW = 5000  # 5km
-    unitOfTimeToGenerate = 300
-    maxNumOfReqGeneratePerUnitTime = 3      # generate how many requests every 6 seconds
+    unitOfTimeToGenerate = 200
+    maxNumOfReqGeneratePerUnitTime = 5      # generate how many requests every 6 seconds
     totalRequests = unitOfTimeToGenerate*maxNumOfReqGeneratePerUnitTime
     numOfDriversChoices = [
-        (maxNumOfReqGeneratePerUnitTime*10)*2,   # when first match driver:request = 2:1
-        (maxNumOfReqGeneratePerUnitTime*10),   # when first match driver:request = 1:1
-        (maxNumOfReqGeneratePerUnitTime*10)//2,  # when first match driver:request = 1:2
+        totalRequests//10,   
+        totalRequests//20,   
+        totalRequests//30,  
     ]
 
     for numOfDrivers in numOfDriversChoices:
