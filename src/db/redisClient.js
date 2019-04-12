@@ -5,7 +5,7 @@ redisClient.on('error', (err) => {
     console.log("Error " + err);
 });
 
-// redisClient.flushall();
-// console.log('Flushed all cache on Redis');
+redisClient.flushall();
+console.log('Flushed all cache on Redis');
 
 module.exports = redisClient;

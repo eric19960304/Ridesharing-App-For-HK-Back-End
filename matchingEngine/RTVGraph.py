@@ -45,6 +45,8 @@ class RTVGraph:
                             found=True
                         if d == driver and r == request2:
                             found1=True
+                        if found1 and found:
+                            break
 
                     if found1==True and found==True:
                         locationList = []

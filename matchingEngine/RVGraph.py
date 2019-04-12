@@ -8,6 +8,7 @@ from time import sleep, gmtime, strftime, time
 
 from googleMapApiAdapter import getDistance, getDistanceMatrix
 from utils import gridWorldDistance, gridWorldDistanceMatrix
+import itertools
 
 # redis key name, refer to README for the data struture
 RIDE_REQUEST = 'realTimeRideRequest'
@@ -71,37 +72,32 @@ class RVGraph:
     '''
 
     def RVGraphPairwiseRequests(self, rideRequests):
-        for request in rideRequests:
-            for request2 in rideRequests:
-                if (request, request2) in self.requestsGraph or (request2, request) in self.requestsGraph:
-                    continue
-                if request == request2:
-                    continue
-                #create location List contain two requests' start and end point
-                locationList = []
-                locationList.append( request["startLocation"] )
-                locationList.append( request2["startLocation"] )
-                locationList.append( request["endLocation"] )
-                locationList.append( request2["endLocation"] )
-                #calculate the matrix with those four points
-                distanceMatrix = self._getDistanceMatrix(locationList, locationList)
-                spearatedRideDistance = distanceMatrix[0][2] + distanceMatrix[1][3]
+        for (request, request2) in list(itertools.combinations(rideRequests, 2)):
+            #create location List contain two requests' start and end point
+            locationList = []
+            locationList.append( request["startLocation"] )
+            locationList.append( request2["startLocation"] )
+            locationList.append( request["endLocation"] )
+            locationList.append( request2["endLocation"] )
+            #calculate the matrix with those four points
+            distanceMatrix = self._getDistanceMatrix(locationList, locationList)
+            spearatedRideDistance = distanceMatrix[0][2] + distanceMatrix[1][3]
 
-                possibleDistance = []
-                for i in range(0,2):
-                    for j in range(1, -1, -1):
-                        if i == j:
-                            continue
-                        for k in range(2,4):
-                            for l in range(3, 1, -1):
-                                if k == l:
-                                    continue
-                                pathDistance = distanceMatrix[i][j] + distanceMatrix[j][k] + distanceMatrix[k][l]
-                                possibleDistance.append( pathDistance )
-                shareRideDistance = min(possibleDistance)
+            possibleDistance = []
+            for i in range(0,2):
+                for j in range(1, -1, -1):
+                    if i == j:
+                        continue
+                    for k in range(2,4):
+                        for l in range(3, 1, -1):
+                            if k == l:
+                                continue
+                            pathDistance = distanceMatrix[i][j] + distanceMatrix[j][k] + distanceMatrix[k][l]
+                            possibleDistance.append( pathDistance )
+            shareRideDistance = min(possibleDistance)
 
-                if shareRideDistance < spearatedRideDistance:
-                    self.requestsGraph.append( (request, request2) )
+            if shareRideDistance < spearatedRideDistance:
+                self.requestsGraph.append( (request, request2) )
                                 
 
 
