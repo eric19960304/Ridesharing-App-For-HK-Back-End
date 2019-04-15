@@ -67,7 +67,7 @@ class GridWorldSimulator:
         self.seatUtilization = []
         self.numOfRemainingRequests = []
 
-        self.currentTime = 0
+        self.currentTime = 1
         self.totalRequestCount = 0
         self.totalDriverCount = 0
         self.nextDriverId = 0
@@ -77,23 +77,25 @@ class GridWorldSimulator:
 
         while True:
             # extract request from sequence
-            if self.currentTime < len(self.requetSeq):
-                self.totalRequestCount += len(self.requetSeq[self.currentTime])
-                for r in self.requetSeq[self.currentTime]:
+            if self.currentTime <= len(self.requetSeq):
+                curIdx = self.currentTime - 1
+                self.totalRequestCount += len(self.requetSeq[curIdx])
+                for r in self.requetSeq[curIdx]:
                     r['isOnCar'] = False
-                self.requests.extend( self.requetSeq[self.currentTime] )
+                self.requests.extend( self.requetSeq[curIdx] )
             
             # extract driver from sequence
-            if self.currentTime < len(self.driverLocSeq):
-                self.totalDriverCount += len(self.driverLocSeq[self.currentTime])
-                for loc in self.driverLocSeq[self.currentTime]:
+            if self.currentTime <= len(self.driverLocSeq):
+                curIdx = self.currentTime - 1
+                self.totalDriverCount += len(self.driverLocSeq[curIdx])
+                for loc in self.driverLocSeq[curIdx]:
                     self.drivers.append( Driver(finishedRequestsRef=self.finishedRequests, \
                     userId=self.nextDriverId, initialLocation=loc, \
                     capacity=self.capacity, gridWorldW=self.gridWorldW, gridWorldH=self.gridWorldH) )
                     self.nextDriverId += 0
             
 
-            if self.currentTime!=0 and self.currentTime%self.matchEngineTriggerInterval==0 and len(self.requests)>0 and self.currentTime <= len(self.requetSeq):
+            if self.currentTime!=1 and self.currentTime%self.matchEngineTriggerInterval==0 and len(self.requests)>0 and self.currentTime <= len(self.requetSeq):
                 numOfRequest = len(self.requests)
                 drivers = [ d.getDriver() for d in self.drivers if len(d.getDriver()['ongoingRide']) < 2 ]
 
@@ -397,8 +399,8 @@ if __name__ == '__main__':
     '''
     gridWorldH = 1000  # 1km
     gridWorldW = 5000  # 5km
-    unitOfTimeToGenerate = 200
-    maxNumOfReqGeneratePerUnitTime = 5      # generate how many requests every 6 seconds
+    unitOfTimeToGenerate = 100
+    maxNumOfReqGeneratePerUnitTime = 2      # generate how many requests every 6 seconds
     totalRequests = unitOfTimeToGenerate*maxNumOfReqGeneratePerUnitTime
     numOfDriversChoices = [
         totalRequests//10,   
