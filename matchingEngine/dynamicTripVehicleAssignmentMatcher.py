@@ -68,7 +68,12 @@ class DynamicTripVehicleAssignmentMatcher:
         if showDetails:
             print("rvGraph: ",g.rvGraph)
         print('entered rtv')
-        driversInRV = [ d for d,_,_ in g.rvGraph ]
+        
+        driversInRV = []
+        for d,_,_ in g.rvGraph:
+            if d not in driversInRV:
+                driversInRV.append(d)
+
         g2 = RTVGraph(self.constraints_param, self.useGridWorld)
         g2.RTVGraphFindFeasibleTrips(g, driversInRV)
         if showDetails:
