@@ -506,13 +506,13 @@ def benchmark(numOfReqToGenAtFirst):
     data_2 = tuple([ sim.matchingRates[0][1] for sim in dynamicSimulators])
     rects1 = ax.bar(idex, data_1, bar_width, alpha=opacity, color='c', label='Greedy')
     rects2 = ax.bar(idex + bar_width, data_2, bar_width, alpha=opacity, color='y', label='Dynamic')
-    ax.set_ylabel('rate', fontsize=12)
-    ax.set_title('Match rate', fontsize=16)
+    ax.set_ylabel('rate', fontsize=18)
+    ax.set_title('Match rate', fontsize=20)
     ax.set_xticks(idex + bar_width/2)
     ax.set_xticklabels( (
         '2:1\n(%d:%d)'%(totalRequests*2,totalRequests), 
         '1:1\n(%d:%d)'%(totalRequests, totalRequests), 
-        '1:2\n(%d:%d)'%(totalRequests//2, totalRequests))
+        '1:2\n(%d:%d)'%(totalRequests//2, totalRequests),), fontsize=18
     )
     ax.legend()
 
@@ -525,19 +525,19 @@ def benchmark(numOfReqToGenAtFirst):
     data_2 = tuple([ sim.avgtotalDelay for sim in dynamicSimulators])
     rects1 = ax.bar(idex, data_1, bar_width, alpha=opacity, color='r', label='Greedy')
     rects2 = ax.bar(idex + bar_width, data_2, bar_width, alpha=opacity, color='b', label='Dynamic')
-    ax.set_ylabel('time unit', fontsize=12)
-    ax.set_title('Total Delay', fontsize=16)
+    ax.set_ylabel('time unit', fontsize=16)
+    ax.set_title('Total Delay', fontsize=20)
     ax.set_xticks(idex + bar_width/2)
     ax.set_xticklabels( (
         '2:1\n(%d:%d)'%(totalRequests*2,totalRequests), 
         '1:1\n(%d:%d)'%(totalRequests, totalRequests), 
-        '1:2\n(%d:%d)'%(totalRequests//2, totalRequests))
+        '1:2\n(%d:%d)'%(totalRequests//2, totalRequests)), fontsize=18
     )
     ax.legend()
 
     fig = plt.gcf()
     fig.set_size_inches(24, 12)
-    fig.suptitle('Performance of different driver-request ratio', fontsize=24)
+    fig.suptitle('Performance of different driver-request ratio', fontsize=26)
     timestr = time.strftime("%Y%m%d-%H%M%S")
     fig.savefig('simulationResult/%s_benchmark_%drequest_.png'%(timestr, totalRequests))
     fig.clear()
@@ -649,8 +649,8 @@ def peakTrafficTime(unitOfTimeToGenerate, maxNumOfReqGeneratePerUnitTime):
         gs = gridspec.GridSpec(2, 2)
 
         ax = plt.subplot(gs[0, 0])
-        ax.set_title('Matching Rate', fontsize=16)
-        ax.set_xlabel('time', fontsize=12)
+        ax.set_title('Matching Rate', fontsize=20)
+        ax.set_xlabel('time', fontsize=18)
         ax.set_ylabel('# of matched requests / # of total requests', fontsize=12)
         x = [ x for (x, _) in gridWorld_greedy.matchingRates ]
         y = [ y for (_, y) in gridWorld_greedy.matchingRates ]
@@ -661,8 +661,8 @@ def peakTrafficTime(unitOfTimeToGenerate, maxNumOfReqGeneratePerUnitTime):
         ax.legend()
 
         ax = plt.subplot(gs[0, 1])
-        ax.set_title('Ride Share Rate', fontsize=16)
-        ax.set_xlabel('time', fontsize=12)
+        ax.set_title('Ride Share Rate', fontsize=20)
+        ax.set_xlabel('time', fontsize=18)
         ax.set_ylabel('# of rides that share car with others / # of total rides', fontsize=12)
         x = [ x for (x, _) in gridWorld_greedy.shareRates ]
         y = [ y for (_, y) in gridWorld_greedy.shareRates ]
@@ -673,9 +673,9 @@ def peakTrafficTime(unitOfTimeToGenerate, maxNumOfReqGeneratePerUnitTime):
         ax.legend()
 
         ax = plt.subplot(gs[1, 0])
-        ax.set_title('Accumulated unhandled requets', fontsize=16)
-        ax.set_xlabel('time', fontsize=12)
-        ax.set_ylabel('# of unhandled requets', fontsize=12)
+        ax.set_title('Accumulated unhandled requets', fontsize=20)
+        ax.set_xlabel('time', fontsize=18)
+        ax.set_ylabel('# of unhandled requets', fontsize=18)
         x = [ x for (x, _) in gridWorld_greedy.numOfRemainingRequests ]
         y = [ y for (_, y) in gridWorld_greedy.numOfRemainingRequests ]
         ax.plot(x, y, linestyle='-', label='greedy')
@@ -693,15 +693,15 @@ def peakTrafficTime(unitOfTimeToGenerate, maxNumOfReqGeneratePerUnitTime):
         dynamic_data = (gridWorld_dynamic.avgWaitingTime, gridWorld_dynamic.avgtotalDelay)
         rects1 = ax.bar(idex, greedy_data, bar_width, alpha=opacity, color='r', label='Greedy')
         rects2 = ax.bar(idex + bar_width, dynamic_data, bar_width, alpha=opacity, color='b', label='Dynamic')
-        ax.set_ylabel('time unit', fontsize=12)
-        ax.set_title('Delay', fontsize=16)
+        ax.set_ylabel('time unit', fontsize=18)
+        ax.set_title('Delay', fontsize=20)
         ax.set_xticks(idex + bar_width/2)
-        ax.set_xticklabels( ('avg waiting time', 'avg total delay') )
+        ax.set_xticklabels( ('avg waiting time', 'avg total delay'), fontsize=14)
         ax.legend()
 
         fig = plt.gcf()
         fig.set_size_inches(15, 12)
-        fig.suptitle('%d fix drivers / %d total ride requests'%(numOfDrivers, totalRequest), fontsize=24)
+        fig.suptitle('%d fix drivers / %d total ride requests'%(numOfDrivers, totalRequest), fontsize=26)
         timestr = time.strftime("%Y%m%d-%H%M%S")
         fig.savefig('simulationResult/%s_peak_%d_%d.png'%(timestr, numOfDrivers, totalRequest))
 
