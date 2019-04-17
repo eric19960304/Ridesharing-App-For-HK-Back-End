@@ -5,7 +5,7 @@ from RTVGraph import RTVGraph
 from assignTrips import AssignTrips
 
 class DynamicTripVehicleAssignmentMatcher:
-    def __init__(self, constraints_param, useGridWorld=False, useILP=False):
+    def __init__(self, constraints_param, useGridWorld=False):
         '''
         constraints_param:
         {
@@ -18,7 +18,6 @@ class DynamicTripVehicleAssignmentMatcher:
         #self.maxMatchDistance = constraints_param['maxMatchDistance']
         self.constraints_param = constraints_param
         self.useGridWorld = useGridWorld
-        self.useILP = useILP
 
     def match(self, requests, drivers, currentTime=None, showDetails=False):
         '''
@@ -76,11 +75,7 @@ class DynamicTripVehicleAssignmentMatcher:
             print("rtvGraph: ",g2.rtvGraph)
         
         g3=AssignTrips(self.constraints_param["maxCost"], self.useGridWorld)
-        
-        if self.useILP:
-            g3.assignment_ilp(g2.rtvGraph, showDetails=showDetails)
-        else:
-            g3.assignment(g2.rtvGraph, showDetails=showDetails)
+        g3.assignment_ilp(g2.rtvGraph, showDetails=showDetails)
 
         if showDetails:
             print("assignment: ",g3.assignList)
@@ -147,7 +142,7 @@ def Test():
         }
     ]
 
-    dMatcher = DynamicTripVehicleAssignmentMatcher({ 'maxMatchDistance': 5000, 'maxCost': 5000 }, useILP=False)
+    dMatcher = DynamicTripVehicleAssignmentMatcher({ 'maxMatchDistance': 5000, 'maxCost': 5000 })
     M, R = dMatcher.match(requests, drivers)
     for r, d in M:
         print(r["userId"], '->', d["userId"])

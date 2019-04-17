@@ -57,7 +57,7 @@ class GridWorldSimulator:
         if algo=='greedy':
             self.matcher = GreedyMatcher(self.constraints_param, useGridWorld=True)
         else:
-            self.matcher = DynamicTripVehicleAssignmentMatcher(self.constraints_param, useGridWorld=True, useILP=False)
+            self.matcher = DynamicTripVehicleAssignmentMatcher(self.constraints_param, useGridWorld=True)
         
         self.requests = []
         self.drivers = []
@@ -399,8 +399,8 @@ if __name__ == '__main__':
     '''
     gridWorldH = 1000  # 1km
     gridWorldW = 5000  # 5km
-    unitOfTimeToGenerate = 100
-    maxNumOfReqGeneratePerUnitTime = 2      # generate how many requests every 6 seconds
+    unitOfTimeToGenerate = 200
+    maxNumOfReqGeneratePerUnitTime = 5      # generate how many requests every 6 seconds
     totalRequests = unitOfTimeToGenerate*maxNumOfReqGeneratePerUnitTime
     numOfDriversChoices = [
         totalRequests//10,   
