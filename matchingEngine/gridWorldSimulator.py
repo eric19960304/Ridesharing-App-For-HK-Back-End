@@ -183,13 +183,15 @@ class GridWorldSimulator:
             actualTravelTime = req['finishedDate'] - req['requestedDate']
             totalDelay += actualTravelTime - optimalTravelTime
         
-        for req in self.requests:
-            totalWaitingTime += self.currentTime - req['requestedDate']
-            totalDelay += self.currentTime - req['requestedDate']
+        # for req in self.requests:
+        #     totalWaitingTime += self.currentTime - req['requestedDate']
+        #     totalDelay += self.currentTime - req['requestedDate']
 
         # print('Total waiting time   = %d'%(totalWaitingTime))
         # print('Total delay          = %d'%(totalDelay))
-        reqLen = len(self.finishedRequests)
+        reqLen = len(self.finishedRequests) 
+        # reqLen = len(self.finishedRequests) + len(self.requests)
+        
         self.avgWaitingTime = totalWaitingTime/reqLen
         self.avgtotalDelay = totalDelay/reqLen
         print('Average waiting time = %.3f'%(self.avgWaitingTime))
@@ -387,6 +389,9 @@ def generateRequetSeq(gridWorldW, gridWorldH, numOfSeq, maxNumOfRequestsPerSeq):
     
     return requestSeq
 
+maxMatchDistance_ = 1000
+maxCost_ = 1000
+
 def benchmark(numOfReqToGenAtFirst):
     '''
     Waiting time= T_pickup - T_request
@@ -400,9 +405,9 @@ def benchmark(numOfReqToGenAtFirst):
     gridWorldW = 5000  # 5km 
     totalRequests = numOfReqToGenAtFirst
     numOfDriversChoices = [
-        (numOfReqToGenAtFirst),   # when first match driver:request = 2:1
-        (numOfReqToGenAtFirst)//2,   # when first match driver:request = 1:1
-        (numOfReqToGenAtFirst)//3,  # when first match driver:request = 1:2
+        (numOfReqToGenAtFirst)//2,   
+        (numOfReqToGenAtFirst)//4,  
+        (numOfReqToGenAtFirst)//6,  
     ]
 
     greedySimulators = []
@@ -440,7 +445,7 @@ def benchmark(numOfReqToGenAtFirst):
             gridWorldW=gridWorldW,
             gridWorldH=gridWorldH,
             constraints_param={ 
-                'maxMatchDistance': 1000,
+                'maxMatchDistance': maxMatchDistance_,
             }, 
             requetSeq=requetSeq,
             driverLocSeq=driverLocSeq,
@@ -458,8 +463,8 @@ def benchmark(numOfReqToGenAtFirst):
             gridWorldW=gridWorldW,
             gridWorldH=gridWorldH,
             constraints_param={ 
-                'maxMatchDistance': 1000,
-                'maxCost': 2000
+                'maxMatchDistance': maxMatchDistance_,
+                'maxCost': maxCost_
             }, 
             requetSeq=requetSeq,
             driverLocSeq=driverLocSeq,
@@ -494,6 +499,10 @@ def benchmark(numOfReqToGenAtFirst):
         dynamicSimulators.append(gridWorld_dynamic)
 
 
+    labels = ('1:2\n(%d:%d)'%(totalRequests//2, totalRequests), 
+        '1:4\n(%d:%d)'%(totalRequests//4, totalRequests), 
+        '1:6\n(%d:%d)'%(totalRequests//6, totalRequests),)
+
     # plot figure
     gs = gridspec.GridSpec(1, 2)
 
@@ -502,17 +511,14 @@ def benchmark(numOfReqToGenAtFirst):
     idex = np.arange(numOfBarGroup)
     bar_width = 0.35
     opacity = 0.8
-    data_1 = tuple([ sim.matchingRates[0][1] for sim in greedySimulators])
-    data_2 = tuple([ sim.matchingRates[0][1] for sim in dynamicSimulators])
+    data_1 = tuple([ len(sim.requests) for sim in greedySimulators])
+    data_2 = tuple([ len(sim.requests) for sim in dynamicSimulators])
     rects1 = ax.bar(idex, data_1, bar_width, alpha=opacity, color='c', label='Greedy')
     rects2 = ax.bar(idex + bar_width, data_2, bar_width, alpha=opacity, color='y', label='Dynamic')
-    ax.set_ylabel('rate', fontsize=18)
-    ax.set_title('Match rate', fontsize=20)
+    ax.set_ylabel('# of requests', fontsize=18)
+    ax.set_title('Unhandled Requests', fontsize=20)
     ax.set_xticks(idex + bar_width/2)
-    ax.set_xticklabels( (
-        '1:1\n(%d:%d)'%(totalRequests,totalRequests), 
-        '1:2\n(%d:%d)'%(totalRequests, totalRequests//2), 
-        '1:3\n(%d:%d)'%(totalRequests, totalRequests//3),), fontsize=18
+    ax.set_xticklabels( labels , fontsize=18
     )
     ax.legend()
 
@@ -528,10 +534,7 @@ def benchmark(numOfReqToGenAtFirst):
     ax.set_ylabel('time unit', fontsize=16)
     ax.set_title('Total Delay', fontsize=20)
     ax.set_xticks(idex + bar_width/2)
-    ax.set_xticklabels( (
-        '1:1\n(%d:%d)'%(totalRequests,totalRequests), 
-        '1:2\n(%d:%d)'%(totalRequests, totalRequests//2), 
-        '1:3\n(%d:%d)'%(totalRequests, totalRequests//3)), fontsize=18
+    ax.set_xticklabels( labels, fontsize=18
     )
     ax.legend()
 
@@ -542,7 +545,7 @@ def benchmark(numOfReqToGenAtFirst):
     fig.savefig('simulationResult/%s_benchmark_%drequest_.png'%(timestr, totalRequests))
     fig.clear()
 
-def peakTrafficTime(unitOfTimeToGenerate, maxNumOfReqGeneratePerUnitTime):
+def peakTrafficTime(unitOfTimeToGenerate, maxNumOfReqGeneratePerUnitTime, totalDriver):
     '''
     Waiting time= T_pickup - T_request
     total travel delay = T_drop - T*_arrive
@@ -555,7 +558,7 @@ def peakTrafficTime(unitOfTimeToGenerate, maxNumOfReqGeneratePerUnitTime):
     gridWorldW = 5000  # 5km
     totalRequests = unitOfTimeToGenerate*maxNumOfReqGeneratePerUnitTime
     numOfDriversChoices = [
-        totalRequests//10,   
+        totalDriver,   
         # totalRequests//20,   
         # totalRequests//30,  
     ]
@@ -581,9 +584,7 @@ def peakTrafficTime(unitOfTimeToGenerate, maxNumOfReqGeneratePerUnitTime):
 
         # print stats
 
-        totalRequest = 0
-        for seq in requetSeq:
-            totalRequest += len(seq)
+        totalRequest = totalRequests
 
         print()
         print('num of requsts =', totalRequest)
@@ -614,7 +615,7 @@ def peakTrafficTime(unitOfTimeToGenerate, maxNumOfReqGeneratePerUnitTime):
             gridWorldW=gridWorldW,
             gridWorldH=gridWorldH,
             constraints_param={ 
-                'maxMatchDistance': 1000,
+                'maxMatchDistance': maxMatchDistance_,
             }, 
             requetSeq=requetSeq,
             driverLocSeq=driverLocSeq,
@@ -632,8 +633,8 @@ def peakTrafficTime(unitOfTimeToGenerate, maxNumOfReqGeneratePerUnitTime):
             gridWorldW=gridWorldW,
             gridWorldH=gridWorldH,
             constraints_param={ 
-                'maxMatchDistance': 1000,
-                'maxCost': 2000
+                'maxMatchDistance': maxMatchDistance_,
+                'maxCost': maxCost_
             }, 
             requetSeq=requetSeq,
             driverLocSeq=driverLocSeq,
@@ -706,5 +707,5 @@ def peakTrafficTime(unitOfTimeToGenerate, maxNumOfReqGeneratePerUnitTime):
         fig.savefig('simulationResult/%s_peak_%d_%d.png'%(timestr, numOfDrivers, totalRequest))
 
 if __name__ == '__main__':
-    peakTrafficTime(200, 5)
-    benchmark(100)
+    peakTrafficTime(200, 5, 100)
+    #benchmark(100)
