@@ -87,6 +87,7 @@ class AssignTrips:
 
             
     def assignment_ilp(self, rtvGraph, showDetails=False):
+        rtvGraph = [ trip for trip in rtvGraph if trip[-1] < self.delayMax ]
         xs = []
 
         for i in range(len(rtvGraph)):
