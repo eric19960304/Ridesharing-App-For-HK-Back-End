@@ -399,7 +399,7 @@ if __name__ == '__main__':
     '''
     gridWorldH = 1000  # 1km
     gridWorldW = 5000  # 5km
-    numOfReqToGenAtFirst = 40     
+    numOfReqToGenAtFirst = 50   
     # maxNumOfDriverGeneratePerUnitTime = 2  
     totalRequests = numOfReqToGenAtFirst
     numOfDriversChoices = [
