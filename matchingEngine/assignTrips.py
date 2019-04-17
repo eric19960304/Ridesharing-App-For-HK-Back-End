@@ -5,6 +5,7 @@ RVGraph
 '''
 from time import sleep, gmtime, strftime, time
 import requests
+import pulp
 from googleMapApiAdapter import getDistance, getDistanceMatrix
 
 # redis key name, refer to README for the data struture
@@ -85,8 +86,42 @@ class AssignTrips:
                 (driver,request,delayMin)  '''
 
             
+    def assignment_ilp(self, rtvGraph, showDetails=False):
+        xs = []
+
+        for i in range(len(rtvGraph)):
+            xs.append(pulp.LpVariable(str(i), cat="Binary"))
         
-                                
+        drivers = []
+        requests = []
+        for trip in rtvGraph:
+            if trip[0] not in drivers:
+                drivers.append(trip[0])
+            if trip[1] not in requests:
+                requests.append(trip[1])
+            if len(trip)==4:
+                requests.append(trip[2])
+
+        prob = pulp.LpProblem("assignTrips", pulp.LpMinimize)
+        prob += pulp.lpSum( [ xs[i]*rtvGraph[i][-1] + (1-xs[i])*9999999999999 for i in range(len(rtvGraph)) ] ), "objective"
+
+        for driver in drivers:
+            prob += float(len(driver['ongoingRide'])) + pulp.lpSum( [ xs[i] for i in range(len(rtvGraph)) if rtvGraph[i][0]==driver ] ) <= 2.0, "driver has capacity"
+        
+        for req in requests:
+            prob += pulp.lpSum( [ xs[i] for i in range(len(rtvGraph)) if rtvGraph[i][1]==req or ( len(rtvGraph[i])==4 and rtvGraph[i][2]==req ) ] ) <= 1.0, "request only assigned once"
+
+        prob.writeLP("assignTrips.lp")
+        prob.solve()
+
+        for v in prob.variables():
+            if v.varValue != None and v.varValue >= 1.0:
+                trip = rtvGraph[int(v.name)]
+                self.assignedV.append(trip[0])
+                self.assignedR.append(trip[1])
+                if len(trip)==4:
+                    self.assignList.append((trip[2],trip[0]))
+                self.assignList.append((trip[1],trip[0]))
 
 
     '''

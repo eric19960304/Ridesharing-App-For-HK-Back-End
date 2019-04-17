@@ -19,7 +19,7 @@ class DynamicTripVehicleAssignmentMatcher:
         self.constraints_param = constraints_param
         self.useGridWorld = useGridWorld
 
-    def match(self, requests, drivers, currentTime=None, showDetails=False):
+    def match(self, requests, drivers, currentTime=None, showDetails=False, useILP=False):
         '''
         Input
         requests format:
@@ -73,9 +73,14 @@ class DynamicTripVehicleAssignmentMatcher:
         g2.RTVGraphFindFeasibleTrips(g, driversInRV)
         if showDetails:
             print("rtvGraph: ",g2.rtvGraph)
-        g3=AssignTrips(self.constraints_param["maxCost"], self.useGridWorld)
-        g3.assignment(g2.rtvGraph, showDetails=showDetails)
         
+        g3=AssignTrips(self.constraints_param["maxCost"], self.useGridWorld)
+        
+        if useILP:
+            g3.assignment_ilp(g2.rtvGraph, showDetails=showDetails)
+        else:
+            g3.assignment(g2.rtvGraph, showDetails=showDetails)
+
         if showDetails:
             print("assignment: ",g3.assignList)
             print("assigned V: ",g3. assignedV)
@@ -89,14 +94,6 @@ class DynamicTripVehicleAssignmentMatcher:
 
 def Test():
     requests = [
-        {
-            "id": '1',
-            "userId": 'Eric',
-            "startLocation": loc['city_one'],
-            "endLocation": loc['sai_ying_pun_station'],
-            "timestamp": 1553701200965,
-            "isOnCar": False
-        },
         {
             "id": '2',
             "userId": 'Tony',
@@ -130,20 +127,14 @@ def Test():
         {
             "userId": 'Antony',
             "location":  loc['cu'],
-            "ongoingRide": [],
-            "capacity": 4
-        },
-        {
-            "userId": 'Antony1',
-            "location":  loc['cu'],
-            "ongoingRide": [],
-            "capacity": 4
+            "ongoingRide": [onGoingReq1],
+            "capacity": 2
         },
         {
             "userId": 'Elven',
             "location":  loc['polyu'],
             "ongoingRide": [],
-            "capacity": 4
+            "capacity": 2
         }
     ]
 
@@ -151,7 +142,7 @@ def Test():
     M, R = dMatcher.match(requests, drivers)
     for r, d in M:
         print(r["userId"], '->', d["userId"])
-    print(len(R))
+    print('remaining request: ', len(R))
 
 if __name__ == "__main__":
     Test()
