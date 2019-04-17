@@ -27,6 +27,7 @@ class RVGraph:
         self.rvGraph = []
         self.requestsGraph = []  
         self.maxMatchDistance = constraints_param['maxMatchDistance']
+        self.maxCost = constraints_param['maxCost']
         self.useGridWorld = useGridWorld              
 
     def _getDistanceMatrix(self, origins, destinations):
@@ -205,7 +206,8 @@ class RVGraph:
                             waitingDistance = distanceMatrix[2][0]
 
                         if self.satifiedAllConstraints(minShareDistance, separatedDistance, waitingDistance):
-                            edgeList.append( (driver, request, delayDistance) )
+                            if delayDistance<self.maxCost:
+                                edgeList.append( (driver, request, delayDistance) )
 
                     # passagerLocationList = []
                     # for passagerJson in driverPassagerList:

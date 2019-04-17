@@ -30,25 +30,21 @@ class RTVGraph:
         if self.useGridWorld:
             return gridWorldDistanceMatrix(origins, destinations)
         else:
-            return getDistanceMatrix(origins, destinations)                
+            return getDistanceMatrix(origins, destinations)      
+
+    def _getDistance(self, origin, destination):
+        if self.useGridWorld:
+            return gridWorldDistance(origin, destination)
+        else:
+            return getDistance(origin, destination)             
 
     def RTVGraphFindFeasibleTrips(self,rvGraph,driverList):
-       
         for (request, request2) in rvGraph.requestsGraph:
             
             for driver in driverList:
                 if len(driver["ongoingRide"]) == 0:
-                    found=False
-                    found1=False
-                    for (d,r,delay) in rvGraph.rvGraph:
-                        if d == driver and r == request:
-                            found=True
-                        if d == driver and r == request2:
-                            found1=True
-                        if found1 and found:
-                            break
-
-                    if found1==True and found==True:
+                   
+                    if (self._getDistance(driver['location'],request['startLocation'])<self.maxMatchDistance) and (self._getDistance(driver['location'],request2['startLocation'])<self.maxMatchDistance):
                         locationList = []
                         locationList.append( driver['location'] )
                         locationList.append( request['startLocation'])
