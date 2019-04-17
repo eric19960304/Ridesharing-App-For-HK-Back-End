@@ -399,8 +399,8 @@ if __name__ == '__main__':
     '''
     gridWorldH = 1000  # 1km
     gridWorldW = 5000  # 5km
-    numOfReqToGenAtFirst = 50      # generate how many requests every 6 seconds
-    # maxNumOfDriverGeneratePerUnitTime = 2  # generate how many requests every 6 seconds
+    numOfReqToGenAtFirst = 40     
+    # maxNumOfDriverGeneratePerUnitTime = 2  
     totalRequests = numOfReqToGenAtFirst
     numOfDriversChoices = [
         (numOfReqToGenAtFirst)*2,   # when first match driver:request = 2:1
