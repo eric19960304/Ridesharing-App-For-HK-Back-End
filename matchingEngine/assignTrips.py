@@ -103,10 +103,11 @@ class AssignTrips:
             if len(trip)==4:
                 requests.append(trip[2])
 
-        totalCost = sum([ trip[-1] for trip in rtvGraph ])
+        avgCost = sum([ trip[-1] for trip in rtvGraph ])/len(rtvGraph)
+        print(avgCost)
 
         prob = pulp.LpProblem("assignTrips", pulp.LpMinimize)
-        prob += pulp.lpSum( [ xs[i]*rtvGraph[i][-1] + (1-xs[i])*totalCost for i in range(len(rtvGraph)) ] ), "objective"
+        prob += pulp.lpSum( [ xs[i]*rtvGraph[i][-1] + (1-xs[i])*avgCost*15 for i in range(len(rtvGraph)) ] ), "objective"
 
         for driver in drivers:
             prob += float(len(driver['ongoingRide'])) + pulp.lpSum( [ xs[i] for i in range(len(rtvGraph)) if rtvGraph[i][0]==driver ] ) <= 2.0
