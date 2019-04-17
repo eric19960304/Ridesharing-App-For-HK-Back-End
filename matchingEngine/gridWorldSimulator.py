@@ -400,9 +400,9 @@ def benchmark(numOfReqToGenAtFirst):
     gridWorldW = 5000  # 5km 
     totalRequests = numOfReqToGenAtFirst
     numOfDriversChoices = [
-        (numOfReqToGenAtFirst)//2,   # when first match driver:request = 2:1
-        (numOfReqToGenAtFirst)//3,   # when first match driver:request = 1:1
-        (numOfReqToGenAtFirst)//4,  # when first match driver:request = 1:2
+        (numOfReqToGenAtFirst),   # when first match driver:request = 2:1
+        (numOfReqToGenAtFirst)//2,   # when first match driver:request = 1:1
+        (numOfReqToGenAtFirst)//3,  # when first match driver:request = 1:2
     ]
 
     greedySimulators = []
@@ -510,9 +510,9 @@ def benchmark(numOfReqToGenAtFirst):
     ax.set_title('Match rate', fontsize=20)
     ax.set_xticks(idex + bar_width/2)
     ax.set_xticklabels( (
-        '1:2\n(%d:%d)'%(totalRequests*2,totalRequests), 
-        '1:3\n(%d:%d)'%(totalRequests, totalRequests), 
-        '1:4\n(%d:%d)'%(totalRequests//2, totalRequests),), fontsize=18
+        '1:1\n(%d:%d)'%(totalRequests,totalRequests), 
+        '1:2\n(%d:%d)'%(totalRequests, totalRequests//2), 
+        '1:3\n(%d:%d)'%(totalRequests, totalRequests//3),), fontsize=18
     )
     ax.legend()
 
@@ -529,9 +529,9 @@ def benchmark(numOfReqToGenAtFirst):
     ax.set_title('Total Delay', fontsize=20)
     ax.set_xticks(idex + bar_width/2)
     ax.set_xticklabels( (
-        '1:2\n(%d:%d)'%(totalRequests*2,totalRequests), 
-        '1:3\n(%d:%d)'%(totalRequests, totalRequests), 
-        '1:4\n(%d:%d)'%(totalRequests//2, totalRequests)), fontsize=18
+        '1:1\n(%d:%d)'%(totalRequests,totalRequests), 
+        '1:2\n(%d:%d)'%(totalRequests, totalRequests//2), 
+        '1:3\n(%d:%d)'%(totalRequests, totalRequests//3)), fontsize=18
     )
     ax.legend()
 
