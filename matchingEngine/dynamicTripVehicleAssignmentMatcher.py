@@ -5,7 +5,7 @@ from RTVGraph import RTVGraph
 from assignTrips import AssignTrips
 
 class DynamicTripVehicleAssignmentMatcher:
-    def __init__(self, constraints_param, useGridWorld=False):
+    def __init__(self, constraints_param, useGridWorld=False, useILP=False):
         '''
         constraints_param:
         {
@@ -18,8 +18,9 @@ class DynamicTripVehicleAssignmentMatcher:
         #self.maxMatchDistance = constraints_param['maxMatchDistance']
         self.constraints_param = constraints_param
         self.useGridWorld = useGridWorld
+        self.useILP = useILP
 
-    def match(self, requests, drivers, currentTime=None, showDetails=False, useILP=False):
+    def match(self, requests, drivers, currentTime=None, showDetails=False):
         '''
         Input
         requests format:
@@ -76,7 +77,7 @@ class DynamicTripVehicleAssignmentMatcher:
         
         g3=AssignTrips(self.constraints_param["maxCost"], self.useGridWorld)
         
-        if useILP:
+        if self.useILP:
             g3.assignment_ilp(g2.rtvGraph, showDetails=showDetails)
         else:
             g3.assignment(g2.rtvGraph, showDetails=showDetails)
@@ -95,18 +96,26 @@ class DynamicTripVehicleAssignmentMatcher:
 def Test():
     requests = [
         {
+            "id": '1',
+            "userId": 'eric',
+            "startLocation": loc['city_one'],
+            "endLocation": loc['sai_ying_pun_station'],
+            "timestamp": 1553701760965,
+            "isOnCar": False
+        },
+        {
             "id": '2',
-            "userId": 'Tony',
+            "userId": 'tony',
             "startLocation": loc['cu'],
             "endLocation": loc['hku'],
             "timestamp": 1553701760965,
             "isOnCar": False
         },
         {
-            "id": '4',
+            "id": '3',
             "userId": 'alex',
             "startLocation": loc['cu'],
-            "endLocation": loc['sai_ying_pun_station'],
+            "endLocation": loc['city_one'],
             "timestamp": 1553701760965,
             "isOnCar": False
         },
@@ -114,7 +123,7 @@ def Test():
     ]
 
     onGoingReq1 = {
-        "id": '3',
+        "id": '4',
         "userId": 'David',
         "startLocation": loc['cu'],
         "endLocation": loc['hku'],
@@ -127,18 +136,18 @@ def Test():
         {
             "userId": 'Antony',
             "location":  loc['cu'],
-            "ongoingRide": [onGoingReq1],
+            "ongoingRide": [],
             "capacity": 2
         },
         {
             "userId": 'Elven',
-            "location":  loc['polyu'],
+            "location":  loc['science_park'],
             "ongoingRide": [],
             "capacity": 2
         }
     ]
 
-    dMatcher = DynamicTripVehicleAssignmentMatcher({ 'maxMatchDistance': 5000, 'maxCost': 5000 })
+    dMatcher = DynamicTripVehicleAssignmentMatcher({ 'maxMatchDistance': 5000, 'maxCost': 5000 }, useILP=False)
     M, R = dMatcher.match(requests, drivers)
     for r, d in M:
         print(r["userId"], '->', d["userId"])

@@ -57,7 +57,7 @@ class GridWorldSimulator:
         if algo=='greedy':
             self.matcher = GreedyMatcher(self.constraints_param, useGridWorld=True)
         else:
-            self.matcher = DynamicTripVehicleAssignmentMatcher(self.constraints_param, useGridWorld=True)
+            self.matcher = DynamicTripVehicleAssignmentMatcher(self.constraints_param, useGridWorld=True, useILP=False)
         
         self.requests = []
         self.drivers = []

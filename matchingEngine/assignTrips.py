@@ -103,13 +103,13 @@ class AssignTrips:
                 requests.append(trip[2])
 
         prob = pulp.LpProblem("assignTrips", pulp.LpMinimize)
-        prob += pulp.lpSum( [ xs[i]*rtvGraph[i][-1] + (1-xs[i])*9999999999999 for i in range(len(rtvGraph)) ] ), "objective"
+        prob += pulp.lpSum( [ xs[i]*rtvGraph[i][-1] + (1-xs[i])*5000 for i in range(len(rtvGraph)) ] ), "objective"
 
         for driver in drivers:
-            prob += float(len(driver['ongoingRide'])) + pulp.lpSum( [ xs[i] for i in range(len(rtvGraph)) if rtvGraph[i][0]==driver ] ) <= 2.0, "driver has capacity"
+            prob += float(len(driver['ongoingRide'])) + pulp.lpSum( [ xs[i] for i in range(len(rtvGraph)) if rtvGraph[i][0]==driver ] ) <= 2.0
         
         for req in requests:
-            prob += pulp.lpSum( [ xs[i] for i in range(len(rtvGraph)) if rtvGraph[i][1]==req or ( len(rtvGraph[i])==4 and rtvGraph[i][2]==req ) ] ) <= 1.0, "request only assigned once"
+            prob += pulp.lpSum( [ xs[i] for i in range(len(rtvGraph)) if rtvGraph[i][1]==req or ( len(rtvGraph[i])==4 and rtvGraph[i][2]==req ) ] ) <= 1.0
 
         prob.writeLP("assignTrips.lp")
         prob.solve()
