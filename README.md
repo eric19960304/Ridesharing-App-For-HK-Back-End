@@ -111,6 +111,8 @@ you can adjust the parameters at the (almost) bottom of the simulator.py file.
 
 <img src="https://raw.githubusercontent.com/eric19960304/Ridesharing-App-For-HK-Back-End/master/images/testing/case2_ios_requests.png" width="400"> <img src="https://raw.githubusercontent.com/eric19960304/Ridesharing-App-For-HK-Back-End/master/images/testing/case2_ios_drivers.png" width="400">
 
+Greedy Algo. Result: (R1, D1)
+Dynamic Algo. Result: (R1, D2) & (R3, D1)
 
 Steps to run integration test:
 
