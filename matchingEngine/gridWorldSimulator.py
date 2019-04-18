@@ -34,17 +34,17 @@ class GridWorldSimulator:
     Note: ? means the field will appear if some conditions are satisfied
     '''
 
-    def __init__(self, gridWorldW, gridWorldH, constraints_param, requetSeq, driverLocSeq, driverSpeed, 
+    def __init__(self, gridWorldW, gridWorldH, constraints_param, requestSeq, driverLocSeq, driverSpeed, 
         capacity, matchEngineTriggerInterval, algo, showDetails=False):
         '''
-        For each time unit t, the simulator will bring all the requets in requetSeq[t] to the simulation
-        requetSeq format: 
+        For each time unit t, the simulator will bring all the requests in requestSeq[t] to the simulation
+        requestSeq format: 
         [ [request] ]
         '''
         self.gridWorldH = gridWorldH
         self.gridWorldW = gridWorldW
         self.constraints_param = constraints_param
-        self.requetSeq = requetSeq
+        self.requestSeq = requestSeq
         self.driverLocSeq = driverLocSeq
         self.driverSpeed = driverSpeed
         self.capacity = capacity
@@ -78,12 +78,12 @@ class GridWorldSimulator:
 
         while True:
             # extract request from sequence
-            if self.currentTime <= len(self.requetSeq):
+            if self.currentTime <= len(self.requestSeq):
                 curIdx = self.currentTime - 1
-                self.totalRequestCount += len(self.requetSeq[curIdx])
-                for r in self.requetSeq[curIdx]:
+                self.totalRequestCount += len(self.requestSeq[curIdx])
+                for r in self.requestSeq[curIdx]:
                     r['isOnCar'] = False
-                self.requests.extend( self.requetSeq[curIdx] )
+                self.requests.extend( self.requestSeq[curIdx] )
             
             # extract driver from sequence
             if self.currentTime <= len(self.driverLocSeq):
@@ -96,7 +96,7 @@ class GridWorldSimulator:
                     self.nextDriverId += 0
             
 
-            if (self.currentTime!=1 or benchmark) and (self.currentTime%self.matchEngineTriggerInterval==0 or benchmark) and len(self.requests)>0 and self.currentTime <= len(self.requetSeq):
+            if (self.currentTime!=1 or benchmark) and (self.currentTime%self.matchEngineTriggerInterval==0 or benchmark) and len(self.requests)>0 and self.currentTime <= len(self.requestSeq):
                 numOfRequest = len(self.requests)
                 drivers = [ d.getDriver() for d in self.drivers if len(d.getDriver()['ongoingRide']) < 2 ]
 
@@ -162,7 +162,7 @@ class GridWorldSimulator:
                 d.move(self.currentTime, self.driverSpeed, self.showDetails)
 
             # detect if all ongoing ride ended
-            if self.currentTime >= len(self.requetSeq):
+            if self.currentTime >= len(self.requestSeq):
                 hasOngoingRideInProgress = False
                 for driver in self.drivers:
                     if len(driver.driver['ongoingRide']) > 0:
@@ -415,8 +415,8 @@ def benchmark(numOfReqToGenAtFirst):
 
     for numOfDrivers in numOfDriversChoices:
 
-        # generate requets for all rounds
-        requetSeq = generateRequetSeq(gridWorldW, gridWorldH, 1, numOfReqToGenAtFirst)
+        # generate requests for all rounds
+        requestSeq = generateRequetSeq(gridWorldW, gridWorldH, 1, numOfReqToGenAtFirst)
 
         # generate driver locations
         driverLocSeq = []
@@ -432,7 +432,7 @@ def benchmark(numOfReqToGenAtFirst):
         # print stats
 
         totalRequest = 0
-        for seq in requetSeq:
+        for seq in requestSeq:
             totalRequest += len(seq)
 
         print()
@@ -447,7 +447,7 @@ def benchmark(numOfReqToGenAtFirst):
             constraints_param={ 
                 'maxMatchDistance': maxMatchDistance_,
             }, 
-            requetSeq=requetSeq,
+            requestSeq=requestSeq,
             driverLocSeq=driverLocSeq,
             driverSpeed=82,    # ~25 km/h
             capacity=2,
@@ -466,7 +466,7 @@ def benchmark(numOfReqToGenAtFirst):
                 'maxMatchDistance': maxMatchDistance_,
                 'maxCost': maxCost_
             }, 
-            requetSeq=requetSeq,
+            requestSeq=requestSeq,
             driverLocSeq=driverLocSeq,
             driverSpeed=82,    # ~50 km/h
             capacity=2,
@@ -478,8 +478,8 @@ def benchmark(numOfReqToGenAtFirst):
 
         print()
         # calculate avg travel distance of requests
-        startLocations = [ req['startLocation'] for seq in requetSeq for req in seq ]
-        endLocations = [ req['endLocation'] for seq in requetSeq for req in seq ]
+        startLocations = [ req['startLocation'] for seq in requestSeq for req in seq ]
+        endLocations = [ req['endLocation'] for seq in requestSeq for req in seq ]
         avgTravelDis = 0
         for (s1, s2) in zip(startLocations, endLocations):
             avgTravelDis += gridWorldDistance(s1, s2)
@@ -565,8 +565,8 @@ def peakTrafficTime(unitOfTimeToGenerate, maxNumOfReqGeneratePerUnitTime, totalD
 
     for numOfDrivers in numOfDriversChoices:
 
-        # generate requets for all rounds
-        requetSeq = generateRequetSeq(gridWorldW, gridWorldH, unitOfTimeToGenerate, maxNumOfReqGeneratePerUnitTime)
+        # generate requests for all rounds
+        requestSeq = generateRequetSeq(gridWorldW, gridWorldH, unitOfTimeToGenerate, maxNumOfReqGeneratePerUnitTime)
 
         # generate driver locations
         driverLocSeq = []
@@ -592,8 +592,8 @@ def peakTrafficTime(unitOfTimeToGenerate, maxNumOfReqGeneratePerUnitTime, totalD
 
         print()
         # calculate avg travel distance of requests
-        startLocations = [ req['startLocation'] for seq in requetSeq for req in seq ]
-        endLocations = [ req['endLocation'] for seq in requetSeq for req in seq ]
+        startLocations = [ req['startLocation'] for seq in requestSeq for req in seq ]
+        endLocations = [ req['endLocation'] for seq in requestSeq for req in seq ]
         avgTravelDis = 0
         for (s1, s2) in zip(startLocations, endLocations):
             avgTravelDis += gridWorldDistance(s1, s2)
@@ -617,7 +617,7 @@ def peakTrafficTime(unitOfTimeToGenerate, maxNumOfReqGeneratePerUnitTime, totalD
             constraints_param={ 
                 'maxMatchDistance': maxMatchDistance_,
             }, 
-            requetSeq=requetSeq,
+            requestSeq=requestSeq,
             driverLocSeq=driverLocSeq,
             driverSpeed=82,    # ~25 km/h
             capacity=2,
@@ -636,7 +636,7 @@ def peakTrafficTime(unitOfTimeToGenerate, maxNumOfReqGeneratePerUnitTime, totalD
                 'maxMatchDistance': maxMatchDistance_,
                 'maxCost': maxCost_
             }, 
-            requetSeq=requetSeq,
+            requestSeq=requestSeq,
             driverLocSeq=driverLocSeq,
             driverSpeed=82,    # ~50 km/h
             capacity=2,
@@ -674,9 +674,9 @@ def peakTrafficTime(unitOfTimeToGenerate, maxNumOfReqGeneratePerUnitTime, totalD
         ax.legend()
 
         ax = plt.subplot(gs[1, 0])
-        ax.set_title('Accumulated unhandled requets', fontsize=20)
+        ax.set_title('Accumulated Unhandled Requests', fontsize=20)
         ax.set_xlabel('time', fontsize=18)
-        ax.set_ylabel('# of unhandled requets', fontsize=18)
+        ax.set_ylabel('# of unhandled requests', fontsize=18)
         x = [ x for (x, _) in gridWorld_greedy.numOfRemainingRequests ]
         y = [ y for (_, y) in gridWorld_greedy.numOfRemainingRequests ]
         ax.plot(x, y, linestyle='-', label='greedy')
