@@ -6,3 +6,4 @@ requests==2.21.0
 pymongo==3.7.2
 numpy==1.16.1
 matplotlib==3.0.3
+pulp==1.6.9

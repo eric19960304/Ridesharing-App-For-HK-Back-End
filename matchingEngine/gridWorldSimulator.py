@@ -708,4 +708,4 @@ def peakTrafficTime(unitOfTimeToGenerate, maxNumOfReqGeneratePerUnitTime, totalD
 
 if __name__ == '__main__':
     peakTrafficTime(200, 5, 100)
-    #benchmark(100)
+    benchmark(100)
