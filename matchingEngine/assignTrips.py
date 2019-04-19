@@ -29,6 +29,62 @@ class AssignTrips:
         self.useGridWorld = useGridWorld
           
 
+    def assignment_ilp(self, rtvGraph, showDetails=False):
+        rtvGraph = [ trip for trip in rtvGraph if trip[-1] < self.delayMax ]
+        xs = []
+
+        for i in range(len(rtvGraph)):
+            xs.append(pulp.LpVariable(str(i), cat="Binary"))
+        n = len(xs)
+        
+        drivers = []
+        requests = []
+        for i in range(len(rtvGraph)):
+            trip = rtvGraph[i]
+            if trip[0] not in drivers:
+                drivers.append(trip[0])
+            checkList = [ r for r,idx in requests ]
+            if trip[1] not in checkList:
+                requests.append( (trip[1],i) )
+            if len(trip)==4 and trip[2] not in checkList:
+                requests.append( (trip[2],i) )
+        
+        for i in range(len(requests)):
+            xs.append(pulp.LpVariable(str(n+i), cat="Binary"))
+
+        # cko = sum([ trip[-1] for trip in rtvGraph ])/len(rtvGraph)*10
+        cko = 10000
+
+        prob = pulp.LpProblem("assignTrips", pulp.LpMinimize)
+        prob += pulp.lpSum( [ xs[i]*rtvGraph[i][-1] if i < n else xs[i]*cko for i in range(len(xs)) ] ) 
+        
+        for driver in drivers:
+            prob += pulp.lpSum( [ xs[i]*1.0 for i in range(len(rtvGraph)) if rtvGraph[i][0]==driver ] ) <= 1.0
+
+        k = 0
+        for _, idx in requests:
+            # mapping involved r must be 1
+            prob += pulp.lpSum( [ xs[i]*1.0 for i in range(len(rtvGraph)) if idx==i ] ) <= 1.0
+            # xs[n+k] = 1 - # of mapping
+            prob += xs[n+k] + pulp.lpSum( [ xs[i]*1.0 for i in range(len(rtvGraph)) if idx==i ] ) >= 1.0
+            prob += xs[n+k] + pulp.lpSum( [ xs[i]*1.0 for i in range(len(rtvGraph)) if idx==i ] ) <= 1.0
+            k += 1
+
+        prob.writeLP("assignTrips.lp")
+        prob.solve()
+
+        for v in prob.variables():
+            if v.varValue != None and v.varValue >= 1.0 and int(v.name)<n:
+                trip = rtvGraph[int(v.name)]
+                self.assignedV.append(trip[0])
+                self.assignedR.append(trip[1])
+                self.assignList.append((trip[1],trip[0]))
+                # print(trip[0]['userId'], trip[1]['userId'])
+                if len(trip)==4:
+                    self.assignedR.append(trip[2])
+                    self.assignList.append((trip[2],trip[0]))
+                    # print(trip[0]['userId'], trip[2]['userId'])
+
     def assignment(self,rtvGraph, showDetails=False):
         oneRequestTrip = []
         twoRequestTrip = []
@@ -84,47 +140,6 @@ class AssignTrips:
                 self.assignList.append((trip[1],trip[0]))
             ''' (driver,request,request2,delayMin)    
                 (driver,request,delayMin)  '''
-
-            
-    def assignment_ilp(self, rtvGraph, showDetails=False):
-        rtvGraph = [ trip for trip in rtvGraph if trip[-1] < self.delayMax ]
-        xs = []
-
-        for i in range(len(rtvGraph)):
-            xs.append(pulp.LpVariable(str(i), cat="Binary"))
-        
-        drivers = []
-        requests = []
-        for i in range(len(rtvGraph)):
-            trip = rtvGraph[i]
-            if trip[0] not in drivers:
-                drivers.append(trip[0])
-            if trip[1] not in requests:
-                requests.append( (trip[1], i) )
-            if len(trip)==4:
-                requests.append( (trip[2], i) )
-
-        prob = pulp.LpProblem("assignTrips", pulp.LpMinimize)
-        prob += pulp.lpSum( [ xs[i]*rtvGraph[i][-1] for i in range(len(rtvGraph)) ] ) + pulp.lpSum( [ 999999 for req, idx in requests if pulp.lpSum( [ xs[i] for i in range(len(rtvGraph)) if idx==i ] ) <= 0.0 ] ), "objective"
-
-        for driver in drivers:
-            prob += float(len(driver['ongoingRide'])) + pulp.lpSum( [ xs[i] for i in range(len(rtvGraph)) if rtvGraph[i][0]==driver ] ) <= 2.0
-        
-        for req, idx in requests:
-            prob += pulp.lpSum( [ xs[i] for i in range(len(rtvGraph)) if idx==i ] ) <= 1.0
-
-        prob.writeLP("assignTrips.lp")
-        prob.solve()
-
-        for v in prob.variables():
-            if v.varValue != None and v.varValue >= 1.0:
-                trip = rtvGraph[int(v.name)]
-                self.assignedV.append(trip[0])
-                self.assignedR.append(trip[1])
-                if len(trip)==4:
-                    self.assignList.append((trip[2],trip[0]))
-                self.assignList.append((trip[1],trip[0]))
-
 
     '''
     return data structure example

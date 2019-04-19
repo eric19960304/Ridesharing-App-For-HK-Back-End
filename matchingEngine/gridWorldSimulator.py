@@ -93,7 +93,7 @@ class GridWorldSimulator:
                     self.drivers.append( Driver(finishedRequestsRef=self.finishedRequests, \
                     userId=self.nextDriverId, initialLocation=loc, \
                     capacity=self.capacity, gridWorldW=self.gridWorldW, gridWorldH=self.gridWorldH) )
-                    self.nextDriverId += 0
+                    self.nextDriverId += 1
             
 
             if (self.currentTime!=1 or benchmark) and (self.currentTime%self.matchEngineTriggerInterval==0 or benchmark) and len(self.requests)>0 and self.currentTime <= len(self.requestSeq):

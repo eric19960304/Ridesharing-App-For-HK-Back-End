@@ -80,6 +80,7 @@ class DynamicTripVehicleAssignmentMatcher:
             print("rtvGraph: ",g2.rtvGraph)
         # print('entered assignment')
         g3=AssignTrips(self.constraints_param["maxCost"], self.useGridWorld)
+        #g3.assignment_ilp(g2.rtvGraph, showDetails=showDetails)
         g3.assignment(g2.rtvGraph, showDetails=showDetails)
 
         if showDetails:
