@@ -674,7 +674,7 @@ def peakTrafficTime(unitOfTimeToGenerate, maxNumOfReqGeneratePerUnitTime, totalD
         ax.legend()
 
         ax = plt.subplot(gs[1, 0])
-        ax.set_title('Accumulated Unhandled Requests', fontsize=20)
+        ax.set_title('Unhandled Requests', fontsize=20)
         ax.set_xlabel('time', fontsize=18)
         ax.set_ylabel('# of unhandled requests', fontsize=18)
         x = [ x for (x, _) in gridWorld_greedy.numOfRemainingRequests ]
