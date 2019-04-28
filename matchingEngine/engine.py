@@ -27,10 +27,10 @@ def startEngine():
 
     if sys.argv[1]=='greedy':
         print('using GreedyMatcher')
-        matcher = GreedyMatcher({ 'maxMatchDistance': 5000 })
+        matcher = GreedyMatcher({ 'maxMatchDistance': 2500 })
     elif sys.argv[1]=='dynamic':
         print('using DynamicTripVehicleAssignmentMatcher')
-        matcher = DynamicTripVehicleAssignmentMatcher({ 'maxMatchDistance': 5000, 'maxCost': 5000})
+        matcher = DynamicTripVehicleAssignmentMatcher({ 'maxMatchDistance': 2500, 'maxCost': 2500})
     else:
         print('Usage: python engine.py [greedy|dynamic]')
         exit()
@@ -84,14 +84,14 @@ def startEngine():
             try:
                 # match
                 mappings, remainingRequests = matcher.match(requests, drivers)
-                
-                print("[{}] : ".format( getTimeStr() ), 'mapping (passenger->driver): ')
-                for q, d in mappings:
-                    if 'nickname' in q and 'nickname' in d:
-                        print("  %s -> %s" %(q['nickname'], d['nickname']))
-                    else:
-                        print("  %s -> %s" %(q['userId'], d['userId']))
-                print('remaining requests: ', len(remainingRequests))
+                if(len(mappings)>0):
+                    print("[{}] : ".format( getTimeStr() ), 'mapping (passenger->driver): ')
+                    for q, d in mappings:
+                        if 'nickname' in q and 'nickname' in d:
+                            print("  %s -> %s" %(q['nickname'], d['nickname']))
+                        else:
+                            print("  %s -> %s" %(q['userId'], d['userId']))
+                    print('remaining requests: ', len(remainingRequests))
 
                 for mapping in mappings:
                     r, d = mapping
