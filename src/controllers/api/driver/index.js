@@ -125,6 +125,26 @@ const responseOnGoingRideDetails = (req, res) => {
     });
 };
 
+const checkIfSearhcing = (req, res, next) => {
+    const userId = req.userIdentity._id.toString();
+    redisClient.lrange(
+        REDIS_KEYS.RIDE_REQUEST,
+        0,
+        -1,
+        (err, rideReqs) => {
+            let found = false;
+            rideReqs.forEach( r =>{
+                const rideReq = JSON.parse(r);
+                if(rideReq.userId==userId){
+                    found=true;
+                }
+            });
+            req.isSearching = found;
+            next();
+        }
+    );
+};
+
 const getAllDriversLocations = (req, res) => {
     
     const userId = req.userIdentity._id.toString();
@@ -154,11 +174,29 @@ const getAllDriversLocations = (req, res) => {
                     REDIS_KEYS.DRIVER_LOCATION,
                     driverId,
                     (err, location) => {
-                        let locationList = [];
+                        let matchedLocation = [];
                         if(location!==null){
-                            locationList = [JSON.parse(location)].filter( x => isDriverOnline(x));
+                            matchedLocation = JSON.parse(location);
                         }
-                        return res.status(200).json(locationList);
+
+                        redisClient.hgetall(
+                            REDIS_KEYS.DRIVER_LOCATION,
+                            (err, locations) => {
+                                let allLocationList = [];
+        
+                                if(locations!==null){
+                                    allLocationList = Object.keys(locations)
+                                        .map( (key) => JSON.parse(locations[key]))
+                                        .filter( x => isDriverOnline(x));
+                                }
+        
+                                return res.status(200).json({
+                                    matchedDriver: matchedLocation,
+                                    allDrivers: allLocationList,
+                                    isSearching: req.isSearching
+                                });
+                            }
+                        );
                     }
                 );
             }else{
@@ -166,15 +204,19 @@ const getAllDriversLocations = (req, res) => {
                 redisClient.hgetall(
                     REDIS_KEYS.DRIVER_LOCATION,
                     (err, locations) => {
-                        let locationList = [];
+                        let allLocationList = [];
 
                         if(locations!==null){
-                            locationList = Object.keys(locations)
+                            allLocationList = Object.keys(locations)
                                 .map( (key) => JSON.parse(locations[key]))
                                 .filter( x => isDriverOnline(x));
                         }
 
-                        return res.status(200).json(locationList);
+                        return res.status(200).json({
+                            matchedDriver: null,
+                            allDrivers: allLocationList,
+                            isSearching: req.isSearching
+                        });
                     }
                 );
             }
@@ -192,6 +234,7 @@ router.post('/update',
 );
 
 router.post('/get-all-drivers-location',
+    checkIfSearhcing,
     getAllDriversLocations
 );
 

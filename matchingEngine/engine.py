@@ -30,7 +30,7 @@ def startEngine():
         matcher = GreedyMatcher({ 'maxMatchDistance': 5000 })
     elif sys.argv[1]=='dynamic':
         print('using DynamicTripVehicleAssignmentMatcher')
-        matcher = DynamicTripVehicleAssignmentMatcher({ 'maxMatchDistance': 2500, 'maxCost':2500})
+        matcher = DynamicTripVehicleAssignmentMatcher({ 'maxMatchDistance': 5000, 'maxCost': 5000})
     else:
         print('Usage: python engine.py [greedy|dynamic]')
         exit()

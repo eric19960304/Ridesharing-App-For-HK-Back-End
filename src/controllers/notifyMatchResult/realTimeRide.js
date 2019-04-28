@@ -174,8 +174,6 @@ const sendNotificationAndMessageToUsers = (req, res) => {
             notificationClient.notify(tokensForThisUser, 'New Message:\n' + text);
         }
 
-        console.log(text);
-
         const message = {
             _id: uuidv4(),
             user: {
