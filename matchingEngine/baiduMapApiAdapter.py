@@ -7,6 +7,7 @@ from urllib.request import urlopen
 import json
 import numpy as np
 
+ak=os.environ['BAIDU_MAP_API_KEY']
 
 def getDistance(origin, destination, getDuration=False):
     '''
@@ -23,7 +24,8 @@ def getDistance(origin, destination, getDuration=False):
     dest_str = '&destination='
     dest_lat = destination['latitude']
     dest_lng = destination['longitude']
-    ak_str = '&ak=3TM5Izr0YWu2oZ6Qjg5GCWGXiT7mvC2t'
+    ak_str = '&ak='+ak
+	
 	# 拼接字符串，然后向百度地图服务器发送请求
     url = origin_url + str(origin_lat)+','+str(origin_lng)+dest_str+str(dest_lat)+','+str(dest_lng)+ak_str
     response = urlopen(url)
@@ -70,7 +72,7 @@ def getDistanceMatrix(origins, destinations, getDuration=False):
 
     origin_url = 'http://api.map.baidu.com/routematrix/v2/driving?output=json&origins='
     dest_str = '&destinations='
-    ak_str = '&ak=3TM5Izr0YWu2oZ6Qjg5GCWGXiT7mvC2t'
+    ak_str = '&ak='+ak
 
     url = origin_url+origins_cord+dest_str+dest_cord+ak_str
     response = urlopen(url)
