@@ -87,7 +87,7 @@ where greedy means to use greedy algorihms and means to use "On-demand high-capa
 
 # Grid World Simulator
 
-<img src="https://raw.githubusercontent.com/eric19960304/Ridesharing-App-For-HK-Back-End/master/images/demo/grid_world.png" width="300"> <img src="https://raw.githubusercontent.com/eric19960304/Ridesharing-App-For-HK-Back-End/master/images/testing/100_1000.png" width="550">
+<img src="https://raw.githubusercontent.com/eric19960304/Ridesharing-App-For-HK-Back-End/master/images/demo/grid_world.png" width="300" align="middle"> <img src="https://raw.githubusercontent.com/eric19960304/Ridesharing-App-For-HK-Back-End/master/images/testing/100_1000.png" width="550">
 
 (image on the left are taken from this [website](https://towardsdatascience.com/training-an-agent-to-beat-grid-world-fac8a48109a8))
 
