@@ -87,6 +87,7 @@ where greedy means to use greedy algorihms and means to use "On-demand high-capa
 
 # Grid World Simulator
 
+<img src="https://raw.githubusercontent.com/eric19960304/Ridesharing-App-For-HK-Back-End/master/images/demo/grid_world.png">
 
 <img src="https://raw.githubusercontent.com/eric19960304/Ridesharing-App-For-HK-Back-End/master/images/testing/100_1000.png" width="900">
 
