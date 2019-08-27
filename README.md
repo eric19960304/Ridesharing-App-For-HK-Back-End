@@ -87,9 +87,8 @@ where greedy means to use greedy algorihms and means to use "On-demand high-capa
 
 # Grid World Simulator
 
-<img src="https://raw.githubusercontent.com/eric19960304/Ridesharing-App-For-HK-Back-End/master/images/demo/grid_world.png">
-
-<img src="https://raw.githubusercontent.com/eric19960304/Ridesharing-App-For-HK-Back-End/master/images/testing/100_1000.png" width="900">
+<img src="https://raw.githubusercontent.com/eric19960304/Ridesharing-App-For-HK-Back-End/master/images/demo/grid_world.png" width="400"> <img src="https://raw.githubusercontent.com/eric19960304/Ridesharing-App-For-HK-Back-End/master/images/testing/100_1000.png" width="400">
+(image on the left are taken from this [website](https://towardsdatascience.com/training-an-agent-to-beat-grid-world-fac8a48109a8))
 
 
 The grid world simulator will generate fixed number of drivers at the beginning at random locations and generate a sequences of random requests. Then, the grid world will pass the generated drivers and sequences of requests to both greedy and the "On-demand high-capacity ride-sharing via dynamic trip-vehicle assignment" (dynamic for short) for simulation. Every 10 time units, matching will be conducted, and matched drivers will start move toward their best routes to serve all the ongoing rides assigned to them. After the requests sequences is consumed, matching will not be conducted anymore, and the drivers will finish their remaining rides, then the simulation will end and statistics will be generated using matplotlib.
