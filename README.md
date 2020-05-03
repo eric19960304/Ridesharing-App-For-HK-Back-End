@@ -2,6 +2,7 @@
 
 This repository implemented a Nodejs webserver for our ride-sharing app with two matching algorithms, an originated greedy algorithm and an advanced algorithm from the academic paper "On-demand high-capacity ride-sharing via dynamic trip-vehicle assignment" (https://www.pnas.org/content/114/3/462). Two algorithms are evaluated using both real-world test cases and a grid world simulator.
 
+Project Homepage: https://i.cs.hku.hk/fyp/2018/fyp18028/
 Also see the App repository: https://github.com/eric19960304/Ridesharing-App-For-HK
 
 prerequisite:
@@ -55,9 +56,6 @@ All Restful API endpoints:
 /api/user/unread-messages-count [POST]
 /notify-match-result/real-time-ride [POST]  // for internal use only
 ```
-
-Note: demo server's domain name is https://demo.coder.faith
-
 
 
 # Matching Engine
