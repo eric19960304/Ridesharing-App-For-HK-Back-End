@@ -40,21 +40,22 @@ To run the server in production mode (all env variables should be set):
 
 All Restful API endpoints:
 ```
-/auth/login [POST]
-/auth/signup [POST]
-/auth/signup/activate/:token [GET]
-/auth/reset-password/request [POST]
-/auth/reset-password/:token [GET]   // serve the reset password form
-/auth/reset-password/:token [POST]  // handle reset password form
-/api/secret/google-map-api-key [POST]
-/api/driver/update [POST]
-/api/driver/get-all-drivers-location [POST]
-/api/rider/real-time-ride-request [POST]
-/api/user/edit-profile [POST]
-/api/user/edit-profile-with-password [POST]
-/api/user/push-token [POST]
-/api/user/unread-messages-count [POST]
-/notify-match-result/real-time-ride [POST]  // for internal use only
+/auth/login
+/auth/signup
+/auth/signup/activate/:token
+/auth/reset-password/request
+/auth/reset-password/:token                 // serve the reset password form
+/auth/reset-password/:token                // handle reset password form
+/api/secret/google-map-api-key 
+/api/driver/update                         // for updating driver's current location
+/api/driver/get-all-drivers-location       // for passenger to get all the drivers' current location
+/api/rider/real-time-ride-request         // for passenger to sumbit ride request (start & end locations and other info)
+/api/rider/get-all-real-time-ride-request // for driver to get all the ride requests and display to map when idle
+/api/user/edit-profile
+/api/user/edit-profile-with-password
+/api/user/push-token
+/api/user/unread-messages-count
+/notify-match-result/real-time-ride       // for internal use only
 ```
 
 
