@@ -13,7 +13,7 @@
     "cron": "^1.7.0",
     "debug": "~2.6.9",
     "expo-server-sdk": "^3.1.0",
-    "express": "^4.16.4",
+    "express": "^4.17.3",
     "gmail-send": "^1.2.14",
     "jsonwebtoken": "^8.4.0",
     "mongoose": "^5.4.0",
