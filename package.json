@@ -15,7 +15,7 @@
     "expo-server-sdk": "^3.1.0",
     "express": "^4.16.4",
     "gmail-send": "^1.2.14",
-    "jsonwebtoken": "^8.4.0",
+    "jsonwebtoken": "^9.0.0",
     "mongoose": "^5.4.0",
     "nodemon": "^1.18.9",
     "pug": "^2.0.3",
